@@ -1,0 +1,16 @@
+language: node_js
+
+node_js:
+  - "10"
+
+branches:
+  only:
+  - master
+
+cache: yarn
+
+script:
+  - yarn build --prod --aot --no-vendor-chunk --progress=false --base-href "/gones-streamer/"
+
+after_success:
+  - yarn run deploy
