@@ -1,0 +1,24 @@
+language: node_js
+
+node_js:
+  - "10"
+
+branches:
+  only:
+  - master
+
+cache: yarn
+
+script:
+  # - yarn install --silent
+  - yarn build --prod --aot --no-vendor-chunk --progress=false --base-href "/gones-streamer/"
+  - yarn run deploy
+
+# deploy:
+#   provider: pages
+#   skip-cleanup: true
+#   github-token: $GH_TOKEN  # Set in the settings page of your repository, as a secure variable
+#   local-dir: "./dist/gones-streamer"
+#   keep-history: true
+#   on:
+#     branch: master
