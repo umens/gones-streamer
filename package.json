@@ -15,7 +15,7 @@
         "hmr": "ng serve --configuration hmr",
         "android": "tns run android --bundle",
         "ios": "tns run ios --bundle",
-        "deploy": "npx ngh --dir=dist/gones-streamer --name=\"Deployment Bot\" --email=ulysse.mensa@gmail.com"
+        "deploy": "npx ngh --dir=dist/gones-streamer --name=\"Deployment Bot\" --email=ulysse.mensa@gmail.com --no-silent"
     },
     "private": true,
     "dependencies": {
