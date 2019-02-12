@@ -1,0 +1,13 @@
+<form class="form-signin">
+  <img class="mb-4 rounded" src="assets/logos/logo-small.png" alt="" width="72" height="72">
+  <h1 class="h3 mb-3 font-weight-normal">Connect to OBS Server</h1>
+  <label for="host" class="sr-only">Host</label>
+  <input type="text" class="form-control" required autofocus id="host" #host value="" placeholder="Host/IP" />
+  <label for="port" class="sr-only">Port</label>
+  <input type="number" class="form-control" required id="port" #port value="" placeholder="Port" />
+  <label for="password" class="sr-only">Password</label>
+  <input type="password" class="form-control" required id="password" value="" #password placeholder="Password" />
+  <button class="btn btn-lg btn-primary btn-block" type="button"
+    (click)="login(host.value, port.value, password.value)">Connect</button>
+  <p class="mt-5 mb-3 text-muted">&copy; 2018- 2019</p>
+</form>
