@@ -15,9 +15,9 @@
         "hmr": "ng serve --configuration hmr",
         "android": "tns run android --bundle",
         "ios": "tns run ios --bundle",
-        "deploy": "npx ngh --dir=dist/gones-streamer --name=\"Deployment Bot\" --email=ulysse.mensa@gmail.com --no-silent"
+        "deploy": "npx ngh --repo=https://GH_TOKEN@github.com/umens/gones-streamer.git --dir=dist/gones-streamer --name=\"Deployment Bot\" --email=ulysse.mensa@gmail.com"
     },
-    "private": true,
+    "private": false,
     "dependencies": {
         "@angular/animations": "~7.1.0",
         "@angular/common": "~7.1.0",
