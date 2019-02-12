@@ -1,6 +1,6 @@
 # gones-streamer
 
-[![Build Status](https://travis-ci.org/umens/gones-streamer.svg?branch=master)](https://travis-ci.org/umens/gones-streamer)
+[![Build Status](https://travis-ci.com/umens/gones-streamer.svg?branch=master)](https://travis-ci.com/umens/gones-streamer)
 
 [LIVE App](https://umens.github.io/gones-streamer)
 
