@@ -1,6 +1,8 @@
-# gones-streamer
 
-[![Build Status](https://travis-ci.com/umens/gones-streamer.svg?branch=master)](https://travis-ci.com/umens/gones-streamer)
+<p align="center"><img src="https://github.com/umens/gones-streamer/blob/master/src/assets/logos/logo.png?raw=true" alt="logo" height="200" /></p>
+<h1 align="center">gones-streamer</h1>
+
+[![Build Status](https://travis-ci.com/umens/gones-streamer.svg?branch=master)](https://travis-ci.com/umens/gones-streamer) [![codecov](https://codecov.io/gh/umens/gones-streamer/branch/master/graph/badge.svg)](https://codecov.io/gh/umens/gones-streamer) [![dependencies Status](https://david-dm.org/umens/gones-streamer/status.svg)](https://david-dm.org/umens/gones-streamer) [![devDependencies Status](https://david-dm.org/umens/gones-streamer/dev-status.svg)](https://david-dm.org/umens/gones-streamer?type=dev)
 
 [LIVE App](https://umens.github.io/gones-streamer)
 

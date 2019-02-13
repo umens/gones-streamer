@@ -49,7 +49,8 @@
   </div>
 </div>
 
-<div class="row" *ngIf="isReady">
+<div class="row">
+  <!-- <div class="row" *ngIf="isReady"> -->
 
   <div class="col-6">
 
@@ -90,7 +91,7 @@
         </div>
         <div class="row">
           <div class="col">
-            <div class="card-deck">
+            <div class="card-group">
               <div class="card bg-dark text-white text-center mb-3" (click)="GonesScoreSwal.show()"
                 style="max-width: 18rem;">
                 <div class="card-body">
@@ -103,6 +104,16 @@
                   <h5 class="card-title">{{ awayTeamName }}</h5>
                   <p class="card-text h1">{{ score | slice : -2  }}</p>
                 </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div (click)="setScoreBoardVisibility(!scoreboardVisible)" class="card btn btn-light text-center">
+              <i *ngIf="scoreboardVisible" class="fas fa-eye fa-3x mt-2 mb-2 mx-auto"></i>
+              <i *ngIf="!scoreboardVisible" class="fas fa-eye-slash fa-3x mt-2 mb-2 mx-auto"></i>
+              <div class="card-body">
+                <h5 class="card-title mb-0">Score</h5>
+                <!-- <h5 *ngIf="!scoreboardVisible" class="card-title mb-0">Scoreboard Caché</h5> -->
               </div>
             </div>
           </div>
@@ -172,14 +183,12 @@
     </div>
     <div class="row">
       <div class="col">
-        <div class="card-group">
-          <div (click)="setCurrentScene(scene.name)"
-            [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': scene.active}"
-            *ngFor="let scene of scenes | arrayFilter: {displayable: true, liveCam: true}">
-            <!-- <img src="..." class="card-img-top" alt="..."> -->
+        <div class="card-group" *ngFor="let scene of scenes | arrayFilter: {displayable: true, liveCam: true}">
+          <div (click)="changeLiveCam(source.name)"
+            [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (activeCam == source.name && activeScene == 'Live Scene')}"
+            *ngFor="let source of scene.sources | search: '- Cam': 'name'">
             <div class="card-body">
-              <h5 class="card-title mb-0"><i class="fas fa-video"></i> {{scene.name}}</h5>
-              <!-- <p class="card-text"></p> -->
+              <h5 class="card-title mb-0"><i class="fas fa-video"></i> {{source.name | slice: 2}}</h5>
             </div>
           </div>
         </div>
@@ -194,9 +203,6 @@
 
     <div class="row mb-3">
       <div class="col">
-        <!-- <button class="btn btn-block btn-primary" [swal]="teamTouchdownSwal">
-        <i class="fas fa-video"></i> Touchdown !
-      </button> -->
         <div class="card-deck">
           <div (click)="teamTouchdownSwal.show()" class="card btn btn-light text-center">
             <img src="assets/icons/touchdown.png" class="img-fluid mx-auto" width="64" height="64" alt="...">
@@ -204,34 +210,18 @@
               <h5 class="card-title mb-0">Touchdown</h5>
             </div>
           </div>
-          <!-- </div>
-      <div class="col"> -->
-          <!-- <button class="btn btn-block btn-primary" [swal]="teamSafetySwal">
-        <i class="fas fa-praying-hands"></i> Safety !
-      </button> -->
           <div (click)="teamSafetySwal.show()" class="card btn btn-light text-center">
             <i class="fas fa-praying-hands fa-3x mt-3 mb-2 mx-auto"></i>
-            <!-- <img src="assets/icons/fieldgoal.png" class="card-img-top mt-3 mx-auto" width="64" height="64" alt="..."> -->
             <div class="card-body">
               <h5 class="card-title mb-0">Safety</h5>
             </div>
           </div>
-          <!-- </div>
-      <div class="col"> -->
-          <!-- <button class="btn btn-block btn-primary" [swal]="teamFieldGoalSwal">
-        <img src="assets/icons/fieldgoal.png" width="" height="18"> Field Goal !
-      </button> -->
           <div (click)="teamFieldGoalSwal.show()" class="card btn btn-light text-center">
             <img src="assets/icons/fieldgoal.png" class="img-fluid mx-auto" width="64" height="64" alt="...">
             <div class="card-body">
               <h5 class="card-title mb-0">Field Goal</h5>
             </div>
           </div>
-          <!-- </div>
-      <div class="col"> -->
-          <!-- <button class="btn btn-block btn-primary" (click)="startReplay()">
-        <i class="fas fa-backward"></i> Start Replay
-      </button> -->
           <div (click)="startReplay()"
             [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'text-center': true, 'active': playingReplay, 'disabled': playingReplay}">
             <img src="assets/icons/replay.png" class="img-fluid mx-auto" width="64" height="64" alt="...">
@@ -260,7 +250,7 @@
       '7': 'Field Goal',
       '8': 'Transformation a 2 pts'
     },
-    showCancelButton: true}" type="question" (confirm)="addScore($event)">
+    showCancelButton: true}" type="question" (confirm)="transfoSucceed($event)">
     </swal>
 
     <swal #teamSafetySwal [options]="{

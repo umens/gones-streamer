@@ -22,6 +22,9 @@ export class CockpitComponent implements OnInit, OnDestroy {
   isReady = false;
 
   playingReplay = false;
+  activeCam = '- Cam 1';
+  scoreboardVisible = true;
+  activeScene = 'Live Scene';
 
   isStreaming = false;
   isRecording = false;
@@ -55,6 +58,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
       this.getStreamStatus();
       this.setStudioModeOff();
       this.getProfiles();
+      this.setScoreBoardVisibility(true);
     }).catch(err => {
       console.error(err);
     });
@@ -80,6 +84,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
         this.scenes.find(scene => scene.active).active = false;
         this.scenes.find(scene => scene.name === event['scene-name']).active = true;
         this.scenes.find(scene => scene.name === event['scene-name']).sources = event['sources'];
+        this.activeScene = event['scene-name'];
         break;
       case 'StreamStatus':
         this.isStreaming = event['streaming'];
@@ -139,14 +144,8 @@ export class CockpitComponent implements OnInit, OnDestroy {
   loadScenes() {
     this.obsWebsocket.getScenesList()
       .then((data: any) => {
-        // this.scenes = data.scenes.filter(scene => !(scene.name.startsWith('*')
-        //   || scene.name.startsWith('_')
-        //   || scene.name.startsWith('-')));
         data.scenes.forEach(element => {
-          if ((element.name.startsWith('*')
-            || element.name.startsWith('_')
-            || element.name.startsWith('-')
-            || (element.name === 'First scene' || element.name === 'Replay'))) {
+          if (element.name.startsWith('*') || element.name.startsWith('-')) {
             element.displayable = false;
             element.liveCam = false;
           } else {
@@ -159,9 +158,6 @@ export class CockpitComponent implements OnInit, OnDestroy {
           }
         });
         this.scenes = data.scenes;
-        // this.scenes.find(scene => !(scene.name.startsWith('*')
-        //   || scene.name.startsWith('_')
-        //   || scene.name.startsWith('-'))).displayable = false;
       }).then(data => {
         return this.obsWebsocket.getCurrentScene();
       }).then((current: any) => {
@@ -201,6 +197,9 @@ export class CockpitComponent implements OnInit, OnDestroy {
 
   setCurrentScene(name: string): void {
     this.obsWebsocket.setCurrentScene(name)
+      .then(() => {
+        this.activeScene = name;
+      })
       .catch((err: Error) => {
         console.error(err.message);
       });
@@ -276,12 +275,12 @@ export class CockpitComponent implements OnInit, OnDestroy {
   }
 
   newTouchdown(forGones: string) {
-    this.obsWebsocket.SetSceneItemProperties('- Touchdown animation', { visible: true, 'scene-name': 'Live Caméra 1' })
+    this.obsWebsocket.SetSceneItemProperties('* Touchdown animation', { visible: true, 'scene-name': 'Live Scene' })
       .then(data => {
         this.forGones = (forGones === 'false') ? false : true;
         this.touchdownSwal.show();
         setTimeout(() => {
-          return this.obsWebsocket.SetSceneItemProperties('- Touchdown animation', { visible: false, 'scene-name': 'Live Caméra 1' });
+          return this.obsWebsocket.SetSceneItemProperties('* Touchdown animation', { visible: false, 'scene-name': 'Live Scene' });
         }, 5000);
       }).then(data => {
         // tslint:disable-next-line:no-console
@@ -289,16 +288,40 @@ export class CockpitComponent implements OnInit, OnDestroy {
       }).catch((err: Error) => {
         console.error(err.message);
       });
-    // this.obsWebsocket.SetSceneItemProperties('- Touchdown animation', { visible: true, 'scene-name': 'Live Caméra 2' }).then(data => {
-    //   setTimeout(() => {
-    //     this.obsWebsocket.SetSceneItemProperties('- Touchdown animation', { visible: false, 'scene-name': 'Live Caméra 2' });
-    //   }, 5000);
-    // });
   }
 
   newFieldGoal(forGones: string) {
-    this.forGones = (forGones === 'false') ? false : true;
-    this.addScore(3);
+    this.obsWebsocket.SetSceneItemProperties('* FieldGoal animation', { visible: true, 'scene-name': 'Live Scene' })
+      .then(data => {
+        this.forGones = (forGones === 'false') ? false : true;
+        this.addScore(3);
+        setTimeout(() => {
+          return this.obsWebsocket.SetSceneItemProperties('* FieldGoal animation', { visible: false, 'scene-name': 'Live Scene' });
+        }, 5000);
+      }).then(data => {
+        // tslint:disable-next-line:no-console
+        console.debug('new field goal');
+      }).catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+
+  transfoSucceed(point: string): void {
+    const addedPoints = Number.parseInt(point);
+    this.addScore(addedPoints);
+    if (addedPoints > 6) {
+      this.obsWebsocket.SetSceneItemProperties('* Transfo animation', { visible: true, 'scene-name': 'Live Scene' })
+        .then(data => {
+          setTimeout(() => {
+            return this.obsWebsocket.SetSceneItemProperties('* Transfo animation', { visible: false, 'scene-name': 'Live Scene' });
+          }, 5000);
+        }).then(data => {
+          // tslint:disable-next-line:no-console
+          console.debug('new field goal');
+        }).catch((err: Error) => {
+          console.error(err.message);
+        });
+    }
   }
 
   newSafety(forGones: string) {
@@ -312,9 +335,11 @@ export class CockpitComponent implements OnInit, OnDestroy {
       this.obsWebsocket.SaveReplayBuffer()
         .then(data => {
           setTimeout(() => {
-            this.obsWebsocket.setCurrentScene('Replay').then(data2 => {
+            this.obsWebsocket.setCurrentScene('* Replay').then(data2 => {
+              this.activeScene = '* Replay';
               setTimeout(() => {
-                this.obsWebsocket.setCurrentScene('Live Caméra 1').then(data3 => {
+                this.obsWebsocket.setCurrentScene('Live Scene').then(data3 => {
+                  this.activeScene = 'Live Scene';
                   this.playingReplay = false;
                 });
               }, 15000);
@@ -334,6 +359,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
           this.isStreaming = true;
           return this.obsWebsocket.StartReplayBuffer();
         }).then(data => {
+          this.setCurrentScene('Live Scene');
           // tslint:disable-next-line:no-console
           console.debug('Stream restarted');
         }).catch((err: Error) => {
@@ -348,8 +374,9 @@ export class CockpitComponent implements OnInit, OnDestroy {
     this.SetScore();
     this.isReady = true;
     if (!this.isStreaming) {
-      this.obsWebsocket.setCurrentScene('First scene')
+      this.obsWebsocket.setCurrentScene('* First scene')
         .then(data => {
+          this.activeScene = '* First scene';
           return this.obsWebsocket.StartStreaming();
         }).then(data => {
           this.isStreaming = true;
@@ -357,6 +384,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
         }).then(data => {
           return this.obsWebsocket.setCurrentScene('Pre Game');
         }).then(data => {
+          this.activeScene = 'Pre Game';
           // tslint:disable-next-line:no-console
           console.debug('Stream started');
         }).catch((err: Error) => {
@@ -374,6 +402,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
         }).then(data => {
           return this.obsWebsocket.setCurrentScene('First scene');
         }).then(data => {
+          this.activeScene = 'First scene';
           this.score = '00 - 00';
           this.SetScore();
         }).then(data => {
@@ -394,4 +423,49 @@ export class CockpitComponent implements OnInit, OnDestroy {
     });
   }
 
+  setScoreBoardVisibility(visible: boolean): any {
+    this.obsWebsocket.SetSceneItemProperties('- Score Board', { visible: visible, 'scene-name': 'Live Scene' })
+      .then(() => {
+        this.scoreboardVisible = visible;
+      })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+
+  changeLiveCam(camName: string): any {
+    if (this.activeScene !== 'Live Scene') {
+      if (this.activeCam !== camName) {
+        this.obsWebsocket.setCurrentScene('Live Scene')
+          .then(() => {
+            this.activeScene = 'Live Scene';
+            return this.obsWebsocket.SetSceneItemProperties(camName, { visible: true, 'scene-name': 'Live Scene' });
+          })
+          .then(() => {
+            return this.obsWebsocket.SetSceneItemProperties(this.activeCam, { visible: false, 'scene-name': 'Live Scene' });
+          })
+          .then(() => {
+            this.activeCam = camName;
+          })
+          .catch((err: Error) => {
+            console.error(err.message);
+          });
+      } else {
+        this.setCurrentScene('Live Scene');
+      }
+    } else {
+      if (this.activeCam !== camName) {
+        this.obsWebsocket.SetSceneItemProperties(camName, { visible: true, 'scene-name': 'Live Scene' })
+          .then(() => {
+            return this.obsWebsocket.SetSceneItemProperties(this.activeCam, { visible: false, 'scene-name': 'Live Scene' });
+          })
+          .then(() => {
+            this.activeCam = camName;
+          })
+          .catch((err: Error) => {
+            console.error(err.message);
+          });
+      }
+    }
+  }
 }

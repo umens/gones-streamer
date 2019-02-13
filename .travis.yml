@@ -9,8 +9,16 @@ branches:
 
 cache: yarn
 
+before_script:
+  - npm install -g codecov
+
 script:
-  - yarn build --prod --aot --no-vendor-chunk --progress=false --base-href "/gones-streamer/"
+  - yarn run lint
+  # - yarn run test --watch=false --code-coverage
+  # - yarn run e2e
+  - yarn build --prod --aot --progress=false --base-href "/gones-streamer/"
 
 after_success:
   - yarn run deploy
+  - yarn run test --watch=false --code-coverage
+  - codecov
