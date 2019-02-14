@@ -4,6 +4,10 @@
         "id": "org.nativescript.gonesstreamer"
     },
     "version": "1.1.0",
+    "auto-changelog": {
+        "template": "keepachangelog",
+        "unreleased": true
+    },
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
@@ -17,8 +21,8 @@
         "ios": "tns run ios --bundle",
         "deploy": "npx ngh --repo=https://GH_TOKEN@github.com/umens/gones-streamer.git --dir=dist/gones-streamer --name=\"Deployment Bot\" --email=ulysse.mensa@gmail.com",
         "docs": "npx compodoc -p src/tsconfig.app.json",
-        "docs2": "npx compodoc -p src/tsconfig.doc.json",
-        "changelog": "auto-changelog -p && git add CHANGELOG.md"
+        "docs:ci": "npx compodoc -p src/tsconfig.doc.json -d dist/gones-streamer/documentation",
+        "changelog": "npm --no-git-tag-version version minor && auto-changelog -p && git add CHANGELOG.md"
     },
     "private": false,
     "dependencies": {
