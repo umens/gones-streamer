@@ -147,7 +147,7 @@ describe('BytesPipe', () => {
     const from = 'B' as ByteUnit;
     const to = 'MB' as ByteUnit;
     const result = pipe.transform(bytes, 0, from, to);
-    expect(result).toEqual('1024 MB')
+    expect(result).toEqual('1024 MB');
   });
 
   it('Should return 1024 MB, from & to units are equals', () => {
@@ -155,6 +155,6 @@ describe('BytesPipe', () => {
     const from = 'MB' as ByteUnit;
     const to = 'MB' as ByteUnit;
     const result = pipe.transform(bytes, 0, from, to);
-    expect(result).toEqual('1024 MB')
-  })
+    expect(result).toEqual('1024 MB');
+  });
 });

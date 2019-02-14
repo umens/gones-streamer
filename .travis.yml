@@ -7,10 +7,21 @@ branches:
   only:
   - master
 
-cache: yarn
+cache: 
+  yarn
+  # directories:
+  #   - ./node_modules
+
+before_script:
+  - npm install -g codecov
 
 script:
-  - yarn build --prod --aot --no-vendor-chunk --progress=false --base-href "/gones-streamer/"
+  - yarn run lint
+  - yarn run test --code-coverage --no-watch --no-progress --browsers=ChromeHeadlessCI
+  # - yarn run e2e --protractor-config=e2e/protractor-ci.conf.js
+  - yarn build --prod --aot --progress=false --base-href "/gones-streamer/"
 
 after_success:
+  - yarn run docs:ci
   - yarn run deploy
+  - codecov
