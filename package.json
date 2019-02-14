@@ -22,7 +22,9 @@
         "deploy": "npx ngh --repo=https://GH_TOKEN@github.com/umens/gones-streamer.git --dir=dist/gones-streamer --name=\"Deployment Bot\" --email=ulysse.mensa@gmail.com",
         "docs": "npx compodoc -p src/tsconfig.app.json",
         "docs:ci": "npx compodoc -p src/tsconfig.doc.json -d dist/gones-streamer/documentation",
-        "changelog": "npm --no-git-tag-version version minor && auto-changelog -p && git add CHANGELOG.md"
+        "changelog:patch": "npm --no-git-tag-version version patch && auto-changelog -p && git add CHANGELOG.md",
+        "changelog:minor": "npm --no-git-tag-version version minor && auto-changelog -p && git add CHANGELOG.md",
+        "changelog:major": "npm --no-git-tag-version version major && auto-changelog -p && git add CHANGELOG.md"
     },
     "private": false,
     "dependencies": {
