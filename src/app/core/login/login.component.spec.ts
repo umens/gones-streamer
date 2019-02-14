@@ -15,7 +15,8 @@ describe('LoginComponent', () => {
       access_token: {
         host: 'localhost',
         port: 4444,
-        password: ''
+        password: '',
+        secure: false
       }
     },
     tokenKey: 'a6smm_utoken'
