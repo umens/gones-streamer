@@ -121,6 +121,20 @@
     <h3 id="index">Index</h3>
     <table class="table table-sm table-bordered index-table">
         <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#secureSocket">secureSocket</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
 
                 <tr>
                     <td class="col-md-4">
@@ -130,6 +144,9 @@
                 <tr>
                     <td class="col-md-4">
                         <ul class="index-list">
+                            <li>
+                                <a href="#changed">changed</a>
+                            </li>
                             <li>
                                 <a href="#login">login</a>
                             </li>
@@ -159,7 +176,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="9" class="link-to-prism">src/app/core/login/login.component.ts:9</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/app/core/login/login.component.ts:11</a></div>
                             </td>
                         </tr>
 
@@ -210,6 +227,71 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
+                        <a name="changed"></a>
+                        <span class="name">
+                            <b>
+                            changed
+                            </b>
+                            <a href="#changed"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+<code>changed(evt)</code>
+                    </td>
+                </tr>
+
+
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/app/core/login/login.component.ts:22</a></div>
+                            </td>
+                        </tr>
+
+
+                <tr>
+                    <td class="col-md-4">
+
+                            <div class="io-description">
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>evt</td>
+                                                    
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                            <div>
+                            </div>
+                            <div class="io-description">
+                                <b>Returns : </b>    <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                            </div>
+                                <div class="io-description">
+                                    
+                                </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
                         <a name="login"></a>
                         <span class="name">
                             <b>
@@ -221,14 +303,14 @@
                 </tr>
                 <tr>
                     <td class="col-md-4">
-<code>login(host, port, password)</code>
+<code>login(host, port, password, secure)</code>
                     </td>
                 </tr>
 
 
                         <tr>
                             <td class="col-md-4">
-                                    <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/app/core/login/login.component.ts:16</a></div>
+                                    <div class="io-line">Defined in <a href="" data-line="18" class="link-to-prism">src/app/core/login/login.component.ts:18</a></div>
                             </td>
                         </tr>
 
@@ -266,6 +348,15 @@
                                                 </tr>
                                                 <tr>
                                                         <td>password</td>
+                                                    
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+
+                                                </tr>
+                                                <tr>
+                                                        <td>secure</td>
                                                     
                                                     <td>
                                                             No
@@ -311,7 +402,7 @@
 
                         <tr>
                             <td class="col-md-4">
-                                    <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/app/core/login/login.component.ts:13</a></div>
+                                    <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/app/core/login/login.component.ts:15</a></div>
                             </td>
                         </tr>
 
@@ -329,6 +420,38 @@
         </table>
 </section>
 
+    <section>
+    
+        <h3 id="inputs">
+            Properties
+        </h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="secureSocket"></a>
+                        <span class="name">
+                            <b>
+                            secureSocket</b>
+                            <a href="#secureSocket"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Default value : </i><code>false</code>
+                        </td>
+                    </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/app/core/login/login.component.ts:11</a></div>
+                            </td>
+                        </tr>
+
+
+            </tbody>
+        </table>
+</section>
 
 </div>
 
@@ -344,13 +467,19 @@ import { AuthenticationService } from &#x27;../services/authentication.service&#
 })
 export class LoginComponent implements OnInit {
 
+  secureSocket &#x3D; false;
+
   constructor(private authentication: AuthenticationService) { }
 
   ngOnInit() {
   }
 
-  login(host, port, password) {
-    this.authentication.login(host, port, password);
+  login(host, port, password, secure) {
+    this.authentication.login(host, port, password, secure);
+  }
+
+  changed(evt) {
+    this.secureSocket &#x3D; evt.target.checked;
   }
 
 }
@@ -367,8 +496,13 @@ export class LoginComponent implements OnInit {
   &lt;input type&#x3D;&quot;number&quot; class&#x3D;&quot;form-control&quot; required id&#x3D;&quot;port&quot; #port value&#x3D;&quot;&quot; placeholder&#x3D;&quot;Port&quot; /&gt;
   &lt;label for&#x3D;&quot;password&quot; class&#x3D;&quot;sr-only&quot;&gt;Password&lt;/label&gt;
   &lt;input type&#x3D;&quot;password&quot; class&#x3D;&quot;form-control&quot; required id&#x3D;&quot;password&quot; value&#x3D;&quot;&quot; #password placeholder&#x3D;&quot;Password&quot; /&gt;
+  &lt;div class&#x3D;&quot;checkbox mb-3&quot;&gt;
+    &lt;label&gt;
+      &lt;input type&#x3D;&quot;checkbox&quot; [checked]&#x3D;&quot;secureSocket&quot; (change)&#x3D;&quot;changed($event)&quot;&gt; Secure Socket ?
+    &lt;/label&gt;
+  &lt;/div&gt;
   &lt;button class&#x3D;&quot;btn btn-lg btn-primary btn-block&quot; type&#x3D;&quot;button&quot;
-    (click)&#x3D;&quot;login(host.value, port.value, password.value)&quot;&gt;Connect&lt;/button&gt;
+    (click)&#x3D;&quot;login(host.value, port.value, password.value, secureSocket)&quot;&gt;Connect&lt;/button&gt;
   &lt;p class&#x3D;&quot;mt-5 mb-3 text-muted&quot;&gt;&amp;copy; 2018- 2019&lt;/p&gt;
 &lt;/form&gt;</code></pre>
     </div>
@@ -469,7 +603,7 @@ export class LoginComponent implements OnInit {
 <script src="../js/libs/htmlparser.js"></script>
 <script src="../js/libs/deep-iterator.js"></script>
 <script>
-        var COMPONENT_TEMPLATE = '<div><form class="form-signin">  <img class="mb-4 rounded" src="assets/logos/logo-small.png" alt="" width="72" height="72">  <h1 class="h3 mb-3 font-weight-normal">Connect to OBS Server</h1>  <label for="host" class="sr-only">Host</label>  <input type="text" class="form-control" required autofocus id="host" #host value="" placeholder="Host/IP" />  <label for="port" class="sr-only">Port</label>  <input type="number" class="form-control" required id="port" #port value="" placeholder="Port" />  <label for="password" class="sr-only">Password</label>  <input type="password" class="form-control" required id="password" value="" #password placeholder="Password" />  <button class="btn btn-lg btn-primary btn-block" type="button"    (click)="login(host.value, port.value, password.value)">Connect</button>  <p class="mt-5 mb-3 text-muted">&copy; 2018- 2019</p></form></div>'
+        var COMPONENT_TEMPLATE = '<div><form class="form-signin">  <img class="mb-4 rounded" src="assets/logos/logo-small.png" alt="" width="72" height="72">  <h1 class="h3 mb-3 font-weight-normal">Connect to OBS Server</h1>  <label for="host" class="sr-only">Host</label>  <input type="text" class="form-control" required autofocus id="host" #host value="" placeholder="Host/IP" />  <label for="port" class="sr-only">Port</label>  <input type="number" class="form-control" required id="port" #port value="" placeholder="Port" />  <label for="password" class="sr-only">Password</label>  <input type="password" class="form-control" required id="password" value="" #password placeholder="Password" />  <div class="checkbox mb-3">    <label>      <input type="checkbox" [checked]="secureSocket" (change)="changed($event)"> Secure Socket ?    </label>  </div>  <button class="btn btn-lg btn-primary btn-block" type="button"    (click)="login(host.value, port.value, password.value, secureSocket)">Connect</button>  <p class="mt-5 mb-3 text-muted">&copy; 2018- 2019</p></form></div>'
     var COMPONENTS = [{'name': 'CockpitComponent', 'selector': 'app-cockpit'},{'name': 'FooterComponent', 'selector': 'app-footer'},{'name': 'HeaderComponent', 'selector': 'app-header'},{'name': 'LoginComponent', 'selector': 'app-login'},{'name': 'NotFoundComponent', 'selector': 'app-not-found'},{'name': 'RemoteCenterComponent', 'selector': 'app-remote-center'},{'name': 'ShellComponent', 'selector': 'app-shell'}];
     var DIRECTIVES = [];
     var ACTUAL_COMPONENT = {'name': 'LoginComponent'};

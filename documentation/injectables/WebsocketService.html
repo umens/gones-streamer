@@ -252,7 +252,7 @@
                 </tr>
                 <tr>
                     <td class="col-md-4">
-<code>connect(host: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, port: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+<code>connect(host: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, port: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, secure)</code>
                     </td>
                 </tr>
 
@@ -308,6 +308,20 @@
                                                     
                                                         <td>
                                                                 <code>4444</code>
+                                                        </td>
+
+                                                </tr>
+                                                <tr>
+                                                        <td>secure</td>
+                                                        <td>
+                                                        </td>
+                                                    
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                        <td>
+                                                                <code>false</code>
                                                         </td>
 
                                                 </tr>
@@ -641,7 +655,7 @@ export class WebsocketService extends EventEmitter {
 	 *
 	 * @returns {Promise}
 	 */
-  connect(host &#x3D; &#x27;localhost&#x27;, port &#x3D; 4444) {
+  connect(host &#x3D; &#x27;localhost&#x27;, port &#x3D; 4444, secure &#x3D; false) {
     if (this._socket) {
       this._socket.onopen &#x3D; null;
       this._socket.onmessage &#x3D; null;
@@ -652,8 +666,8 @@ export class WebsocketService extends EventEmitter {
 
     return new Promise((resolve, reject) &#x3D;&gt; {
       this._connecting &#x3D; { resolve, reject };
-
-      const url &#x3D; &#x27;ws://&#x27; + host + &#x27;:&#x27; + port;
+      const secureSocket &#x3D; (secure) ? &#x27;wss://&#x27; : &#x27;ws://&#x27;;
+      const url &#x3D; secureSocket + host + &#x27;:&#x27; + port;
       this._socket &#x3D; new WebSocket(url);
 
       this._socket.onopen &#x3D; socketOnOpen.bind(this);

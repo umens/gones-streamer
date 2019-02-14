@@ -245,7 +245,7 @@
                 </tr>
                 <tr>
                     <td class="col-md-4">
-<code>connect(host, port, password)</code>
+<code>connect(host, port, password, secure)</code>
                     </td>
                 </tr>
 
@@ -290,6 +290,15 @@
                                                 </tr>
                                                 <tr>
                                                         <td>password</td>
+                                                    
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+
+                                                </tr>
+                                                <tr>
+                                                        <td>secure</td>
                                                     
                                                     <td>
                                                             No
@@ -1496,9 +1505,9 @@ export class ObsWebsocketService {
     });
   }
 
-  connect(host, port, password) {
+  connect(host, port, password, secure) {
     return new Promise((resolve, reject) &#x3D;&gt; {
-      this._wsService.connect(host, port).then((data: any) &#x3D;&gt; {
+      this._wsService.connect(host, port, secure).then((data: any) &#x3D;&gt; {
         if (data.authRequired) {
           return this._wsService.login(password);
         }
