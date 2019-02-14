@@ -28,7 +28,7 @@ export class WebsocketService extends EventEmitter {
 	 *
 	 * @returns {Promise}
 	 */
-  connect(host = 'localhost', port = 4444) {
+  connect(host = 'localhost', port = 4444, secure = false) {
     if (this._socket) {
       this._socket.onopen = null;
       this._socket.onmessage = null;
@@ -39,8 +39,8 @@ export class WebsocketService extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       this._connecting = { resolve, reject };
-
-      const url = 'ws://' + host + ':' + port;
+      const secureSocket = (secure) ? 'wss://' : 'ws://';
+      const url = secureSocket + host + ':' + port;
       this._socket = new WebSocket(url);
 
       this._socket.onopen = socketOnOpen.bind(this);

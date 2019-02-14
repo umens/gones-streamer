@@ -50,7 +50,8 @@ export class CockpitComponent implements OnInit, OnDestroy {
     this.obsWebsocket.connect(
       this.authenticationService.token.access_token.host,
       this.authenticationService.token.access_token.port,
-      this.authenticationService.token.access_token.password
+      this.authenticationService.token.access_token.password,
+      this.authenticationService.token.access_token.secure
     ).then(() => {
       this.loadScenes();
       this.getScore();
@@ -245,22 +246,23 @@ export class CockpitComponent implements OnInit, OnDestroy {
 
   setScoreManuallyForGones(score: number) {
     this.forGones = true;
-    this.addScore(score);
+    this.addScore(score, true);
   }
 
   setScoreManuallyForAway(score: number) {
     this.forGones = false;
-    this.addScore(score);
+    this.addScore(score, true);
   }
 
-  addScore(score: number) {
+  addScore(score: number, manually?: boolean) {
+    manually = (manually === undefined) ? false : manually;
     score = Number(score);
     const scores = this.score.split(' - ');
     if (this.forGones) {
-      scores[0] = (Number(scores[0]) + score) + '';
+      scores[0] = (!manually) ? (Number(scores[0]) + score) + '' : score + '';
       scores[0] = (scores[0].length === 1) ? '0' + scores[0] : scores[0];
     } else {
-      scores[1] = (Number(scores[1]) + score) + '';
+      scores[1] = (!manually) ? (Number(scores[1]) + score) + '' : score + '';
       scores[1] = (scores[1].length === 1) ? '0' + scores[1] : scores[1];
     }
     this.score = scores[0] + ' - ' + scores[1];
@@ -400,16 +402,16 @@ export class CockpitComponent implements OnInit, OnDestroy {
           this.isStreaming = false;
           return this.obsWebsocket.StopReplayBuffer();
         }).then(data => {
-          return this.obsWebsocket.setCurrentScene('First scene');
+          return this.obsWebsocket.setCurrentScene('* First scene');
         }).then(data => {
-          this.activeScene = 'First scene';
+          this.activeScene = '* First scene';
           this.score = '00 - 00';
           this.SetScore();
         }).then(data => {
           // tslint:disable-next-line:no-console
           console.debug('Stream stopped');
         }).catch((err: Error) => {
-          console.error(err.message);
+          console.error(err);
         });
     }
   }

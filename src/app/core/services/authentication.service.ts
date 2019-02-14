@@ -11,7 +11,8 @@ export class AuthenticationService {
     access_token: {
       host: 'localhost',
       port: 4444,
-      password: ''
+      password: '',
+      secure: false
     }
   };
 
@@ -19,11 +20,12 @@ export class AuthenticationService {
 
   constructor(private router: Router) { }
 
-  login(host: string, port: number, password: string) {
+  login(host: string, port: number, password: string, secure: boolean) {
     this.token.access_token = {
       host: host,
       port: port,
-      password: password
+      password: password,
+      secure: secure
     };
     this.setToken(this.token);
     this.router.navigate(['/remote-center']);

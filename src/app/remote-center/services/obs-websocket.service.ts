@@ -20,9 +20,9 @@ export class ObsWebsocketService {
     });
   }
 
-  connect(host, port, password) {
+  connect(host, port, password, secure) {
     return new Promise((resolve, reject) => {
-      this._wsService.connect(host, port).then((data: any) => {
+      this._wsService.connect(host, port, secure).then((data: any) => {
         if (data.authRequired) {
           return this._wsService.login(password);
         }
