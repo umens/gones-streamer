@@ -10,9 +10,12 @@ if (environment.production) {
   enableProdMode();
 }
 
+// platformBrowserDynamic().bootstrapModule(AppModule).catch(err => console.error(err));
+
 const bootstrap = () => platformBrowserDynamic().bootstrapModule(AppModule);
 
 if (environment.hmr) {
+  // tslint:disable-next-line: no-string-literal
   if (module['hot']) {
     hmrBootstrap(module, bootstrap);
   } else {

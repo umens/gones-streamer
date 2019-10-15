@@ -1,8 +1,10 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { ObsWebsocketService } from '../services/obs-websocket.service';
-import { AuthenticationService } from '../../core/services/authentication.service';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { SwalComponent } from '@toverux/ngx-sweetalert2';
+
+import { SwalComponent } from '@sweetalert2/ngx-sweetalert2';
+
+import { ObsWebsocketService } from '../services/obs-websocket.service';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
 
 @Component({
   selector: 'app-cockpit',
@@ -15,8 +17,16 @@ export class CockpitComponent implements OnInit, OnDestroy {
   scenes: any[] = null;
   socketConnected = false;
   subscription: Subscription;
+  scoreGones = '00';
+  scoreAway = '00';
+  currentQuarter = 'Q1';
+  flagThrown = false;
+  /**
+   * @deprecated
+   */
   score = '00 - 00';
   awayTeamName = '';
+  awayTeamCityName = '';
   forGones: boolean = null;
   hoverStop = false;
   isReady = false;
@@ -38,10 +48,10 @@ export class CockpitComponent implements OnInit, OnDestroy {
   transmittionSpeedB = 0.00;
   fps = 0.00;
 
-  @ViewChild('touchdownSwal') private touchdownSwal: SwalComponent;
-  @ViewChild('teamTouchdownSwal') private teamTouchdownSwal: SwalComponent;
-  @ViewChild('teamSafetySwal') private teamSafetySwal: SwalComponent;
-  @ViewChild('teamFieldGoalSwal') private teamFieldGoalSwal: SwalComponent;
+  @ViewChild('touchdownSwal', {static: false}) private touchdownSwal: SwalComponent;
+  @ViewChild('teamTouchdownSwal', {static: false}) private teamTouchdownSwal: SwalComponent;
+  @ViewChild('teamSafetySwal', {static: false}) private teamSafetySwal: SwalComponent;
+  @ViewChild('teamFieldGoalSwal', {static: false}) private teamFieldGoalSwal: SwalComponent;
 
   constructor(
     private authenticationService: AuthenticationService,
@@ -56,10 +66,13 @@ export class CockpitComponent implements OnInit, OnDestroy {
       this.loadScenes();
       this.getScore();
       this.getAwayTeamName();
+      this.getAwayTeamCityName();
+      this.getCurrentQuarter();
       this.getStreamStatus();
       this.setStudioModeOff();
       this.getProfiles();
       this.setScoreBoardVisibility(true);
+      this.setFlagVisibility(false);
     }).catch(err => {
       console.error(err);
     });
@@ -67,7 +80,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
     this.subscription = this.obsWebsocket.eventSource$.subscribe(event => this.workOnEvent(event));
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
   }
 
   ngOnDestroy(): void {
@@ -84,17 +97,22 @@ export class CockpitComponent implements OnInit, OnDestroy {
       case 'SwitchScenes':
         this.scenes.find(scene => scene.active).active = false;
         this.scenes.find(scene => scene.name === event['scene-name']).active = true;
+        // tslint:disable-next-line: no-string-literal
         this.scenes.find(scene => scene.name === event['scene-name']).sources = event['sources'];
         this.activeScene = event['scene-name'];
         break;
       case 'StreamStatus':
+        // tslint:disable-next-line: no-string-literal
         this.isStreaming = event['streaming'];
+        // tslint:disable-next-line: no-string-literal
         this.isRecording = event['recording'];
         this.streamLength = event['total-stream-time'];
 
+        // tslint:disable-next-line: no-string-literal
         this.fps = event['fps'];
         this.droppedFrames = event['num-dropped-frames'];
         this.totalFrames = event['num-total-frames'];
+        // tslint:disable-next-line: no-string-literal
         this.droppedFramesPercent = event['strain'];
         this.transmittionSpeed = event['kbits-per-sec'];
         this.transmittionSpeedB = event['bytes-per-sec'];
@@ -124,7 +142,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
       case 'ReplayStopping':
       case 'ReplayStopped':
         // tslint:disable-next-line:no-console
-        console.debug(event);
+        // console.debug(event);
         break;
 
       case 'StreamStarted':
@@ -137,7 +155,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
 
       default:
         // tslint:disable-next-line:no-console
-        console.debug(event);
+        // console.debug(event);
         break;
     }
   }
@@ -220,13 +238,19 @@ export class CockpitComponent implements OnInit, OnDestroy {
       });
   }
 
-  setAwayTeamName(name: string, city: string) {
-    this.obsWebsocket.SetTextGDIPlusProperties('Away Team Name', { text: name + '\n' + city })
+  /**
+   * @deprecated
+   */
+  setAwayTeamNameAndCity(name: string, city: string) {
+    this.obsWebsocket.SetTextGDIPlusProperties('Away Team Name Txt', { text: name + '\n' + city })
       .catch((err: Error) => {
         console.error(err.message);
       });
   }
-  getAwayTeamName() {
+  /**
+   * @deprecated
+   */
+  getAwayTeamNameAndCity() {
     this.obsWebsocket.GetTextGDIPlusProperties('Away Team Name')
       .then(data => {
         this.awayTeamName = data.text.split(/\r?\n/)[0];
@@ -235,10 +259,43 @@ export class CockpitComponent implements OnInit, OnDestroy {
       });
   }
 
-  getScore() {
-    this.obsWebsocket.GetTextGDIPlusProperties('text-score')
+  setAwayTeamName(name: string) {
+    this.obsWebsocket.SetTextGDIPlusProperties('Away Team Name Txt', { text: name })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+  getAwayTeamName() {
+    this.obsWebsocket.GetTextGDIPlusProperties('Away Team Name Txt')
       .then(data => {
-        this.score = data.text;
+        this.awayTeamName = data.text;
+      }).catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+  setAwayTeamCityName(city: string) {
+    this.obsWebsocket.SetTextGDIPlusProperties('Away Team Name City Txt', { text: city })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+  getAwayTeamCityName() {
+    this.obsWebsocket.GetTextGDIPlusProperties('Away Team Name City Txt')
+      .then(data => {
+        this.awayTeamCityName = data.text;
+      }).catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+
+  getScore() {
+    this.obsWebsocket.GetTextGDIPlusProperties('Home Team Score Txt')
+      .then(dataHome => {
+        this.scoreGones = dataHome.text;
+        return this.obsWebsocket.GetTextGDIPlusProperties('Away Team Score Txt');
+      })
+      .then(dataAway => {
+        this.scoreAway = dataAway.text;
       }).catch((err: Error) => {
         console.error(err.message);
       });
@@ -257,20 +314,52 @@ export class CockpitComponent implements OnInit, OnDestroy {
   addScore(score: number, manually?: boolean) {
     manually = (manually === undefined) ? false : manually;
     score = Number(score);
-    const scores = this.score.split(' - ');
     if (this.forGones) {
-      scores[0] = (!manually) ? (Number(scores[0]) + score) + '' : score + '';
-      scores[0] = (scores[0].length === 1) ? '0' + scores[0] : scores[0];
+      this.scoreGones = (!manually) ? (Number(this.scoreGones) + score) + '' : score + '';
+      this.scoreGones = (this.scoreGones.length === 1) ? '0' + this.scoreGones : this.scoreGones;
+      this.setScoreGones();
     } else {
-      scores[1] = (!manually) ? (Number(scores[1]) + score) + '' : score + '';
-      scores[1] = (scores[1].length === 1) ? '0' + scores[1] : scores[1];
+      this.scoreAway = (!manually) ? (Number(this.scoreAway) + score) + '' : score + '';
+      this.scoreAway = (this.scoreAway.length === 1) ? '0' + this.scoreAway : this.scoreAway;
+      this.setScoreAway();
     }
-    this.score = scores[0] + ' - ' + scores[1];
-    this.SetScore();
+    // this.score = scores[0] + ' - ' + scores[1];
+    // this.SetScore();
   }
 
+  /**
+   * @deprecated
+   */
   SetScore() {
     this.obsWebsocket.SetTextGDIPlusProperties('text-score', { text: this.score })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+  setScoreGones() {
+    this.obsWebsocket.SetTextGDIPlusProperties('Home Team Score Txt', { text: this.scoreGones })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+  setScoreAway() {
+    this.obsWebsocket.SetTextGDIPlusProperties('Away Team Score Txt', { text: this.scoreAway })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+
+  getCurrentQuarter() {
+    this.obsWebsocket.GetTextGDIPlusProperties('Current Quarter')
+      .then(data => {
+        this.currentQuarter = data.text;
+      }).catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+  setCurrentQuarter(quarter: string) {
+    this.currentQuarter = quarter;
+    this.obsWebsocket.SetTextGDIPlusProperties('Current Quarter', { text: this.currentQuarter })
       .catch((err: Error) => {
         console.error(err.message);
       });
@@ -280,7 +369,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
     this.obsWebsocket.SetSceneItemProperties('* Touchdown animation', { visible: true, 'scene-name': 'Live Scene' })
       .then(data => {
         this.forGones = (forGones === 'false') ? false : true;
-        this.touchdownSwal.show();
+        this.touchdownSwal.fire();
         setTimeout(() => {
           return this.obsWebsocket.SetSceneItemProperties('* Touchdown animation', { visible: false, 'scene-name': 'Live Scene' });
         }, 5000);
@@ -309,6 +398,7 @@ export class CockpitComponent implements OnInit, OnDestroy {
   }
 
   transfoSucceed(point: string): void {
+    // tslint:disable-next-line: radix
     const addedPoints = Number.parseInt(point);
     this.addScore(addedPoints);
     if (addedPoints > 6) {
@@ -371,9 +461,16 @@ export class CockpitComponent implements OnInit, OnDestroy {
   }
 
   startLive(name: string, city: string) {
-    this.setAwayTeamName(name, city);
-    this.score = '00 - 00';
-    this.SetScore();
+    this.setAwayTeamName(name);
+    this.setAwayTeamCityName(city);
+    this.scoreGones = '00';
+    this.scoreAway = '00';
+    this.setScoreGones();
+    this.setScoreAway();
+    this.currentQuarter = 'Q1';
+    this.setCurrentQuarter('Q1');
+    // this.score = '00 - 00';
+    // this.SetScore();
     this.isReady = true;
     if (!this.isStreaming) {
       this.obsWebsocket.setCurrentScene('* First scene')
@@ -405,8 +502,14 @@ export class CockpitComponent implements OnInit, OnDestroy {
           return this.obsWebsocket.setCurrentScene('* First scene');
         }).then(data => {
           this.activeScene = '* First scene';
-          this.score = '00 - 00';
-          this.SetScore();
+          this.scoreGones = '00';
+          this.scoreAway = '00';
+          this.setScoreGones();
+          this.setScoreAway();
+          this.currentQuarter = 'Q1';
+          this.setCurrentQuarter('Q1');
+          // this.score = '00 - 00';
+          // this.SetScore();
         }).then(data => {
           // tslint:disable-next-line:no-console
           console.debug('Stream stopped');
@@ -426,9 +529,19 @@ export class CockpitComponent implements OnInit, OnDestroy {
   }
 
   setScoreBoardVisibility(visible: boolean): any {
-    this.obsWebsocket.SetSceneItemProperties('- Score Board', { visible: visible, 'scene-name': 'Live Scene' })
+    this.obsWebsocket.SetSceneItemProperties('- Score Board', { visible, 'scene-name': 'Live Scene' })
       .then(() => {
         this.scoreboardVisible = visible;
+      })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }
+
+  setFlagVisibility(visible: boolean): any {
+    this.obsWebsocket.SetSceneItemProperties('Animation Flag', { visible, 'scene-name': '- Score Board' })
+      .then(() => {
+        this.flagThrown = visible;
       })
       .catch((err: Error) => {
         console.error(err.message);
@@ -471,3 +584,4 @@ export class CockpitComponent implements OnInit, OnDestroy {
     }
   }
 }
+

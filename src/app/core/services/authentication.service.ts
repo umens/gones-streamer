@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthenticationService {
+
   token = {
     refresh_token: 'refreshtokencode',
     exp: new Date((new Date().getDate() + 1)),
@@ -22,10 +23,10 @@ export class AuthenticationService {
 
   login(host: string, port: number, password: string, secure: boolean) {
     this.token.access_token = {
-      host: host,
-      port: port,
-      password: password,
-      secure: secure
+      host,
+      port,
+      password,
+      secure
     };
     this.setToken(this.token);
     this.router.navigate(['/remote-center']);
@@ -46,7 +47,7 @@ export class AuthenticationService {
 
   getAccessToken() {
     if (localStorage.getItem(this.tokenKey) != null) {
-      return JSON.parse(localStorage.getItem(this.tokenKey))['access_token'];
+      return JSON.parse(localStorage.getItem(this.tokenKey)).access_token;
     } else {
       return null;
     }

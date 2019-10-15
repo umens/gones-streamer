@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
 
 import { RemoteCenterComponent } from './remote-center.component';
 
@@ -9,10 +8,9 @@ describe('RemoteCenterComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [RemoteCenterComponent],
-      imports: [RouterTestingModule]
+      declarations: [ RemoteCenterComponent ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

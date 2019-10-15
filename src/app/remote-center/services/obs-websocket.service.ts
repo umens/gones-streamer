@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { WebsocketService } from '../../shared/services/websocket.service';
 import { Subject } from 'rxjs';
+
+import { WebsocketService } from 'src/app/shared/services/websocket.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +14,8 @@ export class ObsWebsocketService {
   // private eventSource = new BehaviorSubject(null);
   // currentEvent = this.eventSource.asObservable();
 
-  constructor(private _wsService: WebsocketService) {
-    this._wsService.on('event', message => {
+  constructor(private wsService: WebsocketService) {
+    this.wsService.on('event', message => {
       this.eventSource.next(message);
       // this.onEvent(message);
     });
@@ -22,9 +23,9 @@ export class ObsWebsocketService {
 
   connect(host, port, password, secure) {
     return new Promise((resolve, reject) => {
-      this._wsService.connect(host, port, secure).then((data: any) => {
+      this.wsService.connect(host, port, secure).then((data: any) => {
         if (data.authRequired) {
-          return this._wsService.login(password);
+          return this.wsService.login(password);
         }
         return data;
       }).then(data => {
@@ -43,14 +44,14 @@ export class ObsWebsocketService {
   }
 
   disconnect(): void {
-    this._wsService.close();
+    this.wsService.close();
   }
 
   emit(OBSEvent, args: any = {}) {
-    const _this = this;
-    return new Promise(function (resolve, reject) {
+    const that = this;
+    return new Promise((resolve, reject) => {
       args['request-type'] = OBSEvent;
-      _this._wsService.send(args).then(data => {
+      that.wsService.send(args).then(data => {
         resolve(data);
       }).catch(err => {
         console.error(err.message);
@@ -98,16 +99,19 @@ export class ObsWebsocketService {
   }
 
   SetSceneItemProperties(name: string, args: any = {}): any {
+    // tslint:disable-next-line: no-string-literal
     args['item'] = name;
     return this.emit('SetSceneItemProperties', args);
   }
 
   SetTextGDIPlusProperties(name: string, args: { text: string; }): any {
+    // tslint:disable-next-line: no-string-literal
     args['source'] = name;
     return this.emit('SetTextGDIPlusProperties', args);
   }
 
   GetTextGDIPlusProperties(name: string): any {
+    // tslint:disable-next-line: object-literal-key-quotes
     return this.emit('GetTextGDIPlusProperties', { 'source': name });
   }
 
@@ -154,5 +158,4 @@ export class ObsWebsocketService {
   ToggleStudioMode(): any {
     return this.emit('ToggleStudioMode', {});
   }
-
 }

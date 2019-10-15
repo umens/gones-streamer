@@ -2,17 +2,16 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { RemoteCenterRoutingModule } from './remote-center-routing.module';
-import { RemoteCenterComponent } from './remote-center.component';
 import { CockpitComponent } from './cockpit/cockpit.component';
-
-import { ObsWebsocketService } from './services/obs-websocket.service';
+import { RemoteCenterComponent } from './remote-center.component';
 import { SharedModule } from '../shared/shared.module';
+import { ObsWebsocketService } from './services/obs-websocket.service';
 import { WebsocketService } from '../shared/services/websocket.service';
-import { SweetAlert2Module } from '@toverux/ngx-sweetalert2';
 
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 @NgModule({
-  declarations: [RemoteCenterComponent, CockpitComponent],
+  declarations: [CockpitComponent, RemoteCenterComponent],
   imports: [
     CommonModule,
     RemoteCenterRoutingModule,

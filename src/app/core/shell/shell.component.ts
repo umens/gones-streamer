@@ -9,7 +9,7 @@ import { Router, NavigationEnd } from '@angular/router';
 })
 export class ShellComponent {
 
-  title: String;
+  title: string;
 
   constructor(
     private router: Router,

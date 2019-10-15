@@ -17,9 +17,9 @@ export class ArrayFilterPipe implements PipeTransform {
   /**
    * Perform the filtering.
    *
-   * @param {any} item The item to compare to the filter.
-   * @param {any} filter The filter to apply.
-   * @return {boolean} True if item satisfies filters, false if not.
+   * @param any item The item to compare to the filter.
+   * @param any filter The filter to apply.
+   * @return boolean True if item satisfies filters, false if not.
    */
   applyFilter(item: any, filter: any[]): boolean {
     for (const field in filter) {

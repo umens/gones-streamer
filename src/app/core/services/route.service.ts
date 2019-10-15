@@ -1,7 +1,7 @@
 import { Route as ngRoute, Routes } from '@angular/router';
 
 import { ShellComponent } from '../shell/shell.component';
-import { AuthGuardService } from './auth-guard.service';
+import { AuthGuard } from '../guards/auth.guard';
 
 /**
  * Provides helper methods to create routes.
@@ -11,17 +11,16 @@ export class Route {
   /**
    * Creates routes using the shell component and authentication.
    * @param routes The routes to add.
-   * @return {Route} The new route using shell as the base.
+   * @return Route The new route using shell as the base.
    */
   static withShell(routes: Routes): ngRoute {
     return {
       path: '',
       component: ShellComponent,
       children: routes,
-      canActivate: [AuthGuardService],
+      canActivate: [AuthGuard],
       // Reuse ShellComponent instance when navigating between child views
       data: { reuse: true }
     };
   }
-
 }
