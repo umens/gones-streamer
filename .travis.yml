@@ -18,6 +18,8 @@ cache:
 before_script:
   - npm install -g codecov
   - npm install -g github-release-notes
+  - ls -al
+  - chmod ugo+x travis-push.sh
 
 script:
   - yarn run lint
@@ -26,10 +28,11 @@ script:
   - yarn build --prod --aot --progress=false --base-href "/gones-streamer/"
 
 after_success:
+  - ls -al
   - yarn run docs:ci
   - yarn run deploy
   - codecov
   - yarn run changelog
-  - chmod ugo+x .travis-push.sh
-  - ./.travis-push.sh
+  - chmod ugo+x travis-push.sh
+  - ./travis-push.sh
   - yarn run release
