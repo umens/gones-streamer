@@ -3,6 +3,9 @@ language: node_js
 node_js:
   - "10"
 
+addons:
+  chrome: stable
+
 branches:
   only:
   - master
@@ -17,8 +20,8 @@ before_script:
 
 script:
   - yarn run lint
-  - yarn run test --code-coverage --no-watch --no-progress --browsers=ChromeHeadlessCI
-  - yarn run e2e --protractor-config=e2e/protractor-ci.conf.js
+  - yarn run test_headless
+  - yarn run e2e_headless
   - yarn build --prod --aot --progress=false --base-href "/gones-streamer/"
 
 after_success:
