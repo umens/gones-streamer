@@ -1,81 +1,85 @@
 import { Injectable } from '@angular/core';
 import * as EventEmitter from 'events';
-import { Subject, Observable, Observer } from 'rxjs';
+// import { Subject, Observable, Observer } from 'rxjs';
 import * as shajs from 'sha.js';
 
 @Injectable()
 export class WebsocketService extends EventEmitter {
 
   debug: () => void;
-  _connecting: any;
-  _idCounter: number;
-  _promises: {};
-  _socket: any;
+  CONNECTING: any;
+  ID_COUNTER: number;
+  PROMISES: {};
+  SOCKET: any;
 
   constructor() {
     super();
 
     this.debug = () => { };
 
-    this._connecting = null;
-    this._idCounter = 1;
-    this._promises = {};
-    this._socket = undefined;
+    this.CONNECTING = null;
+    this.ID_COUNTER = 1;
+    this.PROMISES = {};
+    this.SOCKET = undefined;
   }
 
   /**
-	 * Connect to OBS remote
-	 *
-	 * @returns {Promise}
-	 */
+   * Connect to OBS remote
+   *
+   * @param host websocket url
+   * @param port websocket port
+   * @param secure websocket ssl
+   *
+   * @returns Promise
+   */
   connect(host = 'localhost', port = 4444, secure = false) {
-    if (this._socket) {
-      this._socket.onopen = null;
-      this._socket.onmessage = null;
-      this._socket.onerror = null;
-      this._socket.onclose = null;
-      this._socket.close();
+    if (this.SOCKET) {
+      this.SOCKET.onopen = null;
+      this.SOCKET.onmessage = null;
+      this.SOCKET.onerror = null;
+      this.SOCKET.onclose = null;
+      this.SOCKET.close();
     }
 
     return new Promise((resolve, reject) => {
-      this._connecting = { resolve, reject };
+      this.CONNECTING = { resolve, reject };
       const secureSocket = (secure) ? 'wss://' : 'ws://';
       const url = secureSocket + host + ':' + port;
-      this._socket = new WebSocket(url);
+      this.SOCKET = new WebSocket(url);
 
-      this._socket.onopen = socketOnOpen.bind(this);
-      this._socket.onmessage = socketOnMessage.bind(this);
-      this._socket.onerror = socketOnError.bind(this);
-      this._socket.onclose = socketOnClose.bind(this);
+      this.SOCKET.onopen = socketOnOpen.bind(this);
+      this.SOCKET.onmessage = socketOnMessage.bind(this);
+      this.SOCKET.onerror = socketOnError.bind(this);
+      this.SOCKET.onclose = socketOnClose.bind(this);
     });
   }
 
   /**
-	 * Close socket connection
-	 */
+   * Close socket connection
+   */
   close() {
-    if (this._socket) {
-      this._socket.close();
+    if (this.SOCKET) {
+      this.SOCKET.close();
     }
   }
 
   /**
-	 * Sends raw message to OBS remote
-	 *
-	 * @param message
-	 * @returns {Promise}
-	 */
+   * Sends raw message to OBS remote
+   *
+   * @param message message to be send to websocket
+   * @returns Promise
+   */
   send(message) {
     return new Promise((resolve, reject) => {
-      if (this._socket) {
+      if (this.SOCKET) {
         const id = this._nextID();
-        this._promises[id] = { resolve, reject };
+        this.PROMISES[id] = { resolve, reject };
 
         message['message-id'] = id;
 
         // this.debug('send', message);
 
-        this._socket.send(JSON.stringify(message));
+        this.SOCKET.send(JSON.stringify(message));
       } else {
         throw new Error('Connection isn\'t opened');
       }
@@ -83,11 +87,12 @@ export class WebsocketService extends EventEmitter {
   }
 
   /**
-	 * Convenience method for logging in
-	 *
-	 * @param password
-	 * @returns {Promise}
-	 */
+   * Convenience method for logging in
+   *
+   * @param password password for login to websocket
+   *
+   * @returns Promise
+   */
   async login(password) {
     const { authRequired, salt, challenge }: any = await this.send({ 'request-type': 'GetAuthRequired' });
 
@@ -116,13 +121,12 @@ export class WebsocketService extends EventEmitter {
   }
 
   /**
-	 * Get ID for next request
-	 *
-	 * @returns {string}
-	 * @private
-	 */
+   * Get ID for next request
+   *
+   * @returns string
+   */
   _nextID() {
-    return String(this._idCounter++);
+    return String(this.ID_COUNTER++);
   }
 
 }
@@ -133,8 +137,8 @@ export class WebsocketService extends EventEmitter {
  * Handle socket opening
  */
 function socketOnOpen() {
-  if (this._connecting) {
-    const { resolve, reject } = this._connecting;
+  if (this.CONNECTING) {
+    const { resolve, reject } = this.CONNECTING;
 
     this.send({ 'request-type': 'GetAuthRequired' }).then(({ authRequired }) => {
       resolve({ authRequired });
@@ -146,7 +150,7 @@ function socketOnOpen() {
       }
     }, err => reject(err));
 
-    this._connecting = null;
+    this.CONNECTING = null;
   }
   this.emit('socket.open');
 }
@@ -154,7 +158,7 @@ function socketOnOpen() {
 /**
  * Handle socket messages
  *
- * @param message
+ * @param message message receive by socket
  */
 function socketOnMessage(message) {
   let received;
@@ -181,7 +185,7 @@ function socketOnMessage(message) {
 /**
  * Handle socket errors
  *
- * @param error
+ * @param error socket error
  */
 function socketOnError(error) {
   this.emit('socket.error', error);
@@ -194,10 +198,10 @@ const disconnectReasons = {
 /**
  * Handle socket close events
  *
- * @param event
+ * @param event close event socket handler
  */
 function socketOnClose(event) {
-  if (this._connecting) {
+  if (this.CONNECTING) {
     let message = 'Unknown Error';
     if (event.code in disconnectReasons) {
       message = disconnectReasons[event.code];
@@ -208,8 +212,8 @@ function socketOnClose(event) {
     const error = new Error(message);
     // error.event = event;
 
-    this._connecting.reject(error);
-    this._connecting = null;
+    this.CONNECTING.reject(error);
+    this.CONNECTING = null;
   }
 
   this.emit('socket.close');
@@ -218,18 +222,18 @@ function socketOnClose(event) {
 /**
  * Handle responses from server
  *
- * @param id
- * @param message
+ * @param id message id
+ * @param message message from socket
  */
 function handleCallback(id, message) {
-  const promise = this._promises[id];
+  const promise = this.PROMISES[id];
   if (promise) {
     if (message.status === 'error') {
       promise.reject(new Error(message.error));
     } else {
       promise.resolve(message);
     }
-    delete this._promises[id];
+    delete this.PROMISES[id];
   } else if (message.status === 'error') {
     this.emit('error', message.error, message);
   }
@@ -238,8 +242,8 @@ function handleCallback(id, message) {
 /**
  * Handle general updates
  *
- * @param type
- * @param message
+ * @param type event type
+ * @param message socket message
  */
 function handleUpdate(type, message) {
   this.emit('event', message);

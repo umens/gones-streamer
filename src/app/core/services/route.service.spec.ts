@@ -1,26 +1,21 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-// import { AuthenticationService } from './authentication/authentication.service';
-// import { MockAuthenticationService } from './authentication/authentication.service.mock';
-// import { AuthenticationGuard } from './authentication/authentication.guard';
-import { ShellComponent } from '../shell/shell.component';
 import { Route } from './route.service';
+import { ShellComponent } from '../shell/shell.component';
 
 describe('Route', () => {
   let route: Route;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        // AuthenticationGuard,
-        // { provide: AuthenticationService, useClass: MockAuthenticationService },
-        Route
-      ]
-    });
-  });
+  beforeEach(() => TestBed.configureTestingModule({
+    providers: [
+      // AuthenticationGuard,
+      // { provide: AuthenticationService, useClass: MockAuthenticationService },
+      Route
+    ]
+  }));
 
-  beforeEach(inject([Route], (_route: Route) => {
-    route = _route;
+  beforeEach(inject([Route], (ROUTE: Route) => {
+    route = ROUTE;
   }));
 
   describe('withShell', () => {

@@ -1,12 +1,11 @@
-
 <p align="center"><img src="https://github.com/umens/gones-streamer/blob/master/src/assets/logos/logo.png?raw=true" alt="logo" height="200" /></p>
 <h1 align="center">gones-streamer</h1>
 
-[![Build Status](https://travis-ci.com/umens/gones-streamer.svg?branch=master)](https://travis-ci.com/umens/gones-streamer) [![codecov](https://codecov.io/gh/umens/gones-streamer/branch/master/graph/badge.svg)](https://codecov.io/gh/umens/gones-streamer) [![dependencies Status](https://david-dm.org/umens/gones-streamer/status.svg)](https://david-dm.org/umens/gones-streamer) [![devDependencies Status](https://david-dm.org/umens/gones-streamer/dev-status.svg)](https://david-dm.org/umens/gones-streamer?type=dev)
+[![Build Status](https://travis-ci.com/umens/gones-streamer.svg?branch=master)](https://travis-ci.com/umens/gones-streamer) [![codecov](https://codecov.io/gh/umens/gones-streamer/branch/master/graph/badge.svg)](https://codecov.io/gh/umens/gones-streamer) [![dependencies Status](https://david-dm.org/umens/gones-streamer/status.svg)](https://david-dm.org/umens/gones-streamer) [![devDependencies Status](https://david-dm.org/umens/gones-streamer/dev-status.svg)](https://david-dm.org/umens/gones-streamer?type=dev) [![Automated Release Notes by gren](https://img.shields.io/badge/%F0%9F%A4%96-release%20notes-00B2EE.svg)](https://github.com/umens/gones-streamer/releases/latest)
 
 [LIVE App](https://umens.github.io/gones-streamer)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.1.0.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.9.
 
 ## Development server
 

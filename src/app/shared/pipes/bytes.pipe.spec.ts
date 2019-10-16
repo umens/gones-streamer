@@ -157,4 +157,5 @@ describe('BytesPipe', () => {
     const result = pipe.transform(bytes, 0, from, to);
     expect(result).toEqual('1024 MB');
   });
+
 });

@@ -9,10 +9,12 @@ describe('RemoteCenterComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [RemoteCenterComponent],
-      imports: [RouterTestingModule]
+      imports: [
+        RouterTestingModule
+      ],
+      declarations: [ RemoteCenterComponent ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {
