@@ -26,7 +26,6 @@ script:
   - yarn build --prod --aot --progress=false --base-href "/gones-streamer/"
 
 after_success:
-  - ls -al
   - yarn run docs:ci
   - yarn run deploy
   - codecov
