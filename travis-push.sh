@@ -1,6 +1,8 @@
 #!/bin/sh
 # Credit: https://gist.github.com/willprice/e07efd73fb7f13f917ea
 
+set -ev
+
 setup_git() {
   git config --global user.email "travis@travis-ci.org"
   git config --global user.name "Travis CI"
@@ -22,7 +24,7 @@ push_files() {
   # Remove existing "origin"
   git remote rm origin
   # Add new "origin" with access token in the git URL for authentication
-  git remote add origin https://umens:${GH_TOKEN}@github.com/umens/gones-streamer.git > /dev/null 2>&1
+  git remote add origin https://${GH_TOKEN}@github.com/umens/gones-streamer.git > /dev/null 2>&1
   git push origin master --quiet
 }
 
