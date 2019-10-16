@@ -16,12 +16,15 @@ const routes: Routes = [
     path: 'login',
     component: LoginComponent
   },
-  Route.withShell([
-    {
-      path: 'remote-center',
-      canActivate: [AuthGuard],
-      loadChildren: '../remote-center/remote-center.module#RemoteCenterModule'
-    }]),
+  Route.withShell(
+    [
+      {
+        path: 'remote-center',
+        canActivate: [AuthGuard],
+        loadChildren: () => import('../remote-center/remote-center.module').then(mod => mod.RemoteCenterModule),
+      }
+    ]
+  ),
   {
     path: '**',
     component: NotFoundComponent

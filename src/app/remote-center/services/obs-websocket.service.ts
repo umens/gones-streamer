@@ -36,7 +36,7 @@ export class ObsWebsocketService {
           resolve();
         }
       }).catch(err => {
-        console.error(err.message);
+        console.log(err.message);
         this.connected = false;
         reject(err);
       });
@@ -54,7 +54,7 @@ export class ObsWebsocketService {
       that.wsService.send(args).then(data => {
         resolve(data);
       }).catch(err => {
-        console.error(err.message);
+        console.log(err.message);
         reject(err.message);
       });
     });

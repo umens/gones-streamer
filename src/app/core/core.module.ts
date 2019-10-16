@@ -19,8 +19,8 @@ import { throwIfAlreadyLoaded } from './module-import-guard';
   declarations: [LoginComponent, NotFoundComponent, ShellComponent, FooterComponent, HeaderComponent],
   imports: [
     CommonModule,
+    SweetAlert2Module.forRoot(),
     CoreRoutingModule,
-    SweetAlert2Module.forRoot()
   ],
   exports: [
     RouterModule

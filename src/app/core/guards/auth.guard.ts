@@ -21,7 +21,7 @@ export class AuthGuard implements CanActivate {
       const accessToken = this.authentication.getAccessToken();
 
       if (!token) {
-        console.error('User is not authenticated.');
+        console.log('User is not authenticated.');
         this.redirectToLoginPage();
         return false;
       } else if (this.authentication.isAuthenticated()) {

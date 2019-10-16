@@ -144,45 +144,6 @@
     </dl>
 
     <div class="row mt-3">
-      <div class="col">
-        <h1>Match Evènements</h1>
-      </div>
-    </div>
-    <div class="row mb-3">
-      <div class="col-10">
-        <div class="card-group">
-          <div (click)="setCurrentQuarter('Q1')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q1')}">
-            <div class="card-body">
-              <h6 class="card-title mb-0"> Q1 </h6>
-            </div>
-          </div>
-          <div (click)="setCurrentQuarter('Q2')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q2')}">
-            <div class="card-body">
-              <h6 class="card-title mb-0"> Q2 </h6>
-            </div>
-          </div>
-          <div (click)="setCurrentQuarter('Q3')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q3')}">
-            <div class="card-body">
-              <h6 class="card-title mb-0"> Q3 </h6>
-            </div>
-          </div>
-          <div (click)="setCurrentQuarter('Q4')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q4')}">
-            <div class="card-body">
-              <h6 class="card-title mb-0"> Q4 </h6>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-2">
-        <div (click)="setFlagVisibility(!flagThrown)" [ngClass]="{'card': true, 'btn': true, 'btn-outline-warning': true, 'active': flagThrown}">
-          <div class="card-body">
-            <h6 class="card-title mb-0"> Flag </h6>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mt-3">
         <div class="col">
           <h1>Player Highlight</h1>
         </div>
@@ -250,6 +211,40 @@
     <div class="row mt-3">
       <div class="col">
         <h1>Evènement</h1>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-9">
+        <div class="card-group">
+          <div (click)="setCurrentQuarter('Q1')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q1')}">
+            <div class="card-body">
+              <h6 class="card-title mb-0"> Q1 </h6>
+            </div>
+          </div>
+          <div (click)="setCurrentQuarter('Q2')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q2')}">
+            <div class="card-body">
+              <h6 class="card-title mb-0"> Q2 </h6>
+            </div>
+          </div>
+          <div (click)="setCurrentQuarter('Q3')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q3')}">
+            <div class="card-body">
+              <h6 class="card-title mb-0"> Q3 </h6>
+            </div>
+          </div>
+          <div (click)="setCurrentQuarter('Q4')" [ngClass]="{'card': true, 'btn': true, 'btn-light': true, 'active': (currentQuarter == 'Q4')}">
+            <div class="card-body">
+              <h6 class="card-title mb-0"> Q4 </h6>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div (click)="setFlagVisibility(!flagThrown)" [ngClass]="{'card': true, 'btn': true, 'btn-outline-warning': true, 'active': flagThrown}">
+          <div class="card-body">
+            <h6 class="card-title mb-0"> Flag </h6>
+          </div>
+        </div>
       </div>
     </div>
 

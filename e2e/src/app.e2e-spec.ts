@@ -8,9 +8,9 @@ describe('workspace-project App', () => {
     page = new AppPage();
   });
 
-  it('should display welcome message', () => {
+  it('should display login message', () => {
     page.navigateTo();
-    expect(page.getTitleText()).toEqual('gones-streamer app is running!');
+    expect(page.getTitleText()).toEqual('Connect to OBS Server');
   });
 
   afterEach(async () => {

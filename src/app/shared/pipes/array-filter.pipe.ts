@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class ArrayFilterPipe implements PipeTransform {
 
-  transform(items: any[], filter: any[]): any[] {
+  transform(items: any, filter: any): any[] {
     if (!items || !filter) {
       return items;
     }
@@ -21,7 +21,7 @@ export class ArrayFilterPipe implements PipeTransform {
    * @param any filter The filter to apply.
    * @return boolean True if item satisfies filters, false if not.
    */
-  applyFilter(item: any, filter: any[]): boolean {
+  applyFilter(item: any, filter: any): boolean {
     for (const field in filter) {
       if (filter[field] !== null && filter[field] !== '') {
         if (typeof filter[field] === 'string') {

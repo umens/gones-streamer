@@ -327,15 +327,15 @@ export class CockpitComponent implements OnInit, OnDestroy {
     // this.SetScore();
   }
 
-  /**
-   * @deprecated
-   */
-  SetScore() {
-    this.obsWebsocket.SetTextGDIPlusProperties('text-score', { text: this.score })
-      .catch((err: Error) => {
-        console.error(err.message);
-      });
-  }
+  // /**
+  //  * @deprecated
+  //  */
+  // SetScore() {
+  //   this.obsWebsocket.SetTextGDIPlusProperties('text-score', { text: this.score })
+  //     .catch((err: Error) => {
+  //       console.error(err.message);
+  //     });
+  // }
   setScoreGones() {
     this.obsWebsocket.SetTextGDIPlusProperties('Home Team Score Txt', { text: this.scoreGones })
       .catch((err: Error) => {

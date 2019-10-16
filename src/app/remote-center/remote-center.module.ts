@@ -14,9 +14,9 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
   declarations: [CockpitComponent, RemoteCenterComponent],
   imports: [
     CommonModule,
-    RemoteCenterRoutingModule,
     SharedModule,
-    SweetAlert2Module
+    SweetAlert2Module,
+    RemoteCenterRoutingModule,
   ],
   providers: [ObsWebsocketService, WebsocketService]
 })
