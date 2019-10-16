@@ -18,8 +18,6 @@ cache:
 before_script:
   - npm install -g codecov
   - npm install -g github-release-notes
-  - ls -al
-  - chmod ugo+x travis-push.sh
 
 script:
   - yarn run lint
