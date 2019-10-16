@@ -1,11 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { SharedModule } from '../../shared/shared.module';
-import { SweetAlert2Module, SwalComponent } from '@toverux/ngx-sweetalert2';
+import { Router } from '@angular/router';
+
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 import { CockpitComponent } from './cockpit.component';
-import { AuthenticationService } from '../../core/services/authentication.service';
+import { SharedModule } from 'src/app/shared/shared.module';
 import { ObsWebsocketService } from '../services/obs-websocket.service';
-import { Router } from '@angular/router';
+import { AuthenticationService } from 'src/app/core/services/authentication.service';
 
 describe('CockpitComponent', () => {
   let component: CockpitComponent;
@@ -40,7 +41,7 @@ describe('CockpitComponent', () => {
         { provide: Router, useValue: mockRouter }
       ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {
@@ -51,7 +52,7 @@ describe('CockpitComponent', () => {
     fixture.detectChanges();
   });
 
-  // it('should create', () => {
-  //   expect(component).toBeTruthy();
-  // });
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
 });

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+
 import { AuthenticationService } from '../services/authentication.service';
 
 @Component({
@@ -16,6 +17,12 @@ export class LoginComponent implements OnInit {
   }
 
   login(host, port, password, secure) {
+    if (host === '') {
+      host = 'localhost';
+    }
+    if (port === '') {
+      port = 4444;
+    }
     this.authentication.login(host, port, password, secure);
   }
 

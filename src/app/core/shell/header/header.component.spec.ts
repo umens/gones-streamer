@@ -24,10 +24,10 @@ describe('HeaderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [HeaderComponent],
+      declarations: [ HeaderComponent ],
       providers: [{ provide: AuthenticationService, useValue: authServiceStub }]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

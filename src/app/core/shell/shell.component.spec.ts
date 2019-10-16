@@ -1,23 +1,18 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { NavigationEnd, Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+
+import { Observable } from 'rxjs';
 
 import { ShellComponent } from './shell.component';
-import { Router, NavigationEnd } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
-import { Title } from '@angular/platform-browser';
-import { Observable } from 'rxjs';
 
 describe('ShellComponent', () => {
   let component: ShellComponent;
   let fixture: ComponentFixture<ShellComponent>;
 
-  // let titleService: Title;
-  // let routerService: Router;
-  // const mockRouter = {
-  //   navigate: jasmine.createSpy('navigate'),
-  //   events: Observable.of(new NavigationEnd(0, 'http://localhost:4200/login', 'http://localhost:4200/login'));
-  // };
   class MockRouter {
     public ne = new NavigationEnd(0, 'http://localhost:4200/login', 'http://localhost:4200/login');
     public events = new Observable(observer => {
@@ -28,14 +23,14 @@ describe('ShellComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ShellComponent, HeaderComponent, FooterComponent],
+      declarations: [ ShellComponent, HeaderComponent, FooterComponent ],
       imports: [RouterTestingModule],
       providers: [
         { provide: Router, useClass: MockRouter },
         Title
       ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

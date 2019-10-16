@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class SlugifyPipe implements PipeTransform {
 
-  transform(value: string, args?: any): string {
+  transform(value: string, ...args: any[]): string {
     return value.toString().toLowerCase()
       .replace(/\s+/g, '-')           // Replace spaces with -
       .replace(/[^\w\-]+/g, '')       // Remove all non-word chars

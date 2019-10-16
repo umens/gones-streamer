@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LoginComponent } from './login/login.component';
-import { NotFoundComponent } from './not-found/not-found.component';
-import { AuthGuardService } from './services/auth-guard.service';
 import { Route } from './services/route.service';
+
+import { AuthGuard } from './guards/auth.guard';
+import { NotFoundComponent } from './not-found/not-found.component';
 
 const routes: Routes = [
   {
@@ -15,12 +16,15 @@ const routes: Routes = [
     path: 'login',
     component: LoginComponent
   },
-  Route.withShell([
-    {
-      path: 'remote-center',
-      canActivate: [AuthGuardService],
-      loadChildren: '../remote-center/remote-center.module#RemoteCenterModule'
-    }]),
+  Route.withShell(
+    [
+      {
+        path: 'remote-center',
+        canActivate: [AuthGuard],
+        loadChildren: () => import('../remote-center/remote-center.module').then(mod => mod.RemoteCenterModule),
+      }
+    ]
+  ),
   {
     path: '**',
     component: NotFoundComponent
@@ -28,7 +32,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class CoreRoutingModule { }

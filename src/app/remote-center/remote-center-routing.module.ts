@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { RemoteCenterComponent } from './remote-center.component';
 import { CockpitComponent } from './cockpit/cockpit.component';
 
+
 const routes: Routes = [
   {
     path: '',
