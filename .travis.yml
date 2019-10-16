@@ -17,6 +17,7 @@ cache:
 
 before_script:
   - npm install -g codecov
+  - npm install -g github-release-notes
 
 script:
   - yarn run lint
@@ -29,5 +30,6 @@ after_success:
   - yarn run deploy
   - codecov
   - yarn run changelog
-  - sh .travis-push.sh
+  - chmod ugo+x .travis-push.sh
+  - ./.travis-push.sh
   - yarn run release
