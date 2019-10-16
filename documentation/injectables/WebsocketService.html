@@ -1,0 +1,981 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>gones-streamer documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	      <link rel="stylesheet" href="../styles/style.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="../" class="navbar-brand">gones-streamer documentation</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li>Injectables</li>
+  <li>WebsocketService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+            <a href="#info" role="tab" id="info-tab" data-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li >
+            <a href="#source" role="tab" id="source-tab" data-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="c-info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/app/shared/services/websocket.service.ts</code>
+        </p>
+
+
+            <p class="comment">
+                <h3>Extends</h3>
+            </p>
+            <p class="comment">
+                        <code><a href="https://angular.io/api/core/EventEmitter" target="_blank" >EventEmitter</a></code>
+            </p>
+
+
+            <section>
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#CONNECTING">CONNECTING</a>
+                            </li>
+                            <li>
+                                <a href="#debug">debug</a>
+                            </li>
+                            <li>
+                                <a href="#ID_COUNTER">ID_COUNTER</a>
+                            </li>
+                            <li>
+                                <a href="#PROMISES">PROMISES</a>
+                            </li>
+                            <li>
+                                <a href="#SOCKET">SOCKET</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#_nextID">_nextID</a>
+                            </li>
+                            <li>
+                                <a href="#close">close</a>
+                            </li>
+                            <li>
+                                <a href="#connect">connect</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#login">login</a>
+                            </li>
+                            <li>
+                                <a href="#send">send</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section>
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor()</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/app/shared/services/websocket.service.ts:13</a></div>
+                            </td>
+                        </tr>
+
+            </tbody>
+        </table>
+</section>
+
+            <section>
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="_nextID"></a>
+                    <span class="name">
+                        <b>
+                            _nextID
+                        </b>
+                        <a href="#_nextID"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>_nextID()</code>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-line">Defined in <a href="" data-line="128"
+                            class="link-to-prism">src/app/shared/services/websocket.service.ts:128</a></div>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Get ID for next request</p>
+</div>
+
+                    <div>
+                    </div>
+                    <div class="io-description">
+                        <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                    </div>
+                    <div class="io-description">
+                        <p>string</p>
+
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="close"></a>
+                    <span class="name">
+                        <b>
+                            close
+                        </b>
+                        <a href="#close"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>close()</code>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-line">Defined in <a href="" data-line="60"
+                            class="link-to-prism">src/app/shared/services/websocket.service.ts:60</a></div>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Close socket connection</p>
+</div>
+
+                    <div class="io-description">
+                        <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="connect"></a>
+                    <span class="name">
+                        <b>
+                            connect
+                        </b>
+                        <a href="#connect"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>connect(host: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, port: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, secure)</code>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-line">Defined in <a href="" data-line="35"
+                            class="link-to-prism">src/app/shared/services/websocket.service.ts:35</a></div>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Connect to OBS remote</p>
+</div>
+
+                    <div class="io-description">
+                        <b>Parameters :</b>
+                        <table class="params">
+                            <thead>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Type</td>
+                                    <td>Optional</td>
+                                    <td>Default value</td>
+                                    <td>Description</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>host</td>
+                                    <td>
+                                                <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                    </td>
+
+                                    <td>
+                                        No
+                                    </td>
+
+                                    <td>
+                                        <code>&#x27;localhost&#x27;</code>
+                                    </td>
+
+                                    <td>
+                                        <p>websocket url</p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>port</td>
+                                    <td>
+                                                <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                    </td>
+
+                                    <td>
+                                        No
+                                    </td>
+
+                                    <td>
+                                        <code>4444</code>
+                                    </td>
+
+                                    <td>
+                                        <p>websocket port</p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>secure</td>
+                                    <td>
+                                    </td>
+
+                                    <td>
+                                        No
+                                    </td>
+
+                                    <td>
+                                        <code>false</code>
+                                    </td>
+
+                                    <td>
+                                        <p>websocket ssl</p>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                    </div>
+                    <div class="io-description">
+                        <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                    </div>
+                    <div class="io-description">
+                        <p>Promise</p>
+
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="login"></a>
+                    <span class="name">
+                        <b>
+                            <span class="modifier">Async</span>
+                            login
+                        </b>
+                        <a href="#login"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>login(password)</code>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-line">Defined in <a href="" data-line="96"
+                            class="link-to-prism">src/app/shared/services/websocket.service.ts:96</a></div>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Convenience method for logging in</p>
+</div>
+
+                    <div class="io-description">
+                        <b>Parameters :</b>
+                        <table class="params">
+                            <thead>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Optional</td>
+                                    <td>Description</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>password</td>
+
+                                    <td>
+                                        No
+                                    </td>
+
+
+                                    <td>
+                                        <p>password for login to websocket</p>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                    </div>
+                    <div class="io-description">
+                        <b>Returns : </b>    <code>{}</code>
+
+                    </div>
+                    <div class="io-description">
+                        <p>Promise</p>
+
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="send"></a>
+                    <span class="name">
+                        <b>
+                            send
+                        </b>
+                        <a href="#send"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>send(message)</code>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-line">Defined in <a href="" data-line="72"
+                            class="link-to-prism">src/app/shared/services/websocket.service.ts:72</a></div>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Sends raw message to OBS remote</p>
+</div>
+
+                    <div class="io-description">
+                        <b>Parameters :</b>
+                        <table class="params">
+                            <thead>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Optional</td>
+                                    <td>Description</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>message</td>
+
+                                    <td>
+                                        No
+                                    </td>
+
+
+                                    <td>
+                                        <p>message to be send to websocket</p>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                    </div>
+                    <div class="io-description">
+                        <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                    </div>
+                    <div class="io-description">
+                        <p>Promise</p>
+
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+            <section>
+    
+        <h3 id="inputs">
+            Properties
+        </h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="CONNECTING"></a>
+                        <span class="name">
+                            <b>
+                            CONNECTING</b>
+                            <a href="#CONNECTING"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Type : </i>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </td>
+                    </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/app/shared/services/websocket.service.ts:10</a></div>
+                            </td>
+                        </tr>
+
+
+            </tbody>
+        </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="debug"></a>
+                        <span class="name">
+                            <b>
+                            debug</b>
+                            <a href="#debug"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/function" target="_blank" >function</a></code>
+
+                        </td>
+                    </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="9" class="link-to-prism">src/app/shared/services/websocket.service.ts:9</a></div>
+                            </td>
+                        </tr>
+
+
+            </tbody>
+        </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="ID_COUNTER"></a>
+                        <span class="name">
+                            <b>
+                            ID_COUNTER</b>
+                            <a href="#ID_COUNTER"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+
+                        </td>
+                    </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/app/shared/services/websocket.service.ts:11</a></div>
+                            </td>
+                        </tr>
+
+
+            </tbody>
+        </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="PROMISES"></a>
+                        <span class="name">
+                            <b>
+                            PROMISES</b>
+                            <a href="#PROMISES"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Type : </i>    <code>literal type</code>
+
+                        </td>
+                    </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="12" class="link-to-prism">src/app/shared/services/websocket.service.ts:12</a></div>
+                            </td>
+                        </tr>
+
+
+            </tbody>
+        </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="SOCKET"></a>
+                        <span class="name">
+                            <b>
+                            SOCKET</b>
+                            <a href="#SOCKET"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Type : </i>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </td>
+                    </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/app/shared/services/websocket.service.ts:13</a></div>
+                            </td>
+                        </tr>
+
+
+            </tbody>
+        </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="c-source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@angular/core&#x27;;
+import * as EventEmitter from &#x27;events&#x27;;
+// import { Subject, Observable, Observer } from &#x27;rxjs&#x27;;
+import * as shajs from &#x27;sha.js&#x27;;
+
+@Injectable()
+export class WebsocketService extends EventEmitter {
+
+  debug: () &#x3D;&gt; void;
+  CONNECTING: any;
+  ID_COUNTER: number;
+  PROMISES: {};
+  SOCKET: any;
+
+  constructor() {
+    super();
+
+    this.debug &#x3D; () &#x3D;&gt; { };
+
+    this.CONNECTING &#x3D; null;
+    this.ID_COUNTER &#x3D; 1;
+    this.PROMISES &#x3D; {};
+    this.SOCKET &#x3D; undefined;
+  }
+
+  /**
+   * Connect to OBS remote
+   *
+   * @param host websocket url
+   * @param port websocket port
+   * @param secure websocket ssl
+   *
+   * @returns Promise
+   */
+  connect(host &#x3D; &#x27;localhost&#x27;, port &#x3D; 4444, secure &#x3D; false) {
+    if (this.SOCKET) {
+      this.SOCKET.onopen &#x3D; null;
+      this.SOCKET.onmessage &#x3D; null;
+      this.SOCKET.onerror &#x3D; null;
+      this.SOCKET.onclose &#x3D; null;
+      this.SOCKET.close();
+    }
+
+    return new Promise((resolve, reject) &#x3D;&gt; {
+      this.CONNECTING &#x3D; { resolve, reject };
+      const secureSocket &#x3D; (secure) ? &#x27;wss://&#x27; : &#x27;ws://&#x27;;
+      const url &#x3D; secureSocket + host + &#x27;:&#x27; + port;
+      this.SOCKET &#x3D; new WebSocket(url);
+
+      this.SOCKET.onopen &#x3D; socketOnOpen.bind(this);
+      this.SOCKET.onmessage &#x3D; socketOnMessage.bind(this);
+      this.SOCKET.onerror &#x3D; socketOnError.bind(this);
+      this.SOCKET.onclose &#x3D; socketOnClose.bind(this);
+    });
+  }
+
+  /**
+   * Close socket connection
+   */
+  close() {
+    if (this.SOCKET) {
+      this.SOCKET.close();
+    }
+  }
+
+  /**
+   * Sends raw message to OBS remote
+   *
+   * @param message message to be send to websocket
+   * @returns Promise
+   */
+  send(message) {
+    return new Promise((resolve, reject) &#x3D;&gt; {
+      if (this.SOCKET) {
+        const id &#x3D; this._nextID();
+        this.PROMISES[id] &#x3D; { resolve, reject };
+
+        message[&#x27;message-id&#x27;] &#x3D; id;
+
+        // this.debug(&#x27;send&#x27;, message);
+
+        this.SOCKET.send(JSON.stringify(message));
+      } else {
+        throw new Error(&#x27;Connection isn\&#x27;t opened&#x27;);
+      }
+    });
+  }
+
+  /**
+   * Convenience method for logging in
+   *
+   * @param password password for login to websocket
+   *
+   * @returns Promise
+   */
+  async login(password) {
+    const { authRequired, salt, challenge }: any &#x3D; await this.send({ &#x27;request-type&#x27;: &#x27;GetAuthRequired&#x27; });
+
+    if (!authRequired) {
+      return true;
+    }
+    if (!password) {
+      throw new Error(&#x27;Password Required&#x27;);
+    }
+
+    const authHash &#x3D; shajs(&#x27;sha256&#x27;);
+    authHash.update(password);
+    authHash.update(salt);
+    const authResponse &#x3D; shajs(&#x27;sha256&#x27;);
+    authResponse.update(authHash.digest(&#x27;base64&#x27;));
+    authResponse.update(challenge);
+    const auth &#x3D; authResponse.digest(&#x27;base64&#x27;);
+
+    await this.send({
+      &#x27;request-type&#x27;: &#x27;Authenticate&#x27;,
+      auth
+    });
+    this.emit(&#x27;socket.ready&#x27;);
+
+    return true;
+  }
+
+  /**
+   * Get ID for next request
+   *
+   * @returns string
+   */
+  _nextID() {
+    return String(this.ID_COUNTER++);
+  }
+
+}
+
+
+
+/**
+ * Handle socket opening
+ */
+function socketOnOpen() {
+  if (this.CONNECTING) {
+    const { resolve, reject } &#x3D; this.CONNECTING;
+
+    this.send({ &#x27;request-type&#x27;: &#x27;GetAuthRequired&#x27; }).then(({ authRequired }) &#x3D;&gt; {
+      resolve({ authRequired });
+
+      if (authRequired) {
+        this.emit(&#x27;socket.auth&#x27;);
+      } else {
+        this.emit(&#x27;socket.ready&#x27;);
+      }
+    }, err &#x3D;&gt; reject(err));
+
+    this.CONNECTING &#x3D; null;
+  }
+  this.emit(&#x27;socket.open&#x27;);
+}
+
+/**
+ * Handle socket messages
+ *
+ * @param message message receive by socket
+ */
+function socketOnMessage(message) {
+  let received;
+  try {
+    received &#x3D; JSON.parse(message.data);
+  } catch (err) {
+    this.emit(&#x27;error&#x27;, err);
+  }
+
+  if (!received) {
+    return;
+  }
+
+  this.debug(&#x27;receive&#x27;, received);
+
+  const type &#x3D; received[&#x27;update-type&#x27;];
+  if (type) {
+    handleUpdate.call(this, type, received);
+  } else {
+    handleCallback.call(this, received[&#x27;message-id&#x27;], received);
+  }
+}
+
+/**
+ * Handle socket errors
+ *
+ * @param error socket error
+ */
+function socketOnError(error) {
+  this.emit(&#x27;socket.error&#x27;, error);
+}
+
+const disconnectReasons &#x3D; {
+  1006: &#x27;Server not reachable&#x27;
+};
+
+/**
+ * Handle socket close events
+ *
+ * @param event close event socket handler
+ */
+function socketOnClose(event) {
+  if (this.CONNECTING) {
+    let message &#x3D; &#x27;Unknown Error&#x27;;
+    if (event.code in disconnectReasons) {
+      message &#x3D; disconnectReasons[event.code];
+    } else if (event.message) {
+      message &#x3D; event.message;
+    }
+
+    const error &#x3D; new Error(message);
+    // error.event &#x3D; event;
+
+    this.CONNECTING.reject(error);
+    this.CONNECTING &#x3D; null;
+  }
+
+  this.emit(&#x27;socket.close&#x27;);
+}
+
+/**
+ * Handle responses from server
+ *
+ * @param id message id
+ * @param message message from socket
+ */
+function handleCallback(id, message) {
+  const promise &#x3D; this.PROMISES[id];
+  if (promise) {
+    if (message.status &#x3D;&#x3D;&#x3D; &#x27;error&#x27;) {
+      promise.reject(new Error(message.error));
+    } else {
+      promise.resolve(message);
+    }
+    delete this.PROMISES[id];
+  } else if (message.status &#x3D;&#x3D;&#x3D; &#x27;error&#x27;) {
+    this.emit(&#x27;error&#x27;, message.error, message);
+  }
+}
+
+/**
+ * Handle general updates
+ *
+ * @param type event type
+ * @param message socket message
+ */
+function handleUpdate(type, message) {
+  this.emit(&#x27;event&#x27;, message);
+  this.emit(type, message);
+}
+</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+                   
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'WebsocketService.html';
+       </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="../js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="../js/menu-wc.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>
