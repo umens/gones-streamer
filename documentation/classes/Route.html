@@ -107,90 +107,90 @@
 
             <section>
     
-    <h3 id="methods">
-        Methods
-    </h3>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="withShell"></a>
-                    <span class="name">
-                        <b>
-                            <span class="modifier">Static</span>
+        <h3 id="methods">
+            Methods
+        </h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="withShell"></a>
+                        <span class="name">
+                            <b>
+                                <span class="modifier">Static</span>
                             withShell
-                        </b>
-                        <a href="#withShell"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                    <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>withShell(routes: <a href="../classes/Route.html">Routes</a>)</code>
-                </td>
-            </tr>
+                            </b>
+                            <a href="#withShell"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                            <span class="modifier-icon icon ion-ios-reset"></span>
+                        <code>withShell(routes: <a href="../classes/Route.html">Routes</a>)</code>
+                    </td>
+                </tr>
 
 
-            <tr>
-                <td class="col-md-4">
-                    <div class="io-line">Defined in <a href="" data-line="16"
-                            class="link-to-prism">src/app/core/services/route.service.ts:16</a></div>
-                </td>
-            </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/app/core/services/route.service.ts:16</a></div>
+                            </td>
+                        </tr>
 
 
-            <tr>
-                <td class="col-md-4">
-                    <div class="io-description"><p>Creates routes using the shell component and authentication.</p>
+                <tr>
+                    <td class="col-md-4">
+                            <div class="io-description"><p>Creates routes using the shell component and authentication.</p>
 </div>
 
-                    <div class="io-description">
-                        <b>Parameters :</b>
-                        <table class="params">
-                            <thead>
-                                <tr>
-                                    <td>Name</td>
-                                    <td>Type</td>
-                                    <td>Optional</td>
-                                    <td>Description</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>routes</td>
-                                    <td>
-                                                <code><a href="../classes/Route.html" target="_self" >Routes</a></code>
-                                    </td>
+                            <div class="io-description">
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                                    <td>Description</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>routes</td>
+                                                        <td>
+                                                                    <code><a href="../classes/Route.html" target="_self" >Routes</a></code>
+                                                        </td>
+                                                    
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
 
-                                    <td>
-                                        No
-                                    </td>
+                                                        <td>
+                                                                <p>The routes to add.</p>
 
+                                                        </td>
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                            <div>
+                            </div>
+                            <div class="io-description">
+                                <b>Returns : </b>    <code><a href="../classes/Route.html" target="_self" >ngRoute</a></code>
 
-                                    <td>
-                                        <p>The routes to add.</p>
+                            </div>
+                                <div class="io-description">
+                                    <p>The new route using shell as the base.</p>
 
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
-                    </div>
-                    <div class="io-description">
-                        <b>Returns : </b>        <code><a href="../classes/Route.html" target="_self" >ngRoute</a></code>
-
-                    </div>
-                    <div class="io-description">
-                        <p>Route The new route using shell as the base.</p>
-
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                                </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 </section>
+
 
 
 
@@ -203,7 +203,7 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Route as ngRoute, Routes } from &#x27;@angular/router&#x27;;
 
 import { ShellComponent } from &#x27;../shell/shell.component&#x27;;
-import { AuthGuard } from &#x27;../guards/auth.guard&#x27;;
+import { AuthGuardService } from &#x27;./auth-guard.service&#x27;;
 
 /**
  * Provides helper methods to create routes.
@@ -213,18 +213,19 @@ export class Route {
   /**
    * Creates routes using the shell component and authentication.
    * @param routes The routes to add.
-   * @return Route The new route using shell as the base.
+   * @return {Route} The new route using shell as the base.
    */
   static withShell(routes: Routes): ngRoute {
     return {
       path: &#x27;&#x27;,
       component: ShellComponent,
       children: routes,
-      canActivate: [AuthGuard],
+      canActivate: [AuthGuardService],
       // Reuse ShellComponent instance when navigating between child views
       data: { reuse: true }
     };
   }
+
 }
 </code></pre>
     </div>
@@ -232,7 +233,6 @@ export class Route {
 
 
 
-                   
 
 
 
