@@ -54,7 +54,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/app/app-routing.module.tns.ts</code>
+            <code>src/app/app-routing.module.ts</code>
         </p>
 
 
@@ -71,12 +71,14 @@
 
     <div class="tab-pane fade  tab-source-code" id="c-source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { NgModule } from &#x27;@angular/core&#x27;;
-import { NativeScriptRouterModule } from &#x27;nativescript-angular/router&#x27;;
-import { routes } from &#x27;./app.routes&#x27;;
+import { Routes, RouterModule } from &#x27;@angular/router&#x27;;
+
+
+const routes: Routes &#x3D; [];
 
 @NgModule({
-  imports: [NativeScriptRouterModule.forRoot(routes)],
-  exports: [NativeScriptRouterModule]
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
 })
 export class AppRoutingModule { }
 </code></pre>
@@ -92,6 +94,7 @@ export class AppRoutingModule { }
 
 
 
+                   
 
 
 

@@ -241,22 +241,21 @@
 import { CommonModule } from &#x27;@angular/common&#x27;;
 
 import { RemoteCenterRoutingModule } from &#x27;./remote-center-routing.module&#x27;;
-import { RemoteCenterComponent } from &#x27;./remote-center.component&#x27;;
 import { CockpitComponent } from &#x27;./cockpit/cockpit.component&#x27;;
-
-import { ObsWebsocketService } from &#x27;./services/obs-websocket.service&#x27;;
+import { RemoteCenterComponent } from &#x27;./remote-center.component&#x27;;
 import { SharedModule } from &#x27;../shared/shared.module&#x27;;
+import { ObsWebsocketService } from &#x27;./services/obs-websocket.service&#x27;;
 import { WebsocketService } from &#x27;../shared/services/websocket.service&#x27;;
-import { SweetAlert2Module } from &#x27;@toverux/ngx-sweetalert2&#x27;;
 
+import { SweetAlert2Module } from &#x27;@sweetalert2/ngx-sweetalert2&#x27;;
 
 @NgModule({
-  declarations: [RemoteCenterComponent, CockpitComponent],
+  declarations: [CockpitComponent, RemoteCenterComponent],
   imports: [
     CommonModule,
-    RemoteCenterRoutingModule,
     SharedModule,
-    SweetAlert2Module
+    SweetAlert2Module,
+    RemoteCenterRoutingModule,
   ],
   providers: [ObsWebsocketService, WebsocketService]
 })
@@ -274,6 +273,7 @@ export class RemoteCenterModule { }
 
 
 
+                   
 
 
 

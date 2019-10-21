@@ -73,9 +73,10 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { NgModule } from &#x27;@angular/core&#x27;;
 import { Routes, RouterModule } from &#x27;@angular/router&#x27;;
 import { LoginComponent } from &#x27;./login/login.component&#x27;;
-import { NotFoundComponent } from &#x27;./not-found/not-found.component&#x27;;
-import { AuthGuardService } from &#x27;./services/auth-guard.service&#x27;;
 import { Route } from &#x27;./services/route.service&#x27;;
+
+import { AuthGuard } from &#x27;./guards/auth.guard&#x27;;
+import { NotFoundComponent } from &#x27;./not-found/not-found.component&#x27;;
 
 const routes: Routes &#x3D; [
   {
@@ -87,12 +88,15 @@ const routes: Routes &#x3D; [
     path: &#x27;login&#x27;,
     component: LoginComponent
   },
-  &quot;Route.withShell([\
-    {\
-      path: &#x27;remote-center&#x27;,\
-      canActivate: [AuthGuardService],\
-      loadChildren: &#x27;../remote-center/remote-center.module#RemoteCenterModule&#x27;\
-    }])&quot;,
+  &quot;Route.withShell(\
+    [\
+      {\
+        path: &#x27;remote-center&#x27;,\
+        canActivate: [AuthGuard],\
+        loadChildren: () &#x3D;&gt; import(&#x27;../remote-center/remote-center.module&#x27;).then(mod &#x3D;&gt; mod.RemoteCenterModule),\
+      }\
+    ]\
+  )&quot;,
   {
     path: &#x27;**&#x27;,
     component: NotFoundComponent
@@ -100,7 +104,7 @@ const routes: Routes &#x3D; [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class CoreRoutingModule { }
@@ -117,6 +121,7 @@ export class CoreRoutingModule { }
 
 
 
+                   
 
 
 

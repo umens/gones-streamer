@@ -27,7 +27,7 @@
                    <compodoc-menu mode="normal"></compodoc-menu>
                </div>
                <!-- START CONTENT -->
-               <div class="content injectable">
+               <div class="content guard">
                    <div class="content-data">
 
 
@@ -36,9 +36,11 @@
 
 
 
+
+
 <ol class="breadcrumb">
-  <li>Injectables</li>
-  <li>AuthGuardService</li>
+    <li>Guards</li>
+    <li>AuthGuard</li>
 </ol>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -51,17 +53,19 @@
 </ul>
 
 <div class="tab-content">
-    <div class="tab-pane fade active in" id="c-info">
-        <p class="comment">
+        <div class="tab-pane fade active in" id="c-info">
+            <p class="comment">
             <h3>File</h3>
-        </p>
-        <p class="comment">
-            <code>src/app/core/services/auth-guard.service.ts</code>
-        </p>
+            </p>
+            <p class="comment">
+                <code>src/app/core/guards/auth.guard.ts</code>
+            </p>
 
 
 
-            <section>
+
+
+                <section>
     <h3 id="index">Index</h3>
     <table class="table table-sm table-bordered index-table">
         <tbody>
@@ -92,7 +96,7 @@
     </table>
 </section>
 
-            <section>
+                <section>
     <h3 id="constructor">Constructor</h3>
         <table class="table table-sm table-bordered">
             <tbody>
@@ -103,7 +107,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="9" class="link-to-prism">src/app/core/services/auth-guard.service.ts:9</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/app/core/guards/auth.guard.ts:10</a></div>
                             </td>
                         </tr>
 
@@ -124,7 +128,7 @@
                                                         <td>router</td>
                                                   
                                                         <td>
-                                                                    <code><a href="../classes/Route.html" target="_self" >Router</a></code>
+                                                                        <code><a href="../classes/Route.html" target="_self" >Router</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -136,7 +140,7 @@
                                                         <td>authentication</td>
                                                   
                                                         <td>
-                                                                    <code><a href="../injectables/AuthenticationService.html" target="_self" >AuthenticationService</a></code>
+                                                                        <code><a href="../injectables/AuthenticationService.html" target="_self" >AuthenticationService</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -153,123 +157,169 @@
         </table>
 </section>
 
-            <section>
+                <section>
     
-        <h3 id="methods">
-            Methods
-        </h3>
-        <table class="table table-sm table-bordered">
-            <tbody>
-                <tr>
-                    <td class="col-md-4">
-                        <a name="canActivate"></a>
-                        <span class="name">
-                            <b>
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="canActivate"></a>
+                    <span class="name">
+                        <b>
                             canActivate
-                            </b>
-                            <a href="#canActivate"><span class="icon ion-ios-link"></span></a>
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="col-md-4">
-<code>canActivate()</code>
-                    </td>
-                </tr>
+                        </b>
+                        <a href="#canActivate"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>canActivate(next?: <a href="../classes/Route.html">ActivatedRouteSnapshot</a>, state?: <a href="../classes/Route.html">RouterStateSnapshot</a>)</code>
+                </td>
+            </tr>
 
 
-                        <tr>
-                            <td class="col-md-4">
-                                    <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/app/core/services/auth-guard.service.ts:16</a></div>
-                            </td>
-                        </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-line">Defined in <a href="" data-line="17"
+                            class="link-to-prism">src/app/core/guards/auth.guard.ts:17</a></div>
+                </td>
+            </tr>
 
 
-                <tr>
-                    <td class="col-md-4">
+            <tr>
+                <td class="col-md-4">
 
-                            <div class="io-description">
-                                <b>Returns : </b>    <code>boolean | Promise</code>
+                    <div class="io-description">
+                        <b>Parameters :</b>
+                        <table class="params">
+                            <thead>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Type</td>
+                                    <td>Optional</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>next</td>
+                                    <td>
+                                                <code><a href="../classes/Route.html" target="_self" >ActivatedRouteSnapshot</a></code>
+                                    </td>
 
-                            </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <table class="table table-sm table-bordered">
-            <tbody>
-                <tr>
-                    <td class="col-md-4">
-                        <a name="redirectToLoginPage"></a>
-                        <span class="name">
-                            <b>
+                                    <td>
+                                        Yes
+                                    </td>
+
+
+                                </tr>
+                                <tr>
+                                    <td>state</td>
+                                    <td>
+                                                <code><a href="../classes/Route.html" target="_self" >RouterStateSnapshot</a></code>
+                                    </td>
+
+                                    <td>
+                                        Yes
+                                    </td>
+
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                    </div>
+                    <div class="io-description">
+                        <b>Returns : </b>    <code>Observable | Promise | boolean | UrlTree</code>
+
+                    </div>
+                    <div class="io-description">
+                        
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="redirectToLoginPage"></a>
+                    <span class="name">
+                        <b>
                             redirectToLoginPage
-                            </b>
-                            <a href="#redirectToLoginPage"><span class="icon ion-ios-link"></span></a>
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="col-md-4">
+                        </b>
+                        <a href="#redirectToLoginPage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
 <code>redirectToLoginPage()</code>
-                    </td>
-                </tr>
+                </td>
+            </tr>
 
 
-                        <tr>
-                            <td class="col-md-4">
-                                    <div class="io-line">Defined in <a href="" data-line="32" class="link-to-prism">src/app/core/services/auth-guard.service.ts:32</a></div>
-                            </td>
-                        </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-line">Defined in <a href="" data-line="35"
+                            class="link-to-prism">src/app/core/guards/auth.guard.ts:35</a></div>
+                </td>
+            </tr>
 
 
-                <tr>
-                    <td class="col-md-4">
+            <tr>
+                <td class="col-md-4">
 
-                            <div class="io-description">
-                                <b>Returns : </b>    <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+                    <div class="io-description">
+                        <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
 
-                            </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </section>
+        </div>
 
 
-    </div>
+        <div class="tab-pane fade  tab-source-code" id="c-source">
+            <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@angular/core&#x27;;
+import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from &#x27;@angular/router&#x27;;
+import { Observable } from &#x27;rxjs&#x27;;
 
-
-    <div class="tab-pane fade  tab-source-code" id="c-source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@angular/core&#x27;;
-import { Router } from &#x27;@angular/router&#x27;;
-
-import { AuthenticationService } from &#x27;./authentication.service&#x27;;
+import { AuthenticationService } from &#x27;../services/authentication.service&#x27;;
 
 @Injectable({
   providedIn: &#x27;root&#x27;
 })
-export class AuthGuardService {
+export class AuthGuard implements CanActivate {
 
   constructor(
     private router: Router,
     private authentication: AuthenticationService
   ) { }
 
-  canActivate(): boolean | Promise&lt;boolean&gt; {
-    const token &#x3D; this.authentication.getToken();
-    const accessToken &#x3D; this.authentication.getAccessToken();
+  canActivate(
+    next?: ActivatedRouteSnapshot,
+    state?: RouterStateSnapshot): Observable&lt;boolean | UrlTree&gt; | Promise&lt;boolean | UrlTree&gt; | boolean | UrlTree {
+      const token &#x3D; this.authentication.getToken();
+      const accessToken &#x3D; this.authentication.getAccessToken();
 
-    if (!token) {
-      console.error(&#x27;User is not authenticated.&#x27;);
-      this.redirectToLoginPage();
-      return false;
-    } else if (this.authentication.isAuthenticated()) {
-      return true;
-    } else {
-      this.authentication.refreshToken();
-      return true;
-    }
+      if (!token) {
+        console.log(&#x27;User is not authenticated.&#x27;);
+        this.redirectToLoginPage();
+        return false;
+      } else if (this.authentication.isAuthenticated()) {
+        return true;
+      } else {
+        this.authentication.refreshToken();
+        return true;
+      }
   }
 
   redirectToLoginPage() {
@@ -277,16 +327,14 @@ export class AuthGuardService {
   }
 }
 </code></pre>
-    </div>
-
+        </div>
 </div>
 
 
 
 
 
-
-
+                   
 
 
 
@@ -307,8 +355,8 @@ export class AuthGuardService {
 
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
-            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
-            var COMPODOC_CURRENT_PAGE_URL = 'AuthGuardService.html';
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'guard';
+            var COMPODOC_CURRENT_PAGE_URL = 'AuthGuard.html';
        </script>
 
        <script src="../js/libs/custom-elements.min.js"></script>
