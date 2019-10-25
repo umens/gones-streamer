@@ -20,7 +20,7 @@ import { UserStore } from '../../../@core/stores/user.store';
 export class HeaderComponent implements OnInit, OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
-  userPictureOnly: boolean = false;
+  userPictureOnly = false;
   user: any;
 
   themes = [

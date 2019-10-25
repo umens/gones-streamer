@@ -7,8 +7,8 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'ngx-score-card-placeholder',
-  styleUrls: ['./score-card.component.scss'],
+  selector: 'ngx-team-card-placeholder',
+  styleUrls: ['./team-card.component.scss'],
   template: `
     <nb-card [ngClass]="{'off': true}">
       <div class="icon-container">
@@ -22,5 +22,5 @@ import { Component } from '@angular/core';
     </nb-card>
   `,
 })
-export class ScoreCardPlaceholderComponent {
+export class TeamCardPlaceholderComponent {
 }

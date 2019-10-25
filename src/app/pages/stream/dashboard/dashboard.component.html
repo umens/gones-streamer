@@ -1,54 +1,21 @@
 <div class="row">
   <div class="col-2">
-    <ngx-score-card [title]="'Live'" [on]="true" [type]="light" (statusChanged)="changeDeviceStatus({}, $event)">
+    <ngx-live-status-card>
       <i [ngClass]=""></i>
-    </ngx-score-card>
+    </ngx-live-status-card>
   </div>
   <div class="col-5">
-    <ngx-score-card [title]="'Gones'" [on]="true" [type]="light" (statusChanged)="changeDeviceStatus({}, $event)">
+    <ngx-team-card [title]="'Gones'" [on]="true" [type]="light" (statusChanged)="changeDeviceStatus({}, $event)">
       <i [ngClass]=""></i>
-    </ngx-score-card>
+    </ngx-team-card>
   </div>
   <div class="col-5">
-    <ngx-score-card [title]="'Dauphins'" [on]="true" [type]="light" (statusChanged)="changeDeviceStatus({}, $event)">
+    <ngx-team-card [title]="'Dauphins'" [on]="true" [type]="light" (statusChanged)="changeDeviceStatus({}, $event)">
       <i [ngClass]=""></i>
-    </ngx-score-card>
+    </ngx-team-card>
   </div>
 </div>
 <div class="row">
-  <!-- <div class="col-3">
-    <nb-card size="small">
-      <nb-card-header>
-        Scenes
-      </nb-card-header>
-      <nb-list>
-        <nb-list-item [ngClass]="{ active: true }">
-          Attente du début de match
-        </nb-list-item>
-        <nb-list-item>
-          Mt temps
-        </nb-list-item>
-        <nb-list-item>
-          Fin du match
-        </nb-list-item>
-      </nb-list>
-    </nb-card>
-  </div>
-  <div class="col-2">
-    <nb-card size="small">
-      <nb-card-header>
-        Caméras
-      </nb-card-header>
-      <nb-list>
-        <nb-list-item>
-          Cam 1
-        </nb-list-item>
-        <nb-list-item>
-          Cam 2
-        </nb-list-item>
-      </nb-list>
-    </nb-card>
-  </div> -->
   <div class="col-4">
     <ngx-scenes-card [scenes]="scenes"></ngx-scenes-card>
   </div>
@@ -58,14 +25,13 @@
 
         <nb-tabset>
           <nb-tab tabTitle="Games Control">
-            <p>List of <strong>users</strong>.</p>
-            <button nbButton hero status="primary" (click)="click()">Primary</button>
+            <ngx-game-control></ngx-game-control>
           </nb-tab>
           <nb-tab tabTitle="Highlight Joueur">
-            <p>List of <strong>orders</strong>.</p>
+            <ngx-player-highlight></ngx-player-highlight>
           </nb-tab>
-          <nb-tab tabTitle="Sponsors" disabled>
-            <p>List of <strong>transactions</strong>.</p>
+          <nb-tab tabTitle="Partenaires">
+            <ngx-partner-room></ngx-partner-room>
           </nb-tab>
         </nb-tabset>
 

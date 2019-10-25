@@ -22,6 +22,7 @@ export class PagesMenu {
         icon: 'home-outline',
         link: '/pages/dashboard',
         children: undefined,
+        home: true,
       },
       {
         title: 'E-Dashboard',

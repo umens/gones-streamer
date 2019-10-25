@@ -8,7 +8,7 @@ import { Component, OnDestroy } from '@angular/core';
 export class DashboardComponent implements OnDestroy {
 
   private alive = true;
-  private scenes = [];
+  scenes = [];
 
   constructor() { }
 

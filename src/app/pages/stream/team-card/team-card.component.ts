@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'ngx-score-card',
-  templateUrl: './score-card.component.html',
-  styleUrls: ['./score-card.component.scss']
+  selector: 'ngx-team-card',
+  templateUrl: './team-card.component.html',
+  styleUrls: ['./team-card.component.scss']
 })
-export class ScoreCardComponent {
+export class TeamCardComponent {
 
   @Input() title: string;
   @Input() type: string;
