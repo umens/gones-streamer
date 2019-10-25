@@ -1,34 +1,34 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { LoginComponent } from './login/login.component';
+// import { LoginComponent } from './login/login.component';
 import { Route } from './services/route.service';
 
 import { AuthGuard } from './guards/auth.guard';
 import { NotFoundComponent } from './not-found/not-found.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'remote-center',
-    pathMatch: 'full'
-  },
-  {
-    path: 'login',
-    component: LoginComponent
-  },
-  Route.withShell(
-    [
-      {
-        path: 'remote-center',
-        canActivate: [AuthGuard],
-        loadChildren: () => import('../remote-center/remote-center.module').then(mod => mod.RemoteCenterModule),
-      }
-    ]
-  ),
-  {
-    path: '**',
-    component: NotFoundComponent
-  }
+  // {
+  //   path: '',
+  //   redirectTo: 'remote-center',
+  //   pathMatch: 'full'
+  // },
+  // {
+  //   path: 'login',
+  //   component: LoginComponent
+  // },
+  // Route.withShell(
+  //   [
+  //     {
+  //       path: 'remote-center',
+  //       canActivate: [AuthGuard],
+  //       loadChildren: () => import('../remote-center/remote-center.module').then(mod => mod.RemoteCenterModule),
+  //     }
+  //   ]
+  // ),
+  // {
+  //   path: '**',
+  //   component: NotFoundComponent
+  // }
 ];
 
 @NgModule({

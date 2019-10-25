@@ -1,0 +1,44 @@
+<div class="row">
+  <div [ngClass]="{ 'colAnim': true, 'col-7': cameraAvailable, 'col': !cameraAvailable }">
+    <nb-card size="small">
+      <nb-card-header>
+        Scenes
+      </nb-card-header>
+      <nb-list>
+        <nb-list-item *ngFor="let scene of scenes" [ngClass]="{ active: scene.active }">
+          <div class="sceneName">
+            {{ scene.name }}
+            <nb-badge *ngIf="scene.active" text="Active" status="success" position="right"></nb-badge>
+          </div>
+        </nb-list-item>
+        <!-- <nb-list-item>
+          <div class="sceneName" [ngClass]="{ active: true }">
+            Attente du début de match
+            <nb-badge text="Active" status="success" position="right"></nb-badge>
+          </div>
+        </nb-list-item> -->
+      </nb-list>
+    </nb-card>
+  </div>
+  <div [ngClass]="{ 'colAnim': true, 'col-5': cameraAvailable, 'col-0': !cameraAvailable }">
+    <nb-card size="small">
+      <nb-card-header [ngClass]="{ 'd-none': !cameraAvailable }">
+        Caméras
+      </nb-card-header>
+      <nb-list>
+        <nb-list-item *ngFor="let camera of cameras" [ngClass]="{ active: camera.active }">
+          <div class="sceneName">
+              {{ camera.visible }}
+            <nb-badge *ngIf="camera.visible" text="Active" status="success" position="right"></nb-badge>
+          </div>
+        </nb-list-item>
+        <!-- <nb-list-item [ngClass]="{ active: true }">
+          <div class="sceneName">
+              Cam 1
+            <nb-badge *ngIf="true" text="Active" status="success" position="right"></nb-badge>
+          </div>
+        </nb-list-item> -->
+      </nb-list>
+    </nb-card>
+  </div>
+</div>

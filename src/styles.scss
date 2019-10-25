@@ -1,25 +1,32 @@
+// @import 'themes';
+
+// @import '~@nebular/theme/styles/globals';
+
+// @include nb-install() {
+//   @include nb-theme-global();
+// };
 /* You can add global styles to this file, and also import other style files */
-@import 'variables';
-@import '../node_modules/bootstrap/scss/bootstrap';
+// @import 'variables';
+// @import '../node_modules/bootstrap/scss/bootstrap';
 
-html {
-  font-size: 0.8rem;
-}
+// html {
+//   font-size: 0.8rem;
+// }
 
-@include media-breakpoint-up(sm) {
-  html {
-    font-size: 0.4rem;
-  }
-}
+// @include media-breakpoint-up(sm) {
+//   html {
+//     font-size: 0.4rem;
+//   }
+// }
 
-@include media-breakpoint-up(md) {
-  html {
-    font-size: 0.6rem;
-  }
-}
+// @include media-breakpoint-up(md) {
+//   html {
+//     font-size: 0.6rem;
+//   }
+// }
 
-@include media-breakpoint-up(lg) {
-  html {
-    font-size: 1rem;
-  }
-}
+// @include media-breakpoint-up(lg) {
+//   html {
+//     font-size: 1rem;
+//   }
+// }

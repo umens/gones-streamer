@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 import { CoreRoutingModule } from './core-routing.module';
-import { LoginComponent } from './login/login.component';
+// import { LoginComponent } from './login/login.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { ShellComponent } from './shell/shell.component';
 import { FooterComponent } from './shell/footer/footer.component';
@@ -16,7 +16,9 @@ import { throwIfAlreadyLoaded } from './module-import-guard';
 
 
 @NgModule({
-  declarations: [LoginComponent, NotFoundComponent, ShellComponent, FooterComponent, HeaderComponent],
+  declarations: [
+    // LoginComponent,
+    NotFoundComponent, ShellComponent, FooterComponent, HeaderComponent],
   imports: [
     CommonModule,
     SweetAlert2Module.forRoot(),
