@@ -21,7 +21,7 @@ export class ObsWebsocketService {
     });
   }
 
-  connect(host, port, password, secure) {
+  connect(host: string, port: number, password: string, secure: boolean) {
     return new Promise((resolve, reject) => {
       this.wsService.connect(host, port, secure).then((data: any) => {
         if (data.authRequired) {
@@ -30,13 +30,12 @@ export class ObsWebsocketService {
         return data;
       }).then(data => {
         if (data || !data.authRequired) {
-          // tslint:disable-next-line:no-console
-          console.debug('connected');
+          // console.debug('connected');
           this.connected = true;
           resolve();
         }
       }).catch(err => {
-        console.log(err.message);
+        // console.log(err.message);
         this.connected = false;
         reject(err);
       });

@@ -10,7 +10,7 @@ export class WebsocketService extends EventEmitter {
   CONNECTING: any;
   ID_COUNTER: number;
   PROMISES: {};
-  SOCKET: any;
+  SOCKET: WebSocket;
 
   constructor() {
     super();
@@ -32,7 +32,7 @@ export class WebsocketService extends EventEmitter {
    *
    * @returns Promise
    */
-  connect(host = 'localhost', port = 4444, secure = false) {
+  connect(host = 'localhost', port = 4444, secure = false): Promise<void> {
     if (this.SOCKET) {
       this.SOCKET.onopen = null;
       this.SOCKET.onmessage = null;

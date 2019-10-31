@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, OnChanges, Output, EventEmitter } from '@angular/core';
 import {
   trigger,
   state,
@@ -7,6 +7,8 @@ import {
   transition,
   // ...
 } from '@angular/animations';
+import { Scene } from 'src/app/shared/models/scene.model';
+import { SceneItem } from 'src/app/shared/models/scene-item.model';
 
 @Component({
   selector: 'ngx-scenes-card',
@@ -36,15 +38,59 @@ import {
     ]),
   ]
 })
-export class ScenesCardComponent implements OnInit {
+export class ScenesCardComponent implements OnInit, OnChanges {
 
-  private cameraAvailable = false;
   private cameras = [];
-  @Input() scenes = [];
+  // @Input() obs: any;
+  @Input() scenesLoader = true;
+  @Input() camerasLoader = true;
+  @Input() scenes: Scene[] = [];
+  @Output() scenesChange = new EventEmitter<any>();
+  @Output() camerasChange = new EventEmitter<any>();
 
   constructor() { }
 
   ngOnInit() {
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.hasOwnProperty('scenes')) {
+      const currentScenes = changes.scenes.currentValue;
+      if (currentScenes != null) {
+        if (currentScenes.find(scene => scene.active) !== undefined) {
+          const currentActiveScene = currentScenes.find(scene => scene.active);
+          const cameraSources = currentActiveScene.sources.filter(source => source.name.startsWith('- Cam'));
+          if (cameraSources.length > 0) {
+            this.cameras = cameraSources;
+          } else {
+            this.cameras = [];
+          }
+        } else {
+          this.cameras = [];
+        }
+      }
+    }
+    if (changes.hasOwnProperty('scenesLoader')) {
+      this.scenesLoader = changes.scenesLoader.currentValue;
+    }
+    if (changes.hasOwnProperty('camerasLoader')) {
+      this.camerasLoader = changes.camerasLoader.currentValue;
+    }
+  }
+
+  switchCamera(camera) {
+    if (camera.render) {
+      return false;
+    }
+    this.camerasChange.emit(camera);
+  }
+
+  switchScene(scene) {
+    if (scene.active) {
+      this.scenesLoader = false;
+      return false;
+    }
+    this.scenesChange.emit(scene);
   }
 
 }

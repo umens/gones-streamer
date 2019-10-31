@@ -33,7 +33,7 @@ export class PagesMenu {
       {
         title: 'Live Settings',
         icon: 'settings-2-outline',
-        link: '/pages/dashboard',
+        link: '/pages/live-settings',
         children: undefined,
       },
     ];

@@ -12,6 +12,7 @@ import { PagesComponent } from './pages.component';
 import { ECommerceComponent } from './e-commerce/e-commerce.component';
 import { NotFoundComponent } from './miscellaneous/not-found/not-found.component';
 import { DashboardComponent } from './stream/dashboard/dashboard.component';
+import { LiveSettingsComponent } from './stream/live-settings/live-settings.component';
 
 const routes: Routes = [{
   path: '',
@@ -20,6 +21,10 @@ const routes: Routes = [{
     {
       path: 'dashboard',
       component: DashboardComponent,
+    },
+    {
+      path: 'live-settings',
+      component: LiveSettingsComponent,
     },
     {
       path: 'edashboard',

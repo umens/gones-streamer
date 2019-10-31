@@ -1,13 +1,46 @@
-<nb-card (click)="onClick()" [ngClass]="{'off': !on}">
+<nb-card [ngxGradiant]="team.color" >
+    <!-- [style.background]="'linear-gradient(150deg, #ffffff 40%, ' + team.color + ' 80%)'" -->
   <div class="icon-container">
-    <!-- <img class="img-thumbnail" src="{{type}}"> -->
-    <div class="icon status-{{ type }}">
+    <img class="img-thumbnail" src="{{ team.logo }}">
+    <!-- <div class="icon status-{{ type }}">
       <ng-content></ng-content>
-    </div>
+    </div> -->
   </div>
 
   <div class="details">
-    <div class="title h5">{{ title }}</div>
-    <div class="status paragraph-2">{{ on ? 'ON' : 'OFF' }}</div>
+    <ngx-in-place-edit (update)="updateField('name')" (cancel)="cancelUpdateField('name')">
+      <ng-template ngxViewMode>
+        <div class="title h5">{{ team.name }}</div>
+      </ng-template>
+      <ng-template ngxEditMode>
+        <!-- <div class="input-button-row"> -->
+        <input type="text" nbInput fullWidth fieldSize="tiny" placeholder="" [formControl]="getControl('name')"
+          ngxFocusable ngxEditableOnEvents class="with-button">
+        <!-- <button nbButton outline status="success" size="tiny" class="confirm-button with-icon">
+            <nb-icon icon="checkmark-outline"></nb-icon>
+          </button>
+          <button nbButton outline status="danger" size="tiny" class="cancel-button with-icon">
+            <nb-icon icon="close-outline"></nb-icon>
+          </button>
+        </div> -->
+      </ng-template>
+    </ngx-in-place-edit>
+    <ngx-in-place-edit (update)="updateField('city')" (cancel)="cancelUpdateField('city')">
+      <ng-template ngxViewMode>
+        <div class="status paragraph-2">{{ team.city }}</div>
+      </ng-template>
+      <ng-template ngxEditMode>
+        <!-- <div class="input-button-row"> -->
+        <input type="text" nbInput fullWidth fieldSize="tiny" placeholder="" [formControl]="getControl('city')"
+          ngxFocusable ngxEditableOnEvents class="with-button">
+        <!-- <button nbButton outline status="success" size="tiny" class="confirm-button with-icon">
+            <nb-icon icon="checkmark-outline"></nb-icon>
+          </button>
+          <button nbButton outline status="danger" size="tiny" class="cancel-button with-icon">
+            <nb-icon icon="close-outline"></nb-icon>
+          </button>
+        </div> -->
+      </ng-template>
+    </ngx-in-place-edit>
   </div>
 </nb-card>

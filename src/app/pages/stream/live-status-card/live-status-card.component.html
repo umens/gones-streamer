@@ -1,1 +1,20 @@
-<p>live-status-card works!</p>
+<nb-card size="tiny" [ngClass]="{'off': !isStreaming}">
+  <nb-card-body>
+    <div class="chart-info" (mouseover)="hoverLive=true" (mouseleave)="hoverLive=false" (click)="switchStreamStatus()">
+      <div class="icon-container">
+        <div [ngClass]="{ icon: true, 'status-success': isStreaming, 'status-warning': !isStreaming }">
+          <!-- <ng-content></ng-content> -->
+          <nb-icon *ngIf="isStreaming" pack="eva" icon="{{ hoverLive ? 'stop-circle' : 'video' }}"></nb-icon>
+          <nb-icon *ngIf="!isStreaming" pack="eva" icon="{{ hoverLive ? 'play-circle' : 'video-off' }}"></nb-icon>
+        </div>
+      </div>
+
+      <div class="details">
+        <div *ngIf="isStreaming" class="title h5">Diffusion en cours</div>
+        <div *ngIf="isStreaming" class="status paragraph-2">Depuis {{ streamTime | slice:0:8 }}</div>
+        <div *ngIf="!isStreaming" class="title h5">Offline</div>
+      </div>
+    </div>
+    <ngx-metrics-live-update-chart [liveUpdateChartData]="liveUpdateChartData"></ngx-metrics-live-update-chart>
+  </nb-card-body>
+</nb-card>

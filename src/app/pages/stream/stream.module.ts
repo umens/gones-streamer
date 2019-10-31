@@ -3,27 +3,49 @@ import { CommonModule } from '@angular/common';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TeamCardComponent } from './team-card/team-card.component';
-import { TeamCardPlaceholderComponent } from './team-card/team-card-placeholder.component';
-import { NbListModule, NbTabsetModule, NbCardModule, NbButtonModule, NbBadgeModule, NbAlertModule } from '@nebular/theme';
+import {
+  NbListModule,
+  NbTabsetModule,
+  NbCardModule,
+  NbButtonModule,
+  NbBadgeModule,
+  NbAlertModule,
+  NbToastrModule,
+  NbGlobalPhysicalPosition,
+  NbSpinnerModule,
+  NbIconModule,
+  NbInputModule,
+} from '@nebular/theme';
 import { ScenesCardComponent } from './scenes-card/scenes-card.component';
 import { LiveStatusCardComponent } from './live-status-card/live-status-card.component';
 import { GameControlComponent } from './game-control/game-control.component';
 import { PlayerHighlightComponent } from './player-highlight/player-highlight.component';
 import { PartnerRoomComponent } from './partner-room/partner-room.component';
 import { ScoreboardComponent } from './game-control/scoreboard/scoreboard.component';
+import { ObsWebsocketService } from 'src/app/remote-center/services/obs-websocket.service';
+import { WebsocketService } from 'src/app/shared/services/websocket.service';
+import { LiveSettingsComponent } from './live-settings/live-settings.component';
+import { MetricsLiveUpdateChartComponent } from './live-status-card/metrics-live-update-chart.component';
+import { NgxEchartsModule } from 'ngx-echarts';
+import { FramesMetricsCardComponent } from './frames-metrics-card/frames-metrics-card.component';
+import { FramesPieChartComponent } from './frames-metrics-card/frames-pie-chart.component';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 
 @NgModule({
   declarations: [
     DashboardComponent,
     TeamCardComponent,
-    TeamCardPlaceholderComponent,
     ScenesCardComponent,
     LiveStatusCardComponent,
     GameControlComponent,
     PlayerHighlightComponent,
     PartnerRoomComponent,
     ScoreboardComponent,
+    LiveSettingsComponent,
+    MetricsLiveUpdateChartComponent,
+    FramesMetricsCardComponent,
+    FramesPieChartComponent,
   ],
   imports: [
     CommonModule,
@@ -33,6 +55,15 @@ import { ScoreboardComponent } from './game-control/scoreboard/scoreboard.compon
     NbButtonModule,
     NbBadgeModule,
     NbAlertModule,
-  ]
+    NbToastrModule.forRoot({
+      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
+    }),
+    NbSpinnerModule,
+    NgxEchartsModule,
+    NbIconModule,
+    SharedModule,
+    NbInputModule,
+  ],
+  providers: [ObsWebsocketService, WebsocketService]
 })
 export class StreamModule { }
