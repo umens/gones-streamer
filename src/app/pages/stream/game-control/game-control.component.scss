@@ -1,0 +1,13 @@
+.btn-group {
+  [nbButton]:not(:last-child):not(.dropdown-toggle),
+  .btn-group:not(:last-child) > [nbButton] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  [nbButton]:not(:first-child):not(.dropdown-toggle),
+  .btn-group:not(:first-child) > [nbButton] {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}

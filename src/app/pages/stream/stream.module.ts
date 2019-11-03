@@ -15,6 +15,8 @@ import {
   NbSpinnerModule,
   NbIconModule,
   NbInputModule,
+  NbPopoverModule,
+  NbContextMenuModule,
 } from '@nebular/theme';
 import { ScenesCardComponent } from './scenes-card/scenes-card.component';
 import { LiveStatusCardComponent } from './live-status-card/live-status-card.component';
@@ -30,7 +32,8 @@ import { NgxEchartsModule } from 'ngx-echarts';
 import { FramesMetricsCardComponent } from './frames-metrics-card/frames-metrics-card.component';
 import { FramesPieChartComponent } from './frames-metrics-card/frames-pie-chart.component';
 import { SharedModule } from 'src/app/shared/shared.module';
-
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import { ColorChromeModule } from 'ngx-color/chrome';
 
 @NgModule({
   declarations: [
@@ -63,6 +66,10 @@ import { SharedModule } from 'src/app/shared/shared.module';
     NbIconModule,
     SharedModule,
     NbInputModule,
+    SweetAlert2Module,
+    ColorChromeModule,
+    NbPopoverModule,
+    NbContextMenuModule,
   ],
   providers: [ObsWebsocketService, WebsocketService]
 })

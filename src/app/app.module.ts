@@ -15,6 +15,8 @@ import { ThemeModule } from './@theme/theme.module';
 import { AuthModule } from './@auth/auth.module';
 import { InitUserService } from './@theme/services/init-user.service';
 
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+
 import {
   NbChatModule,
   NbDatepickerModule,
@@ -58,6 +60,7 @@ export function init_app(injector: Injector) {
     }),
     CoreModule.forRoot(),
     NbEvaIconsModule,
+    SweetAlert2Module.forRoot()
   ],
   bootstrap: [AppComponent],
   providers: [

@@ -3,11 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
 var path = require("path");
 var url = require("url");
-var fs = require("fs");
 var appWindow;
-var serve;
-var args = process.argv.slice(1);
-serve = args.some(function (val) { return val === '--serve'; });
 function initWindow() {
     var electronScreen = electron_1.screen;
     var size = electronScreen.getPrimaryDisplay().workAreaSize;
@@ -34,21 +30,8 @@ function initWindow() {
         protocol: 'file:',
         slashes: true
     }));
-    if (serve) {
-        require('electron-reload')(__dirname, {
-            electron: require(__dirname + "/node_modules/electron")
-        });
-        appWindow.loadURL('http://localhost:4200');
-        // Initialize the DevTools.
-        appWindow.webContents.openDevTools();
-    }
-    else {
-        appWindow.loadURL(url.format({
-            pathname: path.join(__dirname, 'dist/index.html'),
-            protocol: 'file:',
-            slashes: true
-        }));
-    }
+    // Initialize the DevTools.
+    appWindow.webContents.openDevTools();
     appWindow.on('closed', function () {
         appWindow = null;
     });
@@ -78,8 +61,4 @@ catch (e) {
     // Catch Error
     // throw e;
 }
-electron_1.ipcMain.on('getFiles', function (event, arg) {
-    var files = fs.readdirSync(__dirname);
-    appWindow.webContents.send('getFilesResponse', files);
-});
 //# sourceMappingURL=main.js.map

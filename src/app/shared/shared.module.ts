@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { ArrayFilterPipe } from './pipes/array-filter.pipe';
 import { BytesPipe } from './pipes/bytes.pipe';
 import { DurationPipe } from './pipes/duration.pipe';
@@ -14,6 +15,7 @@ import { EditableOnEventsDirective } from './components/in-place-edit/directives
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FocusableDirective } from './components//in-place-edit/directives/focusable.directive';
 import { GradiantDirective } from './directives/gradiant.directive';
+import { AdapteTextColorToBgDirective } from './directives/adapte-text-color-to-bg.directive';
 
 @NgModule({
   declarations: [
@@ -28,6 +30,7 @@ import { GradiantDirective } from './directives/gradiant.directive';
     EditableOnEventsDirective,
     FocusableDirective,
     GradiantDirective,
+    AdapteTextColorToBgDirective,
   ],
   imports: [
     CommonModule,
@@ -47,6 +50,7 @@ import { GradiantDirective } from './directives/gradiant.directive';
     FormsModule,
     ReactiveFormsModule,
     GradiantDirective,
+    AdapteTextColorToBgDirective,
   ]
 })
 export class SharedModule { }

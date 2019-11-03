@@ -53,7 +53,7 @@ export class DashboardComponent implements OnDestroy {
     city: 'Away Team City',
     score: 0,
     timeout: 3,
-    color: '#ffffff',
+    color: '#612323',
     logo: 'https://placekitten.com/450/450',
   });
 
@@ -255,6 +255,14 @@ export class DashboardComponent implements OnDestroy {
         }).catch((err: Error) => {
           console.error(err.message);
         });
+    }
+  }
+
+  updateTeam(team: Team, isHomeTeam: boolean) {
+    if (isHomeTeam) {
+      this.homeTeam = team;
+    } else {
+      this.awayTeam = team;
     }
   }
 

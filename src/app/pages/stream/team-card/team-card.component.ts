@@ -1,6 +1,15 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  OnChanges,
+  SimpleChanges
+} from '@angular/core';
 import { Team } from 'src/app/shared/models/team.model';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ColorEvent } from 'ngx-color';
 
 @Component({
   selector: 'ngx-team-card',
@@ -8,26 +17,25 @@ import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./team-card.component.scss']
 })
 export class TeamCardComponent implements OnInit, OnChanges {
+  teamHover = false;
+  showColorpicker = false;
+  selectingColor = false;
 
   @Input() team: Team = null;
 
-  @Output() statusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() teamChanged: EventEmitter<Team> = new EventEmitter<Team>();
 
   controls: FormArray;
 
   constructor() {}
 
-  // onClick() {
-  //   console.log(this.team);
-  //   // this.statusChanged.emit(this.on);
-  // }
-
   ngOnInit() {
-    // this.team = new Team({ name: 'Team name', city: 'Team city'})
-    const toGroups = [new FormGroup({
+    const toGroups = [
+      new FormGroup({
         name: new FormControl(this.team.name, Validators.required),
-        city: new FormControl(this.team.city, Validators.required),
-      })];
+        city: new FormControl(this.team.city, Validators.required)
+      })
+    ];
     this.controls = new FormArray(toGroups);
   }
 
@@ -59,6 +67,27 @@ export class TeamCardComponent implements OnInit, OnChanges {
         [field]: control.value
       };
     }
+    this.teamChanged.emit(this.team);
   }
 
+  handleChangeColor($event: ColorEvent) {
+    this.team.color = $event.color.hex;
+  }
+
+  setScore(score: string | number): void {
+    if (typeof score === 'string') {
+      score = parseInt(score, 10);
+    }
+    this.team.score = score;
+    this.teamChanged.emit(this.team);
+  }
+
+  handleTimeout(num: number) {
+    if (num <= this.team.timeout) {
+      this.team.timeout = num - 1;
+    } else {
+      this.team.timeout = num;
+    }
+    this.teamChanged.emit(this.team);
+  }
 }

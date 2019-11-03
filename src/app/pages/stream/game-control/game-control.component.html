@@ -4,8 +4,96 @@
   </div>
 </div>
 
-<div class="row">
+<div class="row mb-1">
   <div class="col">
-    <p>game-control works!</p>
+    <h6>Général</h6>
+    <div class="row">
+      <div class="col-4">
+        <button nbButton hero status="primary">Flag</button>
+      </div>
+      <div class="col-4">Replay</div>
+      <div class="col-4">Quarter</div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-6">
+    <!-- <h6>{{ homeTeam.name }}</h6> -->
+    <div class="row">
+      <div class="col">
+        <h6>{{ homeTeam.name }} | Points</h6>
+        <div class="btn-group" role="group" aria-label="...">
+          <button nbButton hero size="small" status="primary" (click)="addPoints(6, true)">Touchdown</button>
+          <button
+            size="small"
+            nbButton
+            hero
+            status="primary"
+            [nbContextMenu]="transformationItems"
+            nbContextMenuTag="transfo-home-context-menu"
+          >
+            Transformations
+          </button>
+
+          <button nbButton hero size="small" status="primary" (click)="addPoints(2, true)">Safety</button>
+          <button nbButton hero size="small" status="primary" (click)="addPoints(3, true)">
+            Field Goal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="row">
+      <div class="col">
+        <h6>Big Plays</h6>
+        <div class="btn-group" role="group" aria-label="...">
+          <button nbButton hero size="small" status="primary">
+            Interception
+          </button>
+          <button nbButton hero size="small" status="primary">Pick 6</button>
+          <button nbButton hero size="small" status="primary">Sack</button>
+          <button nbButton hero size="small" status="primary">Fumble</button>
+        </div>
+      </div>
+    </div> -->
+  </div>
+  <div class="col-6">
+    <!-- <h6>{{ awayTeam.name }}</h6> -->
+    <div class="row">
+      <div class="col">
+        <h6>{{ awayTeam.name }} | Points</h6>
+        <div class="btn-group" role="group" aria-label="...">
+          <button nbButton size="small" status="info" (click)="addPoints(6, false)">Touchdown</button>
+          <button
+            size="small"
+            nbButton
+            status="info"
+            [nbContextMenu]="transformationItems"
+            nbContextMenuTag="transfo-away-context-menu"
+          >
+            Transformations
+          </button>
+
+          <button nbButton size="small" status="info" (click)="addPoints(2, false)">Safety</button>
+          <button nbButton size="small" status="info" (click)="addPoints(3, false)">
+            Field Goal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="row">
+      <div class="col">
+        <h6>Big Plays</h6>
+        <div class="btn-group" role="group" aria-label="...">
+          <button nbButton size="small" status="primary">
+            Interception
+          </button>
+          <button nbButton size="small" status="primary">Pick 6</button>
+          <button nbButton size="small" status="primary">Sack</button>
+          <button nbButton size="small" status="primary">Fumble</button>
+        </div>
+      </div>
+    </div> -->
   </div>
 </div>
