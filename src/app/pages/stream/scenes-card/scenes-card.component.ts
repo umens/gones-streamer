@@ -40,7 +40,7 @@ import { SceneItem } from 'src/app/shared/models/scene-item.model';
 })
 export class ScenesCardComponent implements OnInit, OnChanges {
 
-  private cameras = [];
+  cameras = [];
   // @Input() obs: any;
   @Input() scenesLoader = true;
   @Input() camerasLoader = true;

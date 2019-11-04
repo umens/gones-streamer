@@ -236,7 +236,7 @@ export class DashboardComponent implements OnDestroy {
       });
   }
 
-  changeStreamStatus() {
+  changeStreamStatus(event: any) {
     if (this.isStreaming) {
       this.obsWebsocket.StopStreaming()
         .then(() => {

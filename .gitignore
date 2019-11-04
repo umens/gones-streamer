@@ -49,3 +49,6 @@ Thumbs.db
 
 /assets
 /server/node_modules
+/main.js
+/main.js.map
+/release

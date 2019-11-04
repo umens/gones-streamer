@@ -1,4 +1,5 @@
 {
+  "appId": "com.example.app",
   "productName": "gones-streamer",
   "directories": {
     "output": "release/"
@@ -20,10 +21,17 @@
         "!tslint.json"
     ],
   "win": {
-    "icon": "dist",
+    "icon": "dist/icon.png",
     "target": [
+      "msi",
+      "nsis",
       "portable"
     ]
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": true,
+    "allowToChangeInstallationDirectory": false
   },
   "mac": {
     "icon": "dist",

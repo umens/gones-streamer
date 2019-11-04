@@ -26,6 +26,16 @@ const VIEW_BOX_SIZE = 300;
   styleUrls: ['./temperature-dragger.component.scss'],
 })
 export class TemperatureDraggerComponent implements AfterViewInit, OnChanges {
+  @Input('value') set setValue(value) {
+    this.value = value;
+  }
+
+  constructor(
+    private location: Location,
+    private locationStrategy: LocationStrategy,
+  ) {
+    this.oldValue = this.value;
+  }
 
   @ViewChild('svgRoot', { static: true }) svgRoot: ElementRef;
 
@@ -40,11 +50,8 @@ export class TemperatureDraggerComponent implements AfterViewInit, OnChanges {
   @Input() maxLeap = 0.4;
 
   value = 50;
-  @Output() valueChange = new EventEmitter<Number>();
-  @Output() valueChangeCompleted = new EventEmitter<Number>();
-  @Input('value') set setValue(value) {
-    this.value = value;
-  }
+  @Output() valueChange = new EventEmitter<number>();
+  @Output() valueChangeCompleted = new EventEmitter<number>();
 
   @Input() off = false;
   @Output() powerChange = new EventEmitter<boolean>();
@@ -52,6 +59,46 @@ export class TemperatureDraggerComponent implements AfterViewInit, OnChanges {
   @Input() min = 0; // min output value
   @Input() max = 100; // max output value
   @Input() step = 0.1;
+
+  oldValue: number;
+
+  svgControlId = uniqueId++;
+  scaleFactor = 1;
+  bottomAngleRad = 0;
+  radius = 100;
+  translateXValue = 0;
+  translateYValue = 0;
+  thickness = 6;
+  pinRadius = 10;
+  colors: any = [];
+
+  styles: {
+    viewBox: string,
+    arcTranslateStr: string,
+    clipPathStr: string,
+    gradArcs: { color: string, d: any }[],
+    nonSelectedArc: { color: string, d: any },
+    thumbPosition: {
+      x: number;
+      y: number;
+  },
+  blurRadius: number } = {
+    viewBox: '0 0 300 300',
+    arcTranslateStr: 'translate(0, 0)',
+    clipPathStr: '',
+    gradArcs: [],
+    nonSelectedArc: null,
+    thumbPosition: { x: 0, y: 0 },
+    blurRadius: 15,
+  };
+
+  private isMouseDown = false;
+  private changeStarted = false;
+  private init = false;
+
+  private static toRad(angle) {
+    return Math.PI * angle / 180;
+  }
 
   @HostListener('window:mouseup', ['$event'])
   onMouseUp(event) {
@@ -71,39 +118,6 @@ export class TemperatureDraggerComponent implements AfterViewInit, OnChanges {
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.invalidate();
-  }
-
-  oldValue: number;
-
-  svgControlId = uniqueId++;
-  scaleFactor = 1;
-  bottomAngleRad = 0;
-  radius = 100;
-  translateXValue = 0;
-  translateYValue = 0;
-  thickness = 6;
-  pinRadius = 10;
-  colors: any = [];
-
-  styles = {
-    viewBox: '0 0 300 300',
-    arcTranslateStr: 'translate(0, 0)',
-    clipPathStr: '',
-    gradArcs: [],
-    nonSelectedArc: {},
-    thumbPosition: { x: 0, y: 0 },
-    blurRadius: 15,
-  };
-
-  private isMouseDown = false;
-  private changeStarted = false;
-  private init = false;
-
-  constructor(
-    private location: Location,
-    private locationStrategy: LocationStrategy,
-  ) {
-    this.oldValue = this.value;
   }
 
   ngAfterViewInit(): void {
@@ -385,9 +399,5 @@ export class TemperatureDraggerComponent implements AfterViewInit, OnChanges {
 
   private toValueNumber(factor) {
     return Math.round(factor * (this.max - this.min) / this.step) * this.step + this.min;
-  }
-
-  private static toRad(angle) {
-    return Math.PI * angle / 180;
   }
 }

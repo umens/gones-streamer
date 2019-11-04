@@ -12,7 +12,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   template: `
     <nb-card (click)="onClick()" [ngClass]="{'off': !on}">
       <div class="icon-container">
-        <!-- <img class="img-thumbnail" src="{{type}}"> -->
         <div class="icon status-{{ type }}">
           <ng-content></ng-content>
         </div>
