@@ -13,9 +13,11 @@ import { NbThemeService } from '@nebular/theme';
 
 @Injectable()
 export class InitUserService {
-    constructor(protected userStore: UserStore,
-        protected usersService: UserData,
-        protected themeService: NbThemeService) { }
+    constructor(
+      protected userStore: UserStore,
+      protected usersService: UserData,
+      protected themeService: NbThemeService
+    ) { }
 
     initCurrentUser(): Observable<User> {
       return this.usersService.getCurrentUser()

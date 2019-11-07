@@ -17,42 +17,6 @@ export class UsersService extends UserData {
     return new LocalDataSource(this.data);
   }
 
-  getCurrentUser(): Observable<User> {
-    return observableOf(this.data[0]);
-  }
-
-  list(pageNumber: number = 1, pageSize: number = 10): Observable<User[]> {
-    return observableOf(this.data);
-  }
-
-  get(id: number): Observable<User> {
-    return observableOf(this.data.find(x => x.id === id));
-  }
-
-  updateCurrent(user: User): Observable<User> {
-    this.data[0] = user;
-    return observableOf(this.data[0]);
-  }
-
-  update(user: User): Observable<User> {
-    const i = this.data.indexOf(this.data.find(x => x.id === user.id));
-    if (i >= 0) {
-      this.data[i] = user;
-    }
-    return observableOf(user);
-  }
-
-  create(user: User): Observable<User> {
-    user.id = Math.max(...this.data.map(x => x.id)) + 1;
-    this.data.push(user);
-    return observableOf(user);
-  }
-
-  delete(id: number): Observable<boolean> {
-    this.data = [...this.data.filter(x => x.id !== id)];
-    return observableOf();
-  }
-
   private data: User[] = [
     {
       id: 1,
@@ -126,4 +90,40 @@ export class UsersService extends UserData {
         themeName: 'cosmic',
       },
     }];
+
+  getCurrentUser(): Observable<User> {
+    return observableOf(this.data[0]);
+  }
+
+  list(pageNumber: number = 1, pageSize: number = 10): Observable<User[]> {
+    return observableOf(this.data);
+  }
+
+  get(id: number): Observable<User> {
+    return observableOf(this.data.find(x => x.id === id));
+  }
+
+  updateCurrent(user: User): Observable<User> {
+    this.data[0] = user;
+    return observableOf(this.data[0]);
+  }
+
+  update(user: User): Observable<User> {
+    const i = this.data.indexOf(this.data.find(x => x.id === user.id));
+    if (i >= 0) {
+      this.data[i] = user;
+    }
+    return observableOf(user);
+  }
+
+  create(user: User): Observable<User> {
+    user.id = Math.max(...this.data.map(x => x.id)) + 1;
+    this.data.push(user);
+    return observableOf(user);
+  }
+
+  delete(id: number): Observable<boolean> {
+    this.data = [...this.data.filter(x => x.id !== id)];
+    return observableOf();
+  }
 }

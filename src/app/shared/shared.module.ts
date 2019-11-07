@@ -8,6 +8,7 @@ import { SearchPipe } from './pipes/search.pipe';
 import { SlugifyPipe } from './pipes/slugify.pipe';
 
 import { WebsocketService } from './services/websocket.service';
+import { ObsWebsocketService } from './services/obs-websocket.service';
 import { ViewModeDirective } from './components/in-place-edit/directives/view-mode.directive';
 import { EditModeDirective } from './components/in-place-edit/directives/edit-mode.directive';
 import { InPlaceEditComponent } from './components/in-place-edit/in-place-edit.component';
@@ -35,7 +36,10 @@ import { AdapteTextColorToBgDirective } from './directives/adapte-text-color-to-
   imports: [
     CommonModule,
   ],
-  providers: [WebsocketService],
+  providers: [
+    WebsocketService,
+    ObsWebsocketService
+  ],
   exports: [
     SlugifyPipe,
     ArrayFilterPipe,

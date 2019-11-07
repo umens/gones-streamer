@@ -1,9 +1,12 @@
 import { Component, OnDestroy } from '@angular/core';
-import { ObsWebsocketService } from 'src/app/remote-center/services/obs-websocket.service';
 import { Subscription } from 'rxjs';
+
 import { NbToastrService } from '@nebular/theme';
+import { ElectronService } from 'ngx-electron';
+
 import { Scene } from 'src/app/shared/models/scene.model';
 import { Team } from 'src/app/shared/models/team.model';
+import { ObsWebsocketService } from 'src/app/shared/services/obs-websocket.service';
 
 @Component({
   selector: 'ngx-dashboard',
@@ -57,7 +60,12 @@ export class DashboardComponent implements OnDestroy {
     logo: 'https://placekitten.com/450/450',
   });
 
-  constructor(private obsWebsocket: ObsWebsocketService, private toastrService: NbToastrService) {
+  constructor(
+    private obsWebsocket: ObsWebsocketService,
+    private toastrService: NbToastrService,
+    private electronService: ElectronService
+  ) {
+    this.getFiles().then(data => console.log(data));
     this.obsWebsocket.connect('localhost', 4444, '', false).then(async () => {
       this.toastrService.success(`Successfully connected to OBS`, `Connected`);
       this.subscription = this.obsWebsocket.eventSource$.subscribe(event => this.workOnEvent(event));
@@ -81,6 +89,19 @@ export class DashboardComponent implements OnDestroy {
     this.alive = false;
     this.subscription.unsubscribe();
     this.obsWebsocket.disconnect();
+  }
+
+  async getFiles() {
+    return new Promise<string[]>((resolve, reject) => {
+      if (this.electronService.isElectronApp) {
+        this.electronService.ipcRenderer.once('getFilesResponse', (event, arg) => {
+          resolve(arg);
+        });
+        this.electronService.ipcRenderer.send('getFiles');
+      } else {
+        resolve(null);
+      }
+    });
   }
 
   workOnEvent(event: any): void {

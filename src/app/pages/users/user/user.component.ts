@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { Subject } from 'rxjs/Subject';
 import { takeUntil } from 'rxjs/operators';
 
-import { NbToastrService } from '@nebular/theme';
+import { NbToastrService, NbThemeService } from '@nebular/theme';
 
 import { UserData, User } from '../../../@core/interfaces/common/users';
 import { EMAIL_PATTERN, NUMBERS_PATTERN } from '../../../@auth/components';
@@ -51,16 +51,41 @@ export class UserComponent implements OnInit, OnDestroy {
 
   get zipCode() { return this.userForm.get('address').get('zipCode'); }
 
+  get themeName() { return this.userForm.get('settings').get('themeName'); }
+
+  themes = [
+    {
+      value: 'default',
+      name: 'Light',
+    },
+    {
+      value: 'dark',
+      name: 'Dark',
+    },
+    {
+      value: 'cosmic',
+      name: 'Cosmic',
+    },
+    {
+      value: 'corporate',
+      name: 'Corporate',
+    },
+  ];
+
   mode: UserFormMode;
   setViewMode(viewMode: UserFormMode) {
     this.mode = viewMode;
   }
 
-  constructor(private usersService: UserData,
-              private router: Router,
-              private route: ActivatedRoute,
-              private toasterService: NbToastrService,
-              private fb: FormBuilder) {
+  constructor(
+    private usersService: UserData,
+    private router: Router,
+    private route: ActivatedRoute,
+    private toasterService: NbToastrService,
+    private fb: FormBuilder,
+    private themeService: NbThemeService,
+  ) {
+    // this.currentTheme = this.themeService.currentTheme;
   }
 
   ngOnInit(): void {
@@ -85,6 +110,9 @@ export class UserComponent implements OnInit, OnDestroy {
         street: this.fb.control(''),
         city: this.fb.control(''),
         zipCode: this.fb.control(''),
+      }),
+      settings: this.fb.group({
+        themeName: this.fb.control(''),
       }),
     });
   }
@@ -129,6 +157,9 @@ export class UserComponent implements OnInit, OnDestroy {
             city: (user.address && user.address.city) ? user.address.city : '',
             zipCode: (user.address && user.address.zipCode) ? user.address.zipCode : '',
           },
+          settings: {
+            themeName: (user.settings && user.settings.themeName) ? user.settings.themeName : '',
+          },
         });
 
         // this is a place for value changes handling
@@ -160,6 +191,14 @@ export class UserComponent implements OnInit, OnDestroy {
         this.toasterService.success('', `Item ${this.mode === UserFormMode.ADD ? 'created' : 'updated' }!`);
         this.back();
       });
+  }
+
+  changeTheme(themeName: string) {
+    // this.userStore.setSetting(themeName)
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe();
+
+    this.themeService.changeTheme(themeName);
   }
 
   back() {

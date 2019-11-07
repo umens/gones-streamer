@@ -1,14 +1,27 @@
 import { app, BrowserWindow, Screen, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
+import { execFile } from 'child_process';
+
+const appFolder = path.join(app.getAppPath(), '/appDatas');
+const obsFileFodlerPath = path.join(appFolder, '/obsFiles');
 
 let appWindow: BrowserWindow;
 let serve: boolean;
 const args = process.argv.slice(1);
 serve = args.some(val => val === '--serve');
 
-function initWindow() {
+// async function initWindow() {
+async function initWindow() {
+
+  try {
+    await initAppFolderAndFiles();
+    await startObs();
+  } catch (error) {
+    console.error(error);
+  }
+
   const electronScreen: Screen = screen;
   const size = electronScreen.getPrimaryDisplay().workAreaSize;
 
@@ -22,12 +35,16 @@ function initWindow() {
     y: 0,
     width: size.width,
     height: size.height,
-    backgroundColor: '#ffffff',
+    // frame: false,
+    title: 'Gones Streamer',
+    backgroundColor: '#17242D',
     icon: path.join(__dirname, `/../../dist/assets/logos/logo-raw.png`),
     webPreferences: {
       nodeIntegration: true
     }
   });
+
+  appWindow.removeMenu();
 
   // Electron Build Path
   appWindow.loadURL(
@@ -61,11 +78,27 @@ function initWindow() {
   });
 }
 
+async function initAppFolderAndFiles() {
+  try {
+    await fs.mkdir(obsFileFodlerPath, { recursive: true });
+    await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify({}));
+    await fs.writeFile(path.join(appFolder, '/liveSettings.json'), JSON.stringify({}));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 try {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', initWindow);
+  app.on('ready', async () => {
+    try {
+      await initWindow();
+    } catch (error) {
+      console.error(error);
+    }
+  });
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
@@ -88,7 +121,27 @@ try {
   // throw e;
 }
 
-ipcMain.on('getFiles', (event, arg) => {
-  const files = fs.readdirSync(__dirname);
+ipcMain.on('getFiles', async (event, arg) => {
+  const files = await fs.readdir(appFolder);
   appWindow.webContents.send('getFilesResponse', files);
 });
+
+async function startObs() {
+  // console.log(__dirname);
+  // console.log(path.join(app.getAppPath(), '/bin'));
+  // console.log(path.join(__dirname, '/assets/OBS-Studio/bin/64bit/obs64.exe'));
+  const executablePath = path.join(__dirname, '/assets/OBS-Studio/bin/64bit/obs64.exe');
+  const parameters = [
+    '--portable',
+    '--minimize-to-tray',
+    // '--collection "name"',
+    // '--profile "name"',
+    // '--scene "name"'
+  ];
+
+  try {
+    await execFile(executablePath, parameters, { cwd: path.join(__dirname, '/assets/OBS-Studio/bin/64bit') });
+  } catch (error) {
+    console.error(error);
+  }
+}

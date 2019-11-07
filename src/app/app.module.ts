@@ -16,22 +16,23 @@ import { AuthModule } from './@auth/auth.module';
 import { InitUserService } from './@theme/services/init-user.service';
 
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import { NgxElectronModule } from 'ngx-electron';
 
 import {
-  NbChatModule,
-  NbDatepickerModule,
-  NbDialogModule,
+  // NbChatModule,
+  // NbDatepickerModule,
+  // NbDialogModule,
   NbMenuModule,
   NbSidebarModule,
   NbToastrModule,
-  NbWindowModule,
+  // NbWindowModule,
 } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 
 export function init_app(injector: Injector) {
   return () =>
     // new Promise<any>((resolve: () => void) => {
-    new Promise<any>((resolve: (Function)) => {
+    new Promise<any>((resolve: (() => void)) => {
       const initUserService = injector.get(InitUserService);
       initUserService.initCurrentUser().subscribe(() => { },
         () => resolve(), () => resolve()); // a place for logging error
@@ -51,16 +52,17 @@ export function init_app(injector: Injector) {
 
     NbSidebarModule.forRoot(),
     NbMenuModule.forRoot(),
-    NbDatepickerModule.forRoot(),
-    NbDialogModule.forRoot(),
-    NbWindowModule.forRoot(),
+    // NbDatepickerModule.forRoot(),
+    // NbDialogModule.forRoot(),
+    // NbWindowModule.forRoot(),
     NbToastrModule.forRoot(),
-    NbChatModule.forRoot({
-      messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
-    }),
+    // NbChatModule.forRoot({
+    //   messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
+    // }),
     CoreModule.forRoot(),
     NbEvaIconsModule,
-    SweetAlert2Module.forRoot()
+    SweetAlert2Module.forRoot(),
+    NgxElectronModule,
   ],
   bootstrap: [AppComponent],
   providers: [

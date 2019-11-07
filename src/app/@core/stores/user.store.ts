@@ -30,11 +30,11 @@ export class UserStore {
         if (this.user.settings) {
           this.user.settings.themeName = themeName;
         } else {
-          this.user.settings = { themeName: themeName };
+          this.user.settings = { themeName };
         }
         return this.settingsService.updateCurrent(this.user.settings);
       } else {
-        return of({ themeName: themeName });
+        return of({ themeName });
       }
     }
 }

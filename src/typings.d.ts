@@ -13,3 +13,9 @@ interface NodeModule {
 declare var tinymce: any;
 
 declare var echarts: any;
+
+declare var window: Window;
+interface Window {
+  process: any;
+  require: any;
+}
