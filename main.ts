@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Screen, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
-import { promises as fs } from 'fs';
+import { promises as fs, existsSync } from 'fs';
 import { execFile } from 'child_process';
 
 const appFolder = path.join(app.getAppPath(), '/appDatas');
@@ -62,7 +62,7 @@ async function initWindow() {
     });
     appWindow.loadURL('http://localhost:4200');
     // Initialize the DevTools.
-    appWindow.webContents.openDevTools();
+    appWindow.webContents.openDevTools({mode: 'undocked'});
   } else {
     appWindow.loadURL(
       url.format({
@@ -81,8 +81,32 @@ async function initWindow() {
 async function initAppFolderAndFiles() {
   try {
     await fs.mkdir(obsFileFodlerPath, { recursive: true });
-    await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify({}));
-    await fs.writeFile(path.join(appFolder, '/liveSettings.json'), JSON.stringify({}));
+    if (!existsSync(path.join(appFolder, '/gameStatus.json'))) {
+      await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify({
+        "awayTeam": {
+          "city": "Ville Equipe Exterieur",
+          "color": "#612323",
+          "logo": "https://placekitten.com/450/450",
+          "name": "Nom Equipe Exterieur",
+          "score": 0,
+          "timeout": 3
+        },
+        "homeTeam": {
+          "city": "Ville Equipe Domicile",
+          "color": "#133155",
+          "logo": "https://placekitten.com/450/450",
+          "name": "Nom Equipe Domicile",
+          "score": 0,
+          "timeout": 3
+        }, null, 2));
+    }
+    if (!existsSync(path.join(appFolder, '/liveSettings.json'))) {
+      await fs.writeFile(path.join(appFolder, '/liveSettings.json'), JSON.stringify({
+        "bitrate": 5000,
+        "buffer": 15,
+        "streamKey": ""
+      }, null, 2));
+    }
   } catch (error) {
     console.error(error);
   }
@@ -121,9 +145,47 @@ try {
   // throw e;
 }
 
-ipcMain.on('getFiles', async (event, arg) => {
-  const files = await fs.readdir(appFolder);
-  appWindow.webContents.send('getFilesResponse', files);
+ipcMain.on('getDataFiles', async (event, arg) => {
+  // const files = await fs.readdir(appFolder);
+  let datas: any = {};
+  if (existsSync(path.join(appFolder, '/liveSettings.json'))) {
+    let rawDataSettings = await fs.readFile(path.join(appFolder, '/liveSettings.json'), 'utf8');
+    let settings = JSON.parse(rawDataSettings);
+    datas.settings = settings;
+  }
+  if (existsSync(path.join(appFolder, '/gameStatus.json'))) {
+    let rawDataGameSettings = await fs.readFile(path.join(appFolder, '/gameStatus.json'), 'utf8');
+    let gameSettings = JSON.parse(rawDataGameSettings);
+    datas.gameSettings = gameSettings;
+  }
+  appWindow.webContents.send('getDataFilesResponse', datas);
+});
+
+ipcMain.on('updateTeamInfo', async (event, arg) => {
+  await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify(arg, null, 2));
+  appWindow.webContents.send('updateTeamInfoResponse', true);
+});
+
+ipcMain.on('resetTeamInfo', async (event, arg) => {
+  await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify({
+    "awayTeam": {
+      "city": "Ville Equipe Exterieur",
+      "color": "#612323",
+      "logo": "https://placekitten.com/450/450",
+      "name": "Nom Equipe Exterieur",
+      "score": 0,
+      "timeout": 3
+    },
+    "homeTeam": {
+      "city": "Ville Equipe Domicile",
+      "color": "#133155",
+      "logo": "https://placekitten.com/450/450",
+      "name": "Nom Equipe Domicile",
+      "score": 0,
+      "timeout": 3
+    }
+  }, null, 2));
+  appWindow.webContents.send('resetTeamInfoResponse', true);
 });
 
 async function startObs() {

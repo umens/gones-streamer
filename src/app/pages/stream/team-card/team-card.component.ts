@@ -72,6 +72,7 @@ export class TeamCardComponent implements OnInit, OnChanges {
 
   handleChangeColor($event: ColorEvent) {
     this.team.color = $event.color.hex;
+    this.teamChanged.emit(this.team);
   }
 
   setScore(score: string | number): void {

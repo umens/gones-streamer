@@ -43,8 +43,8 @@ export class DashboardComponent implements OnDestroy {
   // teams card
   //// home
   homeTeam: Team = new Team({
-    name: 'Home Team',
-    city: 'Home Team City',
+    name: 'Nom Equipe Domicile',
+    city: 'Ville Equipe Domicile',
     score: 0,
     timeout: 3,
     color: '#133155',
@@ -52,8 +52,8 @@ export class DashboardComponent implements OnDestroy {
   });
   //// away
   awayTeam: Team = new Team({
-    name: 'Away Team',
-    city: 'Away Team City',
+    name: 'Nom Equipe Exterieur',
+    city: 'Ville Equipe Exterieur',
     score: 0,
     timeout: 3,
     color: '#612323',
@@ -65,7 +65,10 @@ export class DashboardComponent implements OnDestroy {
     private toastrService: NbToastrService,
     private electronService: ElectronService
   ) {
-    this.getFiles().then(data => console.log(data));
+    this.getDataFiles().then((data: any) => {
+      this.homeTeam = new Team(data.gameSettings.homeTeam);
+      this.awayTeam = new Team(data.gameSettings.awayTeam);
+    });
     this.obsWebsocket.connect('localhost', 4444, '', false).then(async () => {
       this.toastrService.success(`Successfully connected to OBS`, `Connected`);
       this.subscription = this.obsWebsocket.eventSource$.subscribe(event => this.workOnEvent(event));
@@ -91,13 +94,13 @@ export class DashboardComponent implements OnDestroy {
     this.obsWebsocket.disconnect();
   }
 
-  async getFiles() {
-    return new Promise<string[]>((resolve, reject) => {
+  async getDataFiles() {
+    return new Promise<any>((resolve, reject) => {
       if (this.electronService.isElectronApp) {
-        this.electronService.ipcRenderer.once('getFilesResponse', (event, arg) => {
+        this.electronService.ipcRenderer.once('getDataFilesResponse', (event, arg) => {
           resolve(arg);
         });
-        this.electronService.ipcRenderer.send('getFiles');
+        this.electronService.ipcRenderer.send('getDataFiles');
       } else {
         resolve(null);
       }
@@ -207,6 +210,10 @@ export class DashboardComponent implements OnDestroy {
     }
   }
 
+  loadLastLiveDatas() {
+
+  }
+
   loadScenes() {
     this.obsWebsocket.getScenesList()
       .then((data: any) => {
@@ -285,6 +292,16 @@ export class DashboardComponent implements OnDestroy {
     } else {
       this.awayTeam = team;
     }
+    new Promise<any>((resolve, reject) => {
+      if (this.electronService.isElectronApp) {
+        this.electronService.ipcRenderer.once('updateTeamInfoResponse', (event, arg) => {
+          resolve(arg);
+        });
+        this.electronService.ipcRenderer.send('updateTeamInfo', { homeTeam: this.homeTeam, awayTeam: this.awayTeam });
+      } else {
+        resolve(null);
+      }
+    });
   }
 
 }
