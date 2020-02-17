@@ -99,4 +99,8 @@ export class SceneItemTransform {
    * 	List of children (if this item is a group)
    */
   groupChildren?: SceneItemTransform[];
+
+  constructor(data: any) {
+    Object.assign(this, data);
+  }
 }

@@ -4,9 +4,15 @@ import { Subscription } from 'rxjs';
 import { NbToastrService } from '@nebular/theme';
 import { ElectronService } from 'ngx-electron';
 
-import { Scene } from 'src/app/shared/models/scene.model';
 import { Team } from 'src/app/shared/models/team.model';
 import { ObsWebsocketService } from 'src/app/shared/services/obs-websocket.service';
+import { TeamPossession } from 'src/app/shared/enums/team-possession.enum';
+import { GameOptions } from 'src/app/shared/models/game-options.model';
+import { LiveSettings } from 'src/app/shared/models/live-settings.model';
+import { AvailableScenes } from 'src/app/shared/enums/available-scenes.enum';
+import { ScoreType } from 'src/app/shared/enums/score-type.enum';
+import { Scene } from 'src/app/shared/models/obs-websocket/scene.model';
+import { StreamStatus } from 'src/app/shared/models/obs-websocket/stream-status.model';
 
 @Component({
   selector: 'ngx-dashboard',
@@ -15,11 +21,17 @@ import { ObsWebsocketService } from 'src/app/shared/services/obs-websocket.servi
 })
 export class DashboardComponent implements OnDestroy {
 
+  private liveSettings: LiveSettings = new LiveSettings({
+    bitrate: 6000,
+    buffer: 15,
+    streamKey: ''
+  });
+
   private alive = true;
   private subscription: Subscription;
 
   // scences component
-  scenes: any = null;
+  scenes: Scene[] = [];
   scenesLoader = true;
   camerasLoader = false;
 
@@ -27,6 +39,7 @@ export class DashboardComponent implements OnDestroy {
   liveUpdateChartData: { value: [string, number] }[] = [];
   streamTime = '00:00:00';
   isStreaming = false;
+  replayPlaying = false;
 
   // frames metrics card
   framesChartData: { value: number; name: string }[] = [
@@ -40,6 +53,13 @@ export class DashboardComponent implements OnDestroy {
     }
   ];
 
+  gameOptions: GameOptions = new GameOptions({
+    quarter: 1,
+    possession: TeamPossession.HOME,
+    flag: false,
+    showScoreboard: true
+  });
+
   // teams card
   //// home
   homeTeam: Team = new Team({
@@ -48,7 +68,7 @@ export class DashboardComponent implements OnDestroy {
     score: 0,
     timeout: 3,
     color: '#133155',
-    logo: 'https://placekitten.com/450/450',
+    logo: 'https://placekitten.com/450/450'
   });
   //// away
   awayTeam: Team = new Team({
@@ -57,7 +77,7 @@ export class DashboardComponent implements OnDestroy {
     score: 0,
     timeout: 3,
     color: '#612323',
-    logo: 'https://placekitten.com/450/450',
+    logo: 'https://placekitten.com/450/450'
   });
 
   constructor(
@@ -68,6 +88,7 @@ export class DashboardComponent implements OnDestroy {
     this.getDataFiles().then((data: any) => {
       this.homeTeam = new Team(data.gameSettings.homeTeam);
       this.awayTeam = new Team(data.gameSettings.awayTeam);
+      this.gameOptions = new GameOptions(data.gameSettings.options);
     });
     this.obsWebsocket.connect('localhost', 4444, '', false).then(async () => {
       this.toastrService.success(`Successfully connected to OBS`, `Connected`);
@@ -111,36 +132,50 @@ export class DashboardComponent implements OnDestroy {
     // tslint:disable-next-line: no-console
     console.debug(event);
     switch (event['update-type']) {
-      case 'SceneItemVisibilityChanged':
-        // tslint:disable-next-line: max-line-length
-        // this.scenes.find(scene => scene.active).sources.find(source => source.name === event['item-name']).render = event['item-visible'];
-        break;
       case 'SwitchScenes':
-        // this.scenes.find(scene => scene.active).active = false;
-        // this.scenes.find(scene => scene.name === event['scene-name']).active = true;
+        if (this.scenes.find(scene => scene.name === event['scene-name']) !== undefined) {
+          this.scenes.find(scene => scene.active).active = false;
+          this.scenes.find(scene => scene.name === event['scene-name']).active = true;
+        }
         // tslint:disable-next-line: no-string-literal
         // this.scenes.find(scene => scene.name === event['scene-name']).sources = event['sources'];
         // this.activeScene = event['scene-name'];
         break;
+      case 'ScenesChanged':
+      case 'SceneCollectionChanged':
+      case 'SceneCollectionListChanged':
+      case 'SwitchTransition':
+      case 'TransitionListChanged':
+      case 'TransitionDurationChanged':
+      case 'ProfileChanged':
+      case 'ProfileListChanged':
+      case 'ProfileListChanged':
+        break;
+      case 'SceneItemVisibilityChanged':
+        // tslint:disable-next-line: max-line-length
+        // this.scenes.find(scene => scene.active).sources.find(source => source.name === event['item-name']).render = event['item-visible'];
+        break;
       case 'StreamStatus':
+        const streamStatus = new StreamStatus(event);
+        console.log(streamStatus);
         // const newData = [];
         this.streamTime = event['stream-timecode'];
         this.liveUpdateChartData.push({
           value: [
             new Date().toISOString(),
-            Math.round(event['cpu-usage']),
+            Math.round(streamStatus.cpuUsage),
           ],
         });
 
-        this.framesChartData[0].value = event['num-dropped-frames'];
-        this.framesChartData[1].value = event['num-total-frames'] - event['num-dropped-frames'];
+        this.framesChartData[0].value = streamStatus.numDroppedFrames;
+        this.framesChartData[1].value = streamStatus.numTotalFrames - streamStatus.numDroppedFrames;
         if (this.liveUpdateChartData.length > 50) {
           this.liveUpdateChartData.shift();
         }
         // newData.push({ value: [new Date(), event['cpu-usage']] });
         this.liveUpdateChartData = [...this.liveUpdateChartData];
         this.framesChartData = [...this.framesChartData];
-        this.isStreaming = event.streaming;
+        this.isStreaming = streamStatus.streaming;
         // tslint:disable-next-line: no-string-literal
         // this.isStreaming = event['streaming'];
         // // tslint:disable-next-line: no-string-literal
@@ -200,7 +235,7 @@ export class DashboardComponent implements OnDestroy {
         this.framesChartData = [...this.framesChartData];
         // stop replay buffer
         this.obsWebsocket.StopReplayBuffer().catch((err: Error) => { console.error(err); });
-        this.obsWebsocket.setCurrentScene('* First scene').catch((err: Error) => { console.error(err); });
+        this.obsWebsocket.setCurrentScene(AvailableScenes.STARTING).catch((err: Error) => { console.error(err); });
         break;
 
       default:
@@ -217,7 +252,9 @@ export class DashboardComponent implements OnDestroy {
   loadScenes() {
     this.obsWebsocket.getScenesList()
       .then((data: any) => {
-        this.scenes = data.scenes.filter((element) => (!element.name.startsWith('*') && !element.name.startsWith('-')));
+        this.scenes = data.scenes.filter((element) => (!element.name.startsWith('*') && !element.name.startsWith('-'))).map(scene => {
+          return new Scene(scene);
+        });
         if (this.scenes.find(scene => scene.name === data['current-scene']) !== undefined) {
           this.scenes.find(scene => scene.name === data['current-scene']).active = true;
         }
@@ -274,7 +311,7 @@ export class DashboardComponent implements OnDestroy {
           console.error(err);
         });
     } else {
-      this.obsWebsocket.setCurrentScene('* First scene')
+      this.obsWebsocket.setCurrentScene(AvailableScenes.STARTING)
         .then(() => {
           return this.obsWebsocket.StartStreaming();
         }).then(() => {
@@ -286,21 +323,118 @@ export class DashboardComponent implements OnDestroy {
     }
   }
 
+  // IPC With Electron
+
   updateTeam(team: Team, isHomeTeam: boolean) {
     if (isHomeTeam) {
-      this.homeTeam = team;
+      this.homeTeam = Object.assign({}, team);
     } else {
-      this.awayTeam = team;
+      this.awayTeam = Object.assign({}, team);
     }
+    // tslint:disable-next-line: no-unused-expression
     new Promise<any>((resolve, reject) => {
       if (this.electronService.isElectronApp) {
         this.electronService.ipcRenderer.once('updateTeamInfoResponse', (event, arg) => {
           resolve(arg);
         });
-        this.electronService.ipcRenderer.send('updateTeamInfo', { homeTeam: this.homeTeam, awayTeam: this.awayTeam });
+        this.electronService.ipcRenderer.send('updateTeamInfo', {
+          homeTeam: this.homeTeam,
+          awayTeam: this.awayTeam,
+          options: this.gameOptions
+        });
       } else {
         resolve(null);
       }
+    });
+  }
+
+  updateGameOptions(options: GameOptions): void {
+    this.gameOptions = Object.assign({}, options);
+    // tslint:disable-next-line: no-unused-expression
+    new Promise<any>((resolve, reject) => {
+      if (this.electronService.isElectronApp) {
+        this.electronService.ipcRenderer.once('updateGameOptionsResponse', (event, arg) => {
+          resolve(arg);
+        });
+        this.electronService.ipcRenderer.send('updateGameOptions', this.gameOptions);
+      } else {
+        resolve(null);
+      }
+    });
+  }
+
+  updateImageTeam(file: File, isHomeTeam: boolean) {
+    const that = this;
+    // tslint:disable-next-line: no-unused-expression
+    new Promise<any>((resolve, reject) => {
+      if (this.electronService.isElectronApp) {
+        this.electronService.ipcRenderer.once('uploadTeamImageResponse', (event, arg: string) => {
+          if (isHomeTeam) {
+            that.homeTeam.logo = arg;
+            that.homeTeam = Object.assign({}, that.homeTeam);
+          } else {
+            that.awayTeam.logo = arg;
+            that.awayTeam = Object.assign({}, that.awayTeam);
+          }
+          resolve(arg);
+        });
+        this.electronService.ipcRenderer.send('uploadTeamImage', {
+          path: file.path,
+          name: file.name,
+          isHomeTeam
+        });
+      } else {
+        resolve(null);
+      }
+    });
+  }
+
+  // other Events
+
+  setReplayPlaying(playing: boolean): void {
+    if (this.replayPlaying !== playing) {
+      if (playing) {
+        this.replayPlaying = playing;
+        // this.obsWebsocket.SaveReplayBuffer()
+        // .then(data => {
+        //   // wait 1s for replay video file to be ready
+        //   setTimeout(() => {
+        //     this.obsWebsocket.setCurrentScene(AvailableScenes.REPLAY).then(data2 => {
+        //       setTimeout(() => {
+        //         this.obsWebsocket.setCurrentScene(AvailableScenes.LIVE).then(data3 => {
+        //           this.replayPlaying = false;
+        //         });
+        //       }, this.liveSettings.buffer * 1000);
+        //     });
+        //   }, 1000);
+        // }).catch((err: Error) => {
+        //   console.error(err.message);
+        // });
+
+
+        // TODO: Delete next timeout - was for test
+        this.obsWebsocket.setCurrentScene(AvailableScenes.REPLAY).then(data2 => {
+          setTimeout(() => {
+            this.obsWebsocket.setCurrentScene(AvailableScenes.LIVE).then(data3 => {
+              this.replayPlaying = false;
+            });
+          }, this.liveSettings.buffer * 1000);
+        });
+      } else {
+        this.obsWebsocket.setCurrentScene(AvailableScenes.LIVE).then(data3 => {
+          this.replayPlaying = playing;
+        });
+      }
+    }
+  }
+
+  displayScoreAnimation(scoreType: ScoreType): void {
+    this.obsWebsocket.SetSceneItemProperties(scoreType, { visible: true, 'scene-name': AvailableScenes.LIVE }).then(data => {
+      setTimeout(() => {
+        return this.obsWebsocket.SetSceneItemProperties(scoreType, { visible: false, 'scene-name': AvailableScenes.LIVE });
+      }, 5000);
+    }).catch((err: Error) => {
+      console.error(err.message);
     });
   }
 

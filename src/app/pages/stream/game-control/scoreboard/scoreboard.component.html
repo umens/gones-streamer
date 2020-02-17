@@ -1,1 +1,56 @@
-<p>scoreboard works!</p>
+<div #scoreboard class="p-5 mx-auto jumbotron">
+  <!-- <div class="downs">
+
+  </div> -->
+  <div class="scoreAndTime d-flex flex-row">
+
+    <div class="teamblock-scoreboard" [ngStyle]="{ 'width': '360px', 'background': homeTeam.color }" [ngxAdapteTextColorToBg]="homeTeam.color">
+      <img class="img-thumbnail teamlogo-scoreboard" *ngIf="homeTeam.logo.startsWith('http')" src="{{ homeTeam.logo }}" />
+      <img class="img-thumbnail teamlogo-scoreboard" *ngIf="!homeTeam.logo.startsWith('http')" [src]="homeTeam.logo | safe: 'resourceUrl'" />
+      <div class="teamname-scoreboard font-weight-bold">
+        {{ homeTeam.name }}
+      </div>
+      <div class="teamscore-scoreboard font-weight-bold">
+        {{ homeTeam.score | number: "2.0-0" }}
+      </div>
+      <div class="teamtimeoutblock-scoreboard">
+        <div *ngIf="homeTeam.timeout >= 1" class="teamtimeout-scoreboard bg-warning"></div>
+        <div *ngIf="homeTeam.timeout >= 2" class="teamtimeout-scoreboard bg-warning"></div>
+        <div *ngIf="homeTeam.timeout >= 3" class="teamtimeout-scoreboard bg-warning"></div>
+      </div>
+      <div *ngIf="checkPossessionHome(gameOptions.possession)"  class="teampossession-scoreboard bg-warning"></div>
+    </div>
+
+    <div class="teamblock-scoreboard" [ngStyle]="{ 'margin-left': '5px', 'width': '360px', 'background': awayTeam.color }" [ngxAdapteTextColorToBg]="awayTeam.color">
+      <img class="img-thumbnail teamlogo-scoreboard" *ngIf="awayTeam.logo.startsWith('http')" src="{{ awayTeam.logo }}" />
+      <img class="img-thumbnail teamlogo-scoreboard" *ngIf="!awayTeam.logo.startsWith('http')" [src]="awayTeam.logo | safe: 'resourceUrl'" />
+      <div class="teamname-scoreboard font-weight-bold">
+        {{ awayTeam.name }}
+      </div>
+      <div class="teamscore-scoreboard font-weight-bold">
+        {{ awayTeam.score | number: "2.0-0" }}
+      </div>
+      <div class="teamtimeoutblock-scoreboard">
+        <div *ngIf="awayTeam.timeout >= 1" class="teamtimeout-scoreboard bg-warning"></div>
+        <div *ngIf="awayTeam.timeout >= 2" class="teamtimeout-scoreboard bg-warning"></div>
+        <div *ngIf="awayTeam.timeout >= 3" class="teamtimeout-scoreboard bg-warning"></div>
+      </div>
+      <div *ngIf="!checkPossessionHome(gameOptions.possession)" class="teampossession-scoreboard bg-warning"></div>
+    </div>
+
+    <div class="teamblock-scoreboard" *ngIf="!gameOptions.flag" [ngStyle]="{ 'margin-left': '5px', 'width': '145px', 'background': '#333333' }" [ngxAdapteTextColorToBg]="'#333333'">
+      <div class="quarter-scoreboard text-center font-weight-bold">
+        Q{{ gameOptions.quarter }}
+      </div>
+    </div>
+    <div class="teamblock-scoreboard bg-warning" *ngIf="gameOptions.flag" [ngStyle]="{ 'margin-left': '5px', 'width': '145px' }" [ngxAdapteTextColorToBg]="'#ffaa00'">
+      <div class="quarter-scoreboard text-center font-weight-bold">
+        FLAG
+      </div>
+    </div>
+
+  </div>
+  <!-- <div class="ballOn">
+
+  </div> -->
+</div>

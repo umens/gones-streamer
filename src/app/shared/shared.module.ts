@@ -17,6 +17,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FocusableDirective } from './components//in-place-edit/directives/focusable.directive';
 import { GradiantDirective } from './directives/gradiant.directive';
 import { AdapteTextColorToBgDirective } from './directives/adapte-text-color-to-bg.directive';
+import { FileUploadDirective } from './directives/file-upload.directive';
+import { SafePipe } from '../shared/pipes/safe.pipe';
 
 @NgModule({
   declarations: [
@@ -32,6 +34,8 @@ import { AdapteTextColorToBgDirective } from './directives/adapte-text-color-to-
     FocusableDirective,
     GradiantDirective,
     AdapteTextColorToBgDirective,
+    FileUploadDirective,
+    SafePipe,
   ],
   imports: [
     CommonModule,
@@ -55,6 +59,8 @@ import { AdapteTextColorToBgDirective } from './directives/adapte-text-color-to-
     ReactiveFormsModule,
     GradiantDirective,
     AdapteTextColorToBgDirective,
+    FileUploadDirective,
+    SafePipe,
   ]
 })
 export class SharedModule { }

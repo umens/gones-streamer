@@ -31,7 +31,7 @@
     "electron": "ng build --base-href ./ && tsc --p electron && electron .",
     "electronapp": "tsc --p electron && electron .",
     "electron:serve-tsc": "tsc -p tsconfig-serve.json",
-    "electron:dev": "wait-on http-get://localhost:4200/ && yarn run electron:serve-tsc && electron . --serve",
+    "electron:dev": "wait-on http-get://localhost:4200/ && yarn run electron:serve-tsc && electron . --serve --allow-file-access-from-files",
     "electron:local": "yarn run build:electron && electron .",
     "electron:linux": "yarn run build:electron:prod && electron-builder build --linux",
     "electron:windows": "yarn run build:electron:prod && electron-builder build --windows",

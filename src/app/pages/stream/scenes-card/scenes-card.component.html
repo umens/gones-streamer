@@ -28,7 +28,7 @@
       <nb-list>
         <nb-list-item *ngFor="let camera of cameras" [ngClass]="{ active: camera.render }" (click)='switchCamera(camera)'>
           <div class="sceneName">
-              {{ camera.name | slice: 2 }}
+              {{ camera.name }}
             <nb-badge *ngIf="camera.render" text="Active" status="success" position="right"></nb-badge>
           </div>
         </nb-list-item>

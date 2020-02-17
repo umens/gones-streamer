@@ -72,4 +72,8 @@ export class Output {
    * Total bytes sent
    */
   totalBytes: number;
+
+  constructor(data: any) {
+    Object.assign(this, data);
+  }
 }

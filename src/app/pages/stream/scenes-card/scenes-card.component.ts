@@ -7,8 +7,7 @@ import {
   transition,
   // ...
 } from '@angular/animations';
-import { Scene } from 'src/app/shared/models/scene.model';
-import { SceneItem } from 'src/app/shared/models/scene-item.model';
+import { Scene } from 'src/app/shared/models/obs-websocket/scene.model';
 
 @Component({
   selector: 'ngx-scenes-card',
@@ -59,7 +58,7 @@ export class ScenesCardComponent implements OnInit, OnChanges {
       if (currentScenes != null) {
         if (currentScenes.find(scene => scene.active) !== undefined) {
           const currentActiveScene = currentScenes.find(scene => scene.active);
-          const cameraSources = currentActiveScene.sources.filter(source => source.name.startsWith('- Cam'));
+          const cameraSources = currentActiveScene.sources.filter(source => source.name.startsWith('cam'));
           if (cameraSources.length > 0) {
             this.cameras = cameraSources;
           } else {

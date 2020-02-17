@@ -10,12 +10,12 @@
   <div class="col-6">
     <div class="row">
       <div class="col">
-        <ngx-team-card [team]="homeTeam" (teamChanged)="updateTeam($event, true)"></ngx-team-card>
+        <ngx-team-card [team]="homeTeam" (teamChanged)="updateTeam($event, true)" (logoChanged)="updateImageTeam($event, true)"></ngx-team-card>
       </div>
     </div>
     <div class="row">
       <div class="col">
-        <ngx-team-card [team]="awayTeam" (teamChanged)="updateTeam($event, false)"></ngx-team-card>
+        <ngx-team-card [team]="awayTeam" (teamChanged)="updateTeam($event, false)" (logoChanged)="updateImageTeam($event, false)"></ngx-team-card>
       </div>
     </div>
   </div>
@@ -40,7 +40,7 @@
       <nb-card-body>
         <nb-tabset class="w-100">
           <nb-tab tabTitle="Games Control">
-            <ngx-game-control [homeTeam]="homeTeam" [awayTeam]="awayTeam" (teamChanged)="updateTeam($event.team, $event.isHomeTeam)"></ngx-game-control>
+            <ngx-game-control [homeTeam]="homeTeam" [awayTeam]="awayTeam" [replayPlaying]="replayPlaying" [gameOptions]="gameOptions" (teamChanged)="updateTeam($event.team, $event.isHomeTeam)" (scoringAnimation)="displayScoreAnimation($event)" (gameOptionsChanged)="updateGameOptions($event)" (replayPlayingChanged)="setReplayPlaying($event)"></ngx-game-control>
           </nb-tab>
           <nb-tab tabTitle="Highlight Joueur">
             <ngx-player-highlight></ngx-player-highlight>

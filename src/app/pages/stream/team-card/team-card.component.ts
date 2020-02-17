@@ -24,8 +24,11 @@ export class TeamCardComponent implements OnInit, OnChanges {
   @Input() team: Team = null;
 
   @Output() teamChanged: EventEmitter<Team> = new EventEmitter<Team>();
+  @Output() logoChanged: EventEmitter<File> = new EventEmitter<File>();
 
   controls: FormArray;
+
+  files: File[] = [];
 
   constructor() {}
 
@@ -90,5 +93,9 @@ export class TeamCardComponent implements OnInit, OnChanges {
       this.team.timeout = num;
     }
     this.teamChanged.emit(this.team);
+  }
+
+  uploadFile(fileList: FileList) {
+    this.logoChanged.emit(fileList.item(0));
   }
 }

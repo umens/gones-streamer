@@ -1,6 +1,11 @@
 <nb-card [ngxGradiant]="team.color" (mouseenter)="teamHover = true" (mouseleave)="teamHover = false">
-  <div class="icon-container">
-    <img class="img-thumbnail" src="{{ team.logo }}" />
+  <div class="icon-container" (click)="fileInput.click()" ngxFileUpload (fileDropped)="uploadFile($event)">
+    <input hidden class="d-none" type="file" #fileInput (change)="uploadFile($event.target.files)">
+    <img *ngIf="team.logo.startsWith('http')" class="img-thumbnail" src="{{ team.logo }}" />
+    <img *ngIf="!team.logo.startsWith('http')" class="img-thumbnail" [src]="team.logo | safe: 'resourceUrl'" />
+    <div class="overlay">
+      <nb-icon class="icon" [options]="{ 'icon-font-size': '50px' }" icon="cloud-upload-outline"></nb-icon>
+    </div>
   </div>
 
   <div class="icon-container">
