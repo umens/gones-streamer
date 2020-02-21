@@ -111,7 +111,7 @@ export class GameControlComponent implements OnInit {
   }
 
   changeReplayState(): void {
-    this.replayPlaying = !this.replayPlaying;
-    this.replayPlayingChanged.emit(this.replayPlaying);
+    // this.replayPlaying = !this.replayPlaying;
+    // this.replayPlayingChanged.emit(this.replayPlaying);
   }
 }

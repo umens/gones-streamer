@@ -25,10 +25,10 @@
         </button>
       </div>
       <div class="col-3">
-        <button *ngIf="!replayPlaying" (click)="changeReplayState()" nbButton hero status="primary">
+        <button *ngIf="!replayPlaying" (click)="changeReplayState()" nbButton hero status="basic">
           <nb-icon class="icon" icon="play-circle-outline"></nb-icon> Replay
         </button>
-        <button *ngIf="replayPlaying" (click)="changeReplayState()" nbButton hero status="info">
+        <button *ngIf="replayPlaying" (click)="changeReplayState()" nbButton hero status="primary">
           <nb-icon class="icon" icon="play-circle"></nb-icon> Replay
         </button>
       </div>

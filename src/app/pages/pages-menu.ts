@@ -25,12 +25,6 @@ export class PagesMenu {
         home: true,
       },
       {
-        title: 'E-Dashboard',
-        icon: 'home-outline',
-        link: '/pages/edashboard',
-        children: undefined,
-      },
-      {
         title: 'Live Settings',
         icon: 'settings-2-outline',
         link: '/pages/live-settings',

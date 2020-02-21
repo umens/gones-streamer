@@ -1,5 +1,5 @@
 {
-  "appId": "com.example.app",
+  "appId": "gones.gones-streamer",
   "productName": "gones-streamer",
   "directories": {
     "output": "release/"
@@ -21,7 +21,7 @@
         "!tslint.json"
     ],
   "win": {
-    "icon": "dist/icon.png",
+    "icon": "dist/assets/logos/logo.png",
     "target": [
       "msi",
       "nsis",

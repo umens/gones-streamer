@@ -157,4 +157,28 @@ export class ObsWebsocketService {
   ToggleStudioMode(): any {
     return this.emit('ToggleStudioMode', {});
   }
+
+  GetSourceSettings(sourceName: string) {
+    if (this.connected) {
+      return this.emit('GetSourceSettings', { sourceName });
+    }
+  }
+
+  SetSourceSettings(sourceName: string, sourceSettings: any) {
+    if (this.connected) {
+      return this.emit('SetSourceSettings', { sourceName, sourceSettings });
+    }
+  }
+
+  GetStreamSettings() {
+    if (this.connected) {
+      return this.emit('GetStreamSettings', {});
+    }
+  }
+
+  SetStreamSettings(type: string, settings: any, save: boolean) {
+    if (this.connected) {
+      return this.emit('SetStreamSettings', { type, settings, save });
+    }
+  }
 }

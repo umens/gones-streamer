@@ -5,8 +5,6 @@ import {
   ElementRef,
   ViewChild,
   AfterViewInit,
-  DoCheck,
-  KeyValueDiffers,
   OnChanges,
   SimpleChanges
 } from '@angular/core';

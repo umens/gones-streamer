@@ -12,7 +12,7 @@ import { UserComponent } from './user/user.component';
 import { AdminGuard } from '../../@auth/admin.guard';
 
 const routes: Routes = [{
-  path: '',
+  path: 'users',
   component: UsersComponent,
   children: [
     {

@@ -133,6 +133,12 @@ export class DashboardComponent implements OnDestroy {
     console.debug(event);
     switch (event['update-type']) {
       case 'SwitchScenes':
+        if (event['scene-name'] === AvailableScenes.LIVE && this.replayPlaying) {
+          this.replayPlaying = false;
+        }
+        if (event['scene-name'] === AvailableScenes.REPLAY && !this.replayPlaying) {
+          this.replayPlaying = true;
+        }
         if (this.scenes.find(scene => scene.name === event['scene-name']) !== undefined) {
           this.scenes.find(scene => scene.active).active = false;
           this.scenes.find(scene => scene.name === event['scene-name']).active = true;
@@ -222,8 +228,8 @@ export class DashboardComponent implements OnDestroy {
       case 'StreamStarted':
         this.isStreaming = true;
 
-        // stop replay buffer
-        this.obsWebsocket.StartReplayBuffer().catch((err: Error) => { console.error(err); });
+        // start replay buffer
+        // this.obsWebsocket.StartReplayBuffer().catch((err: Error) => { console.error(err); });
         break;
 
       case 'StreamStopped':
@@ -234,7 +240,7 @@ export class DashboardComponent implements OnDestroy {
         this.framesChartData[1].value = 0;
         this.framesChartData = [...this.framesChartData];
         // stop replay buffer
-        this.obsWebsocket.StopReplayBuffer().catch((err: Error) => { console.error(err); });
+        // this.obsWebsocket.StopReplayBuffer().catch((err: Error) => { console.error(err); });
         this.obsWebsocket.setCurrentScene(AvailableScenes.STARTING).catch((err: Error) => { console.error(err); });
         break;
 
@@ -392,12 +398,23 @@ export class DashboardComponent implements OnDestroy {
   // other Events
 
   setReplayPlaying(playing: boolean): void {
-    if (this.replayPlaying !== playing) {
-      if (playing) {
-        this.replayPlaying = playing;
+    // if (this.replayPlaying !== playing) {
+    //   if (playing) {
+    //     this.replayPlaying = playing;
+        // tslint:disable-next-line: no-unused-expression
+        // new Promise<any>((resolve, reject) => {
+        //   if (this.electronService.isElectronApp) {
+        //     this.electronService.ipcRenderer.once('startReplayResponse', (event, arg: string) => {
+        //       resolve(arg);
+        //     });
+        //     this.electronService.ipcRenderer.send('startReplay');
+        //   } else {
+        //     resolve(null);
+        //   }
+        // });
         // this.obsWebsocket.SaveReplayBuffer()
         // .then(data => {
-        //   // wait 1s for replay video file to be ready
+        //   // wait 0.5s for replay video file to be ready
         //   setTimeout(() => {
         //     this.obsWebsocket.setCurrentScene(AvailableScenes.REPLAY).then(data2 => {
         //       setTimeout(() => {
@@ -406,26 +423,16 @@ export class DashboardComponent implements OnDestroy {
         //         });
         //       }, this.liveSettings.buffer * 1000);
         //     });
-        //   }, 1000);
+        //   }, 500);
         // }).catch((err: Error) => {
         //   console.error(err.message);
         // });
-
-
-        // TODO: Delete next timeout - was for test
-        this.obsWebsocket.setCurrentScene(AvailableScenes.REPLAY).then(data2 => {
-          setTimeout(() => {
-            this.obsWebsocket.setCurrentScene(AvailableScenes.LIVE).then(data3 => {
-              this.replayPlaying = false;
-            });
-          }, this.liveSettings.buffer * 1000);
-        });
-      } else {
-        this.obsWebsocket.setCurrentScene(AvailableScenes.LIVE).then(data3 => {
-          this.replayPlaying = playing;
-        });
-      }
-    }
+      // } else {
+      //   // this.obsWebsocket.setCurrentScene(AvailableScenes.LIVE).then(data3 => {
+      //   //   this.replayPlaying = playing;
+      //   // });
+      // }
+    // }
   }
 
   displayScoreAnimation(scoreType: ScoreType): void {

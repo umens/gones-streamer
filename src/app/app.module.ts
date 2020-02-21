@@ -28,6 +28,8 @@ import {
   // NbWindowModule,
 } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
+import { UsersModule } from './pages/users/users.module';
+import { PagesModule } from './pages/pages.module';
 
 export function init_app(injector: Injector) {
   return () =>
@@ -63,6 +65,8 @@ export function init_app(injector: Injector) {
     NbEvaIconsModule,
     SweetAlert2Module.forRoot(),
     NgxElectronModule,
+    UsersModule,
+    PagesModule,
   ],
   bootstrap: [AppComponent],
   providers: [

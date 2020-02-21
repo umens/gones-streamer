@@ -16,6 +16,7 @@ import {
   NbIconModule,
   NbInputModule,
   NbPopoverModule,
+  NbSelectModule,
   NbContextMenuModule,
 } from '@nebular/theme';
 import { ScenesCardComponent } from './scenes-card/scenes-card.component';
@@ -70,6 +71,7 @@ import { ObsWebsocketService } from 'src/app/shared/services/obs-websocket.servi
     ColorChromeModule,
     NbPopoverModule,
     NbContextMenuModule,
+    NbSelectModule,
   ],
   providers: [ObsWebsocketService, WebsocketService]
 })
