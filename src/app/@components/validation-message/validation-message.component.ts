@@ -8,7 +8,7 @@ import { Component, Input, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
-    selector: 'ngx-validation-message',
+    selector: 'app-validation-message',
     styleUrls: ['./validation-message.component.scss'],
     template: `
              <p class="caption status-danger"

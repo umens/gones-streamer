@@ -7,41 +7,41 @@
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 import {
-  NgxAuthComponent,
-  NgxLoginComponent,
-  NgxRegisterComponent,
-  NgxLogoutComponent,
-  NgxRequestPasswordComponent,
-  NgxResetPasswordComponent,
+  AppAuthComponent,
+  AppLoginComponent,
+  AppRegisterComponent,
+  AppLogoutComponent,
+  AppRequestPasswordComponent,
+  AppResetPasswordComponent,
 } from './components';
 
 const routes: Routes = [{
-  path: '',
-  component: NgxAuthComponent,
+  path: 'auth',
+  component: AppAuthComponent,
   children: [
     {
       path: '',
-      component: NgxLoginComponent,
+      component: AppLoginComponent,
     },
     {
       path: 'login',
-      component: NgxLoginComponent,
+      component: AppLoginComponent,
     },
     {
       path: 'register',
-      component: NgxRegisterComponent,
+      component: AppRegisterComponent,
     },
     {
       path: 'logout',
-      component: NgxLogoutComponent,
+      component: AppLogoutComponent,
     },
     {
       path: 'request-password',
-      component: NgxRequestPasswordComponent,
+      component: AppRequestPasswordComponent,
     },
     {
       path: 'reset-password',
-      component: NgxResetPasswordComponent,
+      component: AppResetPasswordComponent,
     },
   ],
 }];

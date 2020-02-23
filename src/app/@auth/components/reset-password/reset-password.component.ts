@@ -10,12 +10,12 @@ import { NB_AUTH_OPTIONS, NbAuthService, NbAuthResult } from '@nebular/auth';
 import { getDeepFromObject } from '../../helpers';
 
 @Component({
-  selector: 'ngx-reset-password-page',
+  selector: 'app-reset-password-page',
   styleUrls: ['./reset-password.component.scss'],
   templateUrl: './reset-password.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NgxResetPasswordComponent implements OnInit {
+export class AppResetPasswordComponent implements OnInit {
   minLength: number = this.getConfigValue('forms.validation.password.minLength');
   maxLength: number = this.getConfigValue('forms.validation.password.maxLength');
   redirectDelay: number = this.getConfigValue('forms.resetPassword.redirectDelay');

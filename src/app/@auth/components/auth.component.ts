@@ -10,7 +10,7 @@ import { NbAuthService } from '@nebular/auth';
 import { takeWhile } from 'rxjs/operators';
 
 @Component({
-  selector: 'ngx-auth',
+  selector: 'app-auth',
   styleUrls: ['./auth.component.scss'],
   template: `
     <nb-layout>
@@ -33,7 +33,7 @@ import { takeWhile } from 'rxjs/operators';
     </nb-layout>
   `,
 })
-export class NgxAuthComponent implements OnDestroy {
+export class AppAuthComponent implements OnDestroy {
 
   private alive = true;
 

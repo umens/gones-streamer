@@ -1,6 +1,6 @@
 /*
  * Copyright (c) Akveo 2019. All Rights Reserved.
- * Licensed under the Single Application / Multi Application License. 
+ * Licensed under the Single Application / Multi Application License.
  * See LICENSE_SINGLE_APP / LICENSE_MULTI_APP in the 'docs' folder for license information on type of purchased license.
  */
 
@@ -9,6 +9,10 @@ module.exports = {
   api: {
     port: 3002,
     root: '/api',
+  },
+
+  frontEnd: {
+    domain: 'https://streamer.malo-box.ovh',
   },
 
   auth: {
@@ -21,7 +25,7 @@ module.exports = {
   },
 
   db: {
-    url: 'mongodb://localhost:27017/bundle-node-prod',
-    name: 'bundle-node-prod',
+    url: 'mongodb://mongo:27017/gones-streamer',
+    name: 'gones-streamer',
   },
 };

@@ -6,7 +6,7 @@
 
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'ngxNumberWithCommas' })
+@Pipe({ name: 'appNumberWithCommas' })
 export class NumberWithCommasPipe implements PipeTransform {
 
   transform(input: number): string {

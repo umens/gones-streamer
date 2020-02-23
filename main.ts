@@ -1,53 +1,45 @@
-import { app, BrowserWindow, Screen, screen, ipcMain } from 'electron';
+import { app, BrowserWindow, Screen, screen, ipcMain, dialog } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import { promises as fs, existsSync } from 'fs';
 import { execFile, ChildProcess } from 'child_process';
-// import NodePowershell from 'node-powershell';
-import * as shell from 'node-powershell';
+import { rootPath } from 'electron-root-path';
+const isPackaged = require('electron-is-packaged').isPackaged;
+const log = require('electron-log');
 
-const ps = new shell({
-  executionPolicy: 'Bypass',
-  noProfile: true
-});
-
-const binFolder = path.join(app.getAppPath(), '/assets');
-const appFolder = path.join(app.getAppPath(), '/appDatas');
+const extraResources = (isPackaged) ? path.join(rootPath, '/resources') : app.getAppPath();
+const binFolder = path.join(extraResources, '/assets');
+const appFolder = path.join(extraResources, '/appDatas')
 const obsFileFodlerPath = path.join(appFolder, '/obsFiles');
 const assetsFolderPath = path.join(appFolder, '/assetsFiles');
 const assetsImagesFodlerPath = path.join(assetsFolderPath, '/teams');
 
-let appWindow: BrowserWindow;
-let obsProcess: ChildProcess;
-let serve: boolean;
+let win: BrowserWindow = null;
 const args = process.argv.slice(1);
-serve = args.some(val => val === '--serve');
+let serve = args.some(val => val === '--serve');
+let obsProcess: ChildProcess;
 
-// async function initWindow() {
-async function initWindow() {
+async function createWindow(): Promise<BrowserWindow> {
 
   try {
+    log.info('initAppFolderAndFiles');
     await initAppFolderAndFiles();
+    log.info('startObs');
     await startObs();
   } catch (error) {
-    console.log('initWindow');
-    console.error(error);
+    log.info('initWindow');
+    log.error(error);
   }
 
   const electronScreen: Screen = screen;
   const size = electronScreen.getPrimaryDisplay().workAreaSize;
 
-  appWindow = new BrowserWindow({
-    // fullscreen: true,
-    // x: 0,
-    // y: 0,
-    // width: 800,
-    // height: 600,
+  // Create the browser window.
+  win = new BrowserWindow({
     x: 0,
     y: 0,
     width: size.width,
     height: size.height,
-    // frame: false,
     title: 'Gones Streamer',
     backgroundColor: '#17242D',
     icon: path.join(__dirname, `/../../dist/assets/logos/logo-raw.png`),
@@ -55,42 +47,89 @@ async function initWindow() {
       nodeIntegration: true,
       webSecurity: false
     }
+    // webPreferences: {
+    //   nodeIntegration: true,
+    //   allowRunningInsecureContent: (serve) ? true : false,
+    // },
   });
+  log.info('window create');
 
-  appWindow.removeMenu();
-
-  // Electron Build Path
-  // appWindow.loadURL(
-  //   url.format({
-  //     // pathname: path.join(__dirname, `/dist/index.html`),
-  //     pathname: path.join(__dirname, `/../../dist/index.html`),
-  //     protocol: 'file:',
-  //     slashes: true
-  //   })
-  // );
+  win.removeMenu();
+  log.info('remove menu');
 
   if (serve) {
     require('electron-reload')(__dirname, {
       electron: require(`${__dirname}/node_modules/electron`)
     });
-    appWindow.loadURL('http://localhost:4200');
-    // Initialize the DevTools.
-    appWindow.webContents.openDevTools({mode: 'undocked'});
+    win.loadURL('http://localhost:4200');
   } else {
-    appWindow.loadURL(
-      url.format({
-        pathname: path.join(__dirname, 'dist/index.html'),
-        protocol: 'file:',
-        slashes: true
-      })
-    );
+    win.loadURL(url.format({
+      pathname: path.join(__dirname, 'dist/index.html'),
+      protocol: 'file:',
+      slashes: true
+    }));
+    log.info('load front');
   }
 
-  appWindow.on('closed', () => {
-    appWindow = null;
+  if (serve) {
+    // win.webContents.openDevTools();
+    win.webContents.openDevTools({mode: 'undocked'});
+  }
+
+  // Emitted when the window is closed.
+  win.on('closed', () => {
+    // Dereference the window object, usually you would store window
+    // in an array if your app supports multi windows, this is the time
+    // when you should delete the corresponding element.
+    win = null;
   });
+
+  return win;
 }
 
+try {
+
+  // This method will be called when Electron has finished
+  // initialization and is ready to create browser windows.
+  // Some APIs can only be used after this event occurs.
+  app.on('ready', async () => {
+    try {
+      log.info('ready');
+      await createWindow();
+      log.info('created win');
+    } catch (error) {
+      log.info('main ready');
+      log.error(error);
+    }
+  });
+
+  // Quit when all windows are closed.
+  app.on('window-all-closed', () => {
+    // On OS X it is common for applications and their menu bar
+    // to stay active until the user quits explicitly with Cmd + Q
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
+
+  app.on('activate', async () => {
+    // On OS X it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (win === null) {
+      await createWindow();
+    }
+  });
+
+} catch (e) {
+  dialog.showErrorBox('', e)
+  // Catch Error
+  log.error(e);
+  throw e;
+}
+
+/**
+ * Standard functions
+ */
 async function initAppFolderAndFiles() {
   try {
     await fs.mkdir(obsFileFodlerPath, { recursive: true });
@@ -122,12 +161,12 @@ async function initAppFolderAndFiles() {
         }
 
       }, null, 2));
-      await fs.writeFile(path.join(assetsFolderPath, '/awayName.txt'), 'Nom Equipe Exterieur');
-      await fs.writeFile(path.join(assetsFolderPath, '/awayCity.txt'), 'Ville Equipe Exterieur');
-      await fs.writeFile(path.join(assetsFolderPath, '/awayScore.txt'), '00');
-      await fs.writeFile(path.join(assetsFolderPath, '/homeName.txt'), 'Nom Equipe Domicile');
-      await fs.writeFile(path.join(assetsFolderPath, '/homeCity.txt'), 'Ville Equipe Domicile');
-      await fs.writeFile(path.join(assetsFolderPath, '/homeScore.txt'), '00');
+      // await fs.writeFile(path.join(assetsFolderPath, '/awayName.txt'), 'Nom Equipe Exterieur');
+      // await fs.writeFile(path.join(assetsFolderPath, '/awayCity.txt'), 'Ville Equipe Exterieur');
+      // await fs.writeFile(path.join(assetsFolderPath, '/awayScore.txt'), '00');
+      // await fs.writeFile(path.join(assetsFolderPath, '/homeName.txt'), 'Nom Equipe Domicile');
+      // await fs.writeFile(path.join(assetsFolderPath, '/homeCity.txt'), 'Ville Equipe Domicile');
+      // await fs.writeFile(path.join(assetsFolderPath, '/homeScore.txt'), '00');
     }
     if (!existsSync(path.join(appFolder, '/liveSettings.json'))) {
       await fs.writeFile(path.join(appFolder, '/liveSettings.json'), JSON.stringify({
@@ -137,47 +176,35 @@ async function initAppFolderAndFiles() {
       }, null, 2));
     }
   } catch (error) {
-    console.log('initAppFolderAndFiles files');
-    console.error(error);
+    log.info('initAppFolderAndFiles files');
+    log.error(error);
   }
 }
 
-try {
-  // This method will be called when Electron has finished
-  // initialization and is ready to create browser windows.
-  // Some APIs can only be used after this event occurs.
-  app.on('ready', async () => {
-    try {
-      await initWindow();
-    } catch (error) {
-      console.log('main ready');
-      console.error(error);
-    }
-  });
+async function startObs() {
+  const executablePath = path.join(binFolder, '/OBS-Studio/bin/64bit/obs64.exe');
+  const parameters = [
+    '--portable',
+    '--minimize-to-tray',
+    '--collection "gones-streamer"',
+    '--profile "gones-streamer"',
+    '--scene "Starting"'
+  ];
 
-  // Quit when all windows are closed.
-  app.on('window-all-closed', () => {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-      app.quit();
-    }
-  });
+  try {
 
-  app.on('activate', () => {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (appWindow === null) {
-      initWindow();
-    }
-  });
-} catch (e) {
-  // Catch Error
-  // throw e;
-  console.log('main');
-  console.error(e);
+    log.info('starting obs ready');
+    obsProcess = await execFile(executablePath, parameters, { cwd: path.join(binFolder, '/OBS-Studio/bin/64bit') });
+    log.info('starting obs done');
+  } catch (error) {
+    log.info('startObs');
+    log.error(error);
+  }
 }
 
+/**
+ * Ipc Events
+ */
 ipcMain.on('getDataFiles', async (event, arg) => {
   // const files = await fs.readdir(appFolder);
   const datas: any = {};
@@ -191,20 +218,20 @@ ipcMain.on('getDataFiles', async (event, arg) => {
     const gameSettings = JSON.parse(rawDataGameSettings);
     datas.gameSettings = gameSettings;
   }
-  appWindow.webContents.send('getDataFilesResponse', datas);
+  win.webContents.send('getDataFilesResponse', datas);
 });
 
 ipcMain.on('updateTeamInfo', async (event, arg) => {
   await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify(arg, null, 2));
-  await fs.writeFile(path.join(assetsFolderPath, '/awayName.txt'), arg.awayTeam.name);
-  await fs.writeFile(path.join(assetsFolderPath, '/awayCity.txt'), arg.awayTeam.city);
-  const awayScore: string = '' + arg.awayTeam.score;
-  await fs.writeFile(path.join(assetsFolderPath, '/awayScore.txt'), awayScore.padStart(2, '0'));
-  await fs.writeFile(path.join(assetsFolderPath, '/homeName.txt'), arg.homeTeam.name);
-  await fs.writeFile(path.join(assetsFolderPath, '/homeCity.txt'), arg.homeTeam.city);
-  const homeScore: string = '' + arg.homeTeam.score;
-  await fs.writeFile(path.join(assetsFolderPath, '/homeScore.txt'), homeScore.padStart(2, '0'));
-  appWindow.webContents.send('updateTeamInfoResponse', true);
+  // await fs.writeFile(path.join(assetsFolderPath, '/awayName.txt'), arg.awayTeam.name);
+  // await fs.writeFile(path.join(assetsFolderPath, '/awayCity.txt'), arg.awayTeam.city);
+  // const awayScore: string = '' + arg.awayTeam.score;
+  // await fs.writeFile(path.join(assetsFolderPath, '/awayScore.txt'), awayScore.padStart(2, '0'));
+  // await fs.writeFile(path.join(assetsFolderPath, '/homeName.txt'), arg.homeTeam.name);
+  // await fs.writeFile(path.join(assetsFolderPath, '/homeCity.txt'), arg.homeTeam.city);
+  // const homeScore: string = '' + arg.homeTeam.score;
+  // await fs.writeFile(path.join(assetsFolderPath, '/homeScore.txt'), homeScore.padStart(2, '0'));
+  win.webContents.send('updateTeamInfoResponse', true);
 });
 
 ipcMain.on('resetTeamInfo', async (event, arg) => {
@@ -232,13 +259,13 @@ ipcMain.on('resetTeamInfo', async (event, arg) => {
       showScoreboard: true,
     }
   }, null, 2));
-  await fs.writeFile(path.join(assetsFolderPath, '/awayName.txt'), 'Nom Equipe Exterieur');
-  await fs.writeFile(path.join(assetsFolderPath, '/awayCity.txt'), 'Ville Equipe Exterieur');
-  await fs.writeFile(path.join(assetsFolderPath, '/awayScore.txt'), '00');
-  await fs.writeFile(path.join(assetsFolderPath, '/homeName.txt'), 'Nom Equipe Domicile');
-  await fs.writeFile(path.join(assetsFolderPath, '/homeCity.txt'), 'Ville Equipe Domicile');
-  await fs.writeFile(path.join(assetsFolderPath, '/homeScore.txt'), '00');
-  appWindow.webContents.send('resetTeamInfoResponse', true);
+  // await fs.writeFile(path.join(assetsFolderPath, '/awayName.txt'), 'Nom Equipe Exterieur');
+  // await fs.writeFile(path.join(assetsFolderPath, '/awayCity.txt'), 'Ville Equipe Exterieur');
+  // await fs.writeFile(path.join(assetsFolderPath, '/awayScore.txt'), '00');
+  // await fs.writeFile(path.join(assetsFolderPath, '/homeName.txt'), 'Nom Equipe Domicile');
+  // await fs.writeFile(path.join(assetsFolderPath, '/homeCity.txt'), 'Ville Equipe Domicile');
+  // await fs.writeFile(path.join(assetsFolderPath, '/homeScore.txt'), '00');
+  win.webContents.send('resetTeamInfoResponse', true);
 });
 
 ipcMain.on('uploadTeamImage', async (event, arg: { path: string, name: string, isHomeTeam: boolean }) => {
@@ -259,7 +286,15 @@ ipcMain.on('uploadTeamImage', async (event, arg: { path: string, name: string, i
 
   await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify(gameSettings, null, 2));
 
-  appWindow.webContents.send('uploadTeamImageResponse', finalCopy + '#' + new Date().getTime());
+  win.webContents.send('uploadTeamImageResponse', finalCopy + '#' + new Date().getTime());
+});
+
+ipcMain.on('setScoreboardSettings', async (event, arg: any) => {
+  win.webContents.send('setScoreboardSettingsResponse', path.join(assetsFolderPath, '/scoreboard.html'));
+});
+
+ipcMain.on('setAnimationsSettings', async (event, arg: any) => {
+  win.webContents.send('setAnimationsSettingsResponse', obsFileFodlerPath);
 });
 
 ipcMain.on('uploadBGImage', async (event, arg: { path: string, name: string }) => {
@@ -269,7 +304,7 @@ ipcMain.on('uploadBGImage', async (event, arg: { path: string, name: string }) =
   finalCopy = path.join(assetsFolderPath, '/bg.' + ext);
   await fs.copyFile(arg.path, finalCopy);
 
-  appWindow.webContents.send('uploadBGImageResponse', finalCopy);
+  win.webContents.send('uploadBGImageResponse', finalCopy);
 });
 
 ipcMain.on('updateGameOptions', async (event, arg: any) => {
@@ -280,42 +315,42 @@ ipcMain.on('updateGameOptions', async (event, arg: any) => {
 
   await fs.writeFile(path.join(appFolder, '/gameStatus.json'), JSON.stringify(gameSettings, null, 2));
 
-  appWindow.webContents.send('updateGameOptionsResponse', true);
+  win.webContents.send('updateGameOptionsResponse', true);
 });
 
 ipcMain.on('updateScoreboardHTML', async (event, arg: string) => {
   await fs.writeFile(path.join(assetsFolderPath, '/scoreboard.html'), arg);
 
-  appWindow.webContents.send('updateScoreboardHTMLResponse', true);
+  win.webContents.send('updateScoreboardHTMLResponse', true);
 });
 
-ipcMain.on('startReplay', async (event, arg: string) => {
-  // await startReplay();
-  const params = [
-    {
-      name: 'ApplicationTitle',
-      value: 'obs64',
-    },
-    {
-      name: 'Keys',
-      value: '{F10}',
-    }];
-  ps.addCommand(path.join(__dirname, '/assets/replayScriptWin.ps1'));
-  ps.addParameter(params[0]);
-  ps.addParameter(params[1]);
-  ps.invoke()
-  .then((output) => {
-    console.log(output);
-    // ps.addCommand('./script-loop.ps1');
-    // return ps.invoke();
-  });
-  appWindow.webContents.send('startReplayResponse', true);
-});
+// ipcMain.on('startReplay', async (event, arg: string) => {
+//   // await startReplay();
+//   const params = [
+//     {
+//       name: 'ApplicationTitle',
+//       value: 'obs64',
+//     },
+//     {
+//       name: 'Keys',
+//       value: '{F10}',
+//     }];
+//   ps.addCommand(path.join(__dirname, '/assets/replayScriptWin.ps1'));
+//   ps.addParameter(params[0]);
+//   ps.addParameter(params[1]);
+//   ps.invoke()
+//   .then((output) => {
+//     log.info(output);
+//     // ps.addCommand('./script-loop.ps1');
+//     // return ps.invoke();
+//   });
+//   win.webContents.send('startReplayResponse', true);
+// });
 
 ipcMain.on('getStreamSettingsOBS', async (event, arg: string) => {
   const rawStreamSettingsOBS = await fs.readFile(path.join(binFolder, '/OBS-Studio/config/obs-studio/basic/profiles/gonesstreamer/streamEncoder.json'), 'utf8');
   const streamSettingsOBS = JSON.parse(rawStreamSettingsOBS);
-  appWindow.webContents.send('getStreamSettingsOBSResponse', streamSettingsOBS);
+  win.webContents.send('getStreamSettingsOBSResponse', streamSettingsOBS);
 });
 
 
@@ -327,50 +362,5 @@ ipcMain.on('setStreamSettingsOBS', async (event, arg: string) => {
     path.join(binFolder, '/OBS-Studio/config/obs-studio/basic/profiles/gonesstreamer/streamEncoder.json'),
     JSON.stringify(streamSettingsOBS, null, 2)
   );
-  appWindow.webContents.send('setStreamSettingsOBSResponse', true);
+  win.webContents.send('setStreamSettingsOBSResponse', true);
 });
-
-async function startObs() {
-  // console.log(__dirname);
-  // console.log(path.join(app.getAppPath(), '/bin'));
-  // console.log(path.join(__dirname, '/assets/OBS-Studio/bin/64bit/obs64.exe'));
-  const executablePath = path.join(__dirname, '/assets/OBS-Studio/bin/64bit/obs64.exe');
-  const parameters = [
-    '--portable',
-    '--minimize-to-tray',
-    '--collection "gones-streamer"',
-    '--profile "gones-streamer"',
-    '--scene "Starting"'
-  ];
-
-  try {
-    obsProcess = await execFile(executablePath, parameters, { cwd: path.join(__dirname, '/assets/OBS-Studio/bin/64bit') });
-  } catch (error) {
-    console.log('startObs');
-    console.error(error);
-  }
-}
-
-
-// async function startReplay() {
-//   try {
-//     // obsProcess.stdin.write('\x1b[21~', (err) => {
-//     //   if (err) {
-//     //     console.log(err);
-//     //   }
-//     // });
-//     console.log('send');
-//     // scriptPath = path.join(assetsFolderPath, '/homeScore.txt')
-//     await ps.addCommand(`${path.join(__dirname, '/assets/replayScriptWin.ps1')}`);
-//     // await ps.addCommand(`${path.join(__dirname, '/assets/replayScriptWin.ps1')} "obs64" "{f10}"`);
-//     // await ps.addArgument('"obs64"');
-//     // await ps.addArgument('"{f10}"');
-//     await ps.invoke();
-//     console.log('sended');
-//     // replayScriptWin.ps1 "obs64" "{f10}"
-//   } catch (error) {
-//     console.log('startReplay');
-//     console.error(error);
-//     ps.dispose();
-//   }
-// }

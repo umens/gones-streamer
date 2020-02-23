@@ -32,8 +32,8 @@
             [status]="fullName.dirty ? (fullName.invalid  ? 'danger' : 'success') : ''"
             [attr.aria-invalid]="fullName.invalid && fullName.touched ? true : null"
             placeholder="Full name">
-    <ngx-validation-message label="Full name" [showRequired]="fullName?.errors?.required && fullName.touched">
-    </ngx-validation-message>
+    <app-validation-message label="Full name" [showRequired]="fullName?.errors?.required && fullName.touched">
+    </app-validation-message>
   </div>
 
   <div class="form-control-group">
@@ -46,8 +46,8 @@
             [status]="email.dirty ? (email.invalid  ? 'danger' : 'success') : ''"
             [attr.aria-invalid]="email.invalid && email.touched ? true : null"
             placeholder="Email address">
-    <ngx-validation-message label="Email address" [showPattern]="email?.hasError('pattern') && email.touched"
-      [showRequired]="email?.errors?.required && email.touched"></ngx-validation-message>
+    <app-validation-message label="Email address" [showPattern]="email?.hasError('pattern') && email.touched"
+      [showRequired]="email?.errors?.required && email.touched"></app-validation-message>
   </div>
 
   <div class="form-control-group">
@@ -60,11 +60,11 @@
             type="password"
             [status]="password.dirty ? (password.invalid  ? 'danger' : 'success') : ''"
             placeholder="Password">
-    <ngx-validation-message label="Password" [showMinLength]="password?.hasError('minlength') && password.touched"
+    <app-validation-message label="Password" [showMinLength]="password?.hasError('minlength') && password.touched"
       [showMaxLength]="password?.hasError('maxlength') && password.touched"
       [showRequired]="password?.errors?.required && password.touched"
       [minLength]="minLength"
-      [maxLength]="maxLength"></ngx-validation-message>
+      [maxLength]="maxLength"></app-validation-message>
   </div>
 
   <div class="form-control-group">
@@ -77,12 +77,12 @@
             type="password"
             [status]="confirmPassword.dirty ? (confirmPassword.invalid || password.value != confirmPassword.value  ? 'danger' : 'success') : ''"
             placeholder="Password">
-    <ngx-validation-message label="Confirm Password"
+    <app-validation-message label="Confirm Password"
       [showMinLength]="confirmPassword?.hasError('minlength') && confirmPassword.touched"
       [showMaxLength]="confirmPassword?.hasError('maxlength') && confirmPassword.touched"
       [showRequired]="confirmPassword?.errors?.required && confirmPassword.touched"
       [minLength]="minLength"
-      [maxLength]="maxLength"></ngx-validation-message>
+      [maxLength]="maxLength"></app-validation-message>
     <p class="error-message" *ngIf="password.value != confirmPassword.value">
         Password and confirm password does not match!
     </p>

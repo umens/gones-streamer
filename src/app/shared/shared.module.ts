@@ -1,24 +1,23 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ArrayFilterPipe } from './pipes/array-filter.pipe';
-import { BytesPipe } from './pipes/bytes.pipe';
-import { DurationPipe } from './pipes/duration.pipe';
-import { SearchPipe } from './pipes/search.pipe';
-import { SlugifyPipe } from './pipes/slugify.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
-import { WebsocketService } from './services/websocket.service';
-import { ObsWebsocketService } from './services/obs-websocket.service';
+import { InPlaceEditComponent } from './components/';
+import { WebviewDirective, GradiantDirective, AdapteTextColorToBgDirective, FileUploadDirective } from './directives/';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ArrayFilterPipe, BytesPipe, DurationPipe, SearchPipe, SlugifyPipe, SafePipe } from './pipes';
+
 import { ViewModeDirective } from './components/in-place-edit/directives/view-mode.directive';
 import { EditModeDirective } from './components/in-place-edit/directives/edit-mode.directive';
-import { InPlaceEditComponent } from './components/in-place-edit/in-place-edit.component';
 import { EditableOnEventsDirective } from './components/in-place-edit/directives/editable-on-events.directive';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FocusableDirective } from './components//in-place-edit/directives/focusable.directive';
-import { GradiantDirective } from './directives/gradiant.directive';
-import { AdapteTextColorToBgDirective } from './directives/adapte-text-color-to-bg.directive';
-import { FileUploadDirective } from './directives/file-upload.directive';
-import { SafePipe } from '../shared/pipes/safe.pipe';
+import { FocusableDirective } from './components/in-place-edit/directives/focusable.directive';
+import { WebsocketService, ObsWebsocketService } from './services';
+import { NbCardModule, NbButtonModule } from '@nebular/theme';
+import { ThemeModule } from '../@theme/theme.module';
+import { AuthModule } from '../@auth/auth.module';
+import { ComponentsModule } from '../@components/components.module';
+import { NotFoundComponent } from './components/not-found/not-found.component';
 
 @NgModule({
   declarations: [
@@ -36,9 +35,18 @@ import { SafePipe } from '../shared/pipes/safe.pipe';
     AdapteTextColorToBgDirective,
     FileUploadDirective,
     SafePipe,
+    WebviewDirective,
+    NotFoundComponent,
   ],
   imports: [
+    NbCardModule,
+    NbButtonModule,
     CommonModule,
+    TranslateModule,
+    FormsModule,
+    ThemeModule,
+    AuthModule,
+    ComponentsModule,
   ],
   providers: [
     WebsocketService,
@@ -61,6 +69,9 @@ import { SafePipe } from '../shared/pipes/safe.pipe';
     AdapteTextColorToBgDirective,
     FileUploadDirective,
     SafePipe,
+    TranslateModule,
+    WebviewDirective,
+    FormsModule
   ]
 })
-export class SharedModule { }
+export class SharedModule {}

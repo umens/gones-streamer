@@ -23,13 +23,13 @@ import { RoleProvider } from './role.provider';
 import { NbRoleProvider, NbSecurityModule } from '@nebular/security';
 
 import {
-  NgxLoginComponent,
-  NgxAuthComponent,
-  NgxAuthBlockComponent,
-  NgxLogoutComponent,
-  NgxRegisterComponent,
-  NgxRequestPasswordComponent,
-  NgxResetPasswordComponent,
+  AppLoginComponent,
+  AppAuthComponent,
+  AppAuthBlockComponent,
+  AppLogoutComponent,
+  AppRegisterComponent,
+  AppRequestPasswordComponent,
+  AppResetPasswordComponent,
 } from './components';
 
 import {
@@ -49,13 +49,13 @@ import { authSettings } from './access.settings';
 const GUARDS = [AuthGuard, AdminGuard];
 const PIPES = [AuthPipe];
 const COMPONENTS = [
-  NgxLoginComponent,
-  NgxAuthComponent,
-  NgxLogoutComponent,
-  NgxRegisterComponent,
-  NgxRequestPasswordComponent,
-  NgxResetPasswordComponent,
-  NgxAuthBlockComponent,
+  AppLoginComponent,
+  AppAuthComponent,
+  AppLogoutComponent,
+  AppRegisterComponent,
+  AppRequestPasswordComponent,
+  AppResetPasswordComponent,
+  AppAuthBlockComponent,
 ];
 
 const NB_MODULES = [

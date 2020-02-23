@@ -6,7 +6,7 @@
 
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'ngxCapitalize' })
+@Pipe({ name: 'appCapitalize' })
 export class CapitalizePipe implements PipeTransform {
 
   transform(input: string): string {

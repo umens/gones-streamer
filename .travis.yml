@@ -1,35 +1,21 @@
+os:
+  - linux
+  - osx
 language: node_js
-
 node_js:
-  - "10"
-
-addons:
-  chrome: stable
-
-branches:
-  only:
-  - master
-
-cache:
-  yarn
-  # directories:
-  #   - ./node_modules
-
+  - '12'
+  - '10'
+dist: xenial
+sudo: required
+services:
+  - xvfb
 before_script:
-  - npm install -g codecov
-  - npm install -g github-release-notes
-
+  - export DISPLAY=:99.0
+install:
+  - npm set progress=false
+  - npm install
 script:
-  - yarn run lint
-  - yarn run test_headless
-  - yarn run e2e_headless
-  - yarn build --prod --aot --progress=false --base-href "/gones-streamer/"
-
-after_success:
-  - yarn run docs:ci
-  - yarn run deploy
-  - codecov
-  - yarn run changelog
-  - chmod ugo+x travis-push.sh
-  - ./travis-push.sh
-  - yarn run release
+  - ng lint
+  - npm run test
+  - npm run e2e
+  - npm run build

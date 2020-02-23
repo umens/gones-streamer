@@ -1,7 +1,7 @@
-export const environment = {
+export const AppConfig = {
   production: true,
-  hmr: false,
-  apiUrl: 'http://localhost:3001/api',
+  environment: 'PROD',
+  apiUrl: 'https://streamer.malo-box.ovh/api',
   testUser: {
     token: {},
     email: '',

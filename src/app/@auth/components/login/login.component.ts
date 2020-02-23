@@ -18,12 +18,12 @@ import { EMAIL_PATTERN } from '../constants';
 import { InitUserService } from '../../../@theme/services/init-user.service';
 
 @Component({
-  selector: 'ngx-login',
+  selector: 'app-login',
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
-export class NgxLoginComponent implements OnInit {
+export class AppLoginComponent implements OnInit {
 
   minLength: number = this.getConfigValue('forms.validation.password.minLength');
   maxLength: number = this.getConfigValue('forms.validation.password.maxLength');

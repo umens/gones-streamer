@@ -13,7 +13,7 @@ import { Subject } from 'rxjs';
 import { UserStore } from '../../../@core/stores/user.store';
 
 @Component({
-  selector: 'ngx-header',
+  selector: 'app-header',
   styleUrls: ['./header.component.scss'],
   templateUrl: './header.component.html',
 })
@@ -55,7 +55,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   getMenuItems() {
-    const userLink = this.user ?  '/pages/users/current/' : '';
+    const userLink = this.user ?  '/users/current/' : '';
     return [
       { title: 'Profile', link: userLink, queryParams: { profile: true } },
       { title: 'Log out', link: '/auth/logout' },

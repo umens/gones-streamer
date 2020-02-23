@@ -2,7 +2,7 @@ import { Directive, HostListener } from '@angular/core';
 import { InPlaceEditComponent } from '../in-place-edit.component';
 
 @Directive({
-  selector: '[ngxEditableOnEvents]'
+  selector: '[appEditableOnEvents]'
 })
 export class EditableOnEventsDirective {
 

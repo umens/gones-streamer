@@ -1,7 +1,7 @@
 import { Directive, ElementRef, AfterViewInit } from '@angular/core';
 
 @Directive({
-  selector: '[ngxFocusable]'
+  selector: '[appFocusable]'
 })
 export class FocusableDirective implements AfterViewInit {
 

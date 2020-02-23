@@ -1,25 +1,35 @@
 {
-  "appId": "gones.gones-streamer",
-  "productName": "gones-streamer",
+  "appId": "com.gones.streamer",
+  "productName": "Gones Streamer",
   "directories": {
     "output": "release/"
   },
-    "files": [
-        "**/*",
-        "!**/*.ts",
-        "!*.code-workspace",
-        "!LICENSE.md",
-        "!package.json",
-        "!package-lock.json",
-        "!src/",
-        "!e2e/",
-        "!hooks/",
-        "!angular.json",
-        "!_config.yml",
-        "!karma.conf.js",
-        "!tsconfig.json",
-        "!tslint.json"
-    ],
+  "extraResources": [
+    "appDatas",
+    "assets"
+  ],
+  "files": [
+    "**/*",
+    "!**/*.ts",
+    "!*.code-workspace",
+    "!LICENSE.md",
+    "!package.json",
+    "!package-lock.json",
+    "!yarn.lock",
+    "!yarn-error.log",
+    "!src/",
+    "!e2e/",
+    "!hooks/",
+    "!appDatas/",
+    "!assets/",
+    "!server/",
+    "!release/",
+    "!angular.json",
+    "!_config.yml",
+    "!karma.conf.js",
+    "!tsconfig.json",
+    "!tslint.json"
+  ],
   "win": {
     "icon": "dist/assets/logos/logo.png",
     "target": [
@@ -35,14 +45,10 @@
   },
   "mac": {
     "icon": "dist",
-    "target": [
-      "dmg"
-    ]
+    "target": ["dmg"]
   },
   "linux": {
     "icon": "dist",
-    "target": [
-      "AppImage"
-    ]
+    "target": ["AppImage"]
   }
 }

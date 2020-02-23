@@ -11,12 +11,12 @@ import { getDeepFromObject } from '../../helpers';
 import { EMAIL_PATTERN } from '../constants';
 
 @Component({
-  selector: 'ngx-register',
+  selector: 'app-register',
   styleUrls: ['./register.component.scss'],
   templateUrl: './register.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NgxRegisterComponent implements OnInit {
+export class AppRegisterComponent implements OnInit {
 
   minLength: number = this.getConfigValue('forms.validation.password.minLength');
   maxLength: number = this.getConfigValue('forms.validation.password.maxLength');

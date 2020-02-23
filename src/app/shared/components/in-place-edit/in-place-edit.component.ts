@@ -6,7 +6,7 @@ import { take, filter, switchMapTo } from 'rxjs/operators';
 import { untilDestroyed } from 'ngx-take-until-destroy';
 
 @Component({
-  selector: 'ngx-in-place-edit',
+  selector: 'app-in-place-edit',
   template: `
     <ng-container *ngTemplateOutlet="currentView"></ng-container>
   `,

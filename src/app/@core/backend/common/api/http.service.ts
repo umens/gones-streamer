@@ -7,7 +7,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
+import { AppConfig } from '../../../../../environments/environment';
 import { DataSource } from 'ng2-smart-table/lib/lib/data-source/data-source';
 import { ServerDataSource } from 'ng2-smart-table';
 
@@ -15,7 +15,7 @@ import { ServerDataSource } from 'ng2-smart-table';
 export class HttpService {
 
   get apiUrl(): string {
-    return environment.apiUrl;
+    return AppConfig.apiUrl;
   }
 
   constructor(private http: HttpClient) {}

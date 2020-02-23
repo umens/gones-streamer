@@ -10,10 +10,10 @@ import { NB_AUTH_OPTIONS, NbAuthService, NbAuthResult } from '@nebular/auth';
 import { getDeepFromObject } from '../../helpers';
 
 @Component({
-  selector: 'ngx-logout',
+  selector: 'app-logout',
   templateUrl: './logout.component.html',
 })
-export class NgxLogoutComponent implements OnInit {
+export class AppLogoutComponent implements OnInit {
 
   redirectDelay: number = this.getConfigValue('forms.logout.redirectDelay');
   strategy: string = this.getConfigValue('forms.logout.strategy');

@@ -1,35 +1,34 @@
-/*
- * Copyright (c) Akveo 2019. All Rights Reserved.
- * Licensed under the Single Application / Multi Application License.
- * See LICENSE_SINGLE_APP / LICENSE_MULTI_APP in the 'docs' folder for license information on type of purchased license.
- */
+import 'reflect-metadata';
+import '../polyfills';
+
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule, Injector, APP_INITIALIZER } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
-import { CoreModule } from './@core/core.module';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { CoreModule } from './core/core.module';
+import { CoreModule as NebularCoreModule } from './@core/core.module';
+
+import { AppRoutingModule } from './app-routing.module';
+
+// NG Translate
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+import { NbSidebarModule, NbMenuModule, NbToastrModule, NbGlobalPhysicalPosition } from '@nebular/theme';
 
 import { AppComponent } from './app.component';
-import { AppRoutingModule } from './app-routing.module';
-import { ThemeModule } from './@theme/theme.module';
+import { StreamerModule } from './streamer/streamer.module';
 import { AuthModule } from './@auth/auth.module';
-import { InitUserService } from './@theme/services/init-user.service';
-
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
-import { NgxElectronModule } from 'ngx-electron';
-
-import {
-  // NbChatModule,
-  // NbDatepickerModule,
-  // NbDialogModule,
-  NbMenuModule,
-  NbSidebarModule,
-  NbToastrModule,
-  // NbWindowModule,
-} from '@nebular/theme';
+import { ThemeModule } from './@theme/theme.module';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
-import { UsersModule } from './pages/users/users.module';
-import { PagesModule } from './pages/pages.module';
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import { InitUserService } from './@theme/services/init-user.service';
+import { UsersModule } from './users/users.module';
+
+// AoT requires an exported function for factories
+export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 export function init_app(injector: Injector) {
   return () =>
@@ -47,7 +46,6 @@ export function init_app(injector: Injector) {
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    AppRoutingModule,
 
     ThemeModule.forRoot(),
     AuthModule.forRoot(),
@@ -57,16 +55,28 @@ export function init_app(injector: Injector) {
     // NbDatepickerModule.forRoot(),
     // NbDialogModule.forRoot(),
     // NbWindowModule.forRoot(),
-    NbToastrModule.forRoot(),
+    NbToastrModule.forRoot({
+      position: NbGlobalPhysicalPosition.BOTTOM_RIGHT,
+    }),
     // NbChatModule.forRoot({
     //   messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
     // }),
-    CoreModule.forRoot(),
+    NebularCoreModule.forRoot(),
     NbEvaIconsModule,
     SweetAlert2Module.forRoot(),
-    NgxElectronModule,
+
+    CoreModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
+    }),
+
     UsersModule,
-    PagesModule,
+    StreamerModule,
+    AppRoutingModule,
   ],
   bootstrap: [AppComponent],
   providers: [
@@ -78,5 +88,4 @@ export function init_app(injector: Injector) {
     },
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

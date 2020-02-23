@@ -11,12 +11,12 @@ import { getDeepFromObject } from '../../helpers';
 import { EMAIL_PATTERN } from '../constants';
 
 @Component({
-  selector: 'ngx-request-password-page',
+  selector: 'app-request-password-page',
   styleUrls: ['./request-password.component.scss'],
   templateUrl: './request-password.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NgxRequestPasswordComponent implements OnInit {
+export class AppRequestPasswordComponent implements OnInit {
   redirectDelay: number = this.getConfigValue('forms.requestPassword.redirectDelay');
   showMessages: any = this.getConfigValue('forms.requestPassword.showMessages');
   strategy: string = this.getConfigValue('forms.requestPassword.strategy');

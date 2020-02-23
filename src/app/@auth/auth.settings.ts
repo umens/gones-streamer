@@ -5,7 +5,7 @@
  */
 
 import { NbPasswordAuthStrategy } from '@nebular/auth';
-import { environment } from '../../environments/environment';
+import { AppConfig } from '../../environments/environment';
 
 export const socialLinks = [
   // {
@@ -29,7 +29,7 @@ export const authOptions = {
   strategies: [
     NbPasswordAuthStrategy.setup({
       name: 'email',
-      baseEndpoint: environment.apiUrl,
+      baseEndpoint: AppConfig.apiUrl,
       token: {
         key: 'token',
       },
