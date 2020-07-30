@@ -1,8 +1,0 @@
-<component name="CopyrightManager">
-  <settings>
-    <module2copyright>
-      <element module="All" copyright="bundle-node" />
-      <element module="project" copyright="bundle-node" />
-    </module2copyright>
-  </settings>
-</component>

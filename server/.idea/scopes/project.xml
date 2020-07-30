@@ -1,3 +1,0 @@
-<component name="DependencyValidationManager">
-  <scope name="project" pattern="file[bundle-node]:src//*||file[bundle-node]:config//*" />
-</component>
