@@ -1,4 +1,4 @@
-// /// <reference types="react-scripts" />
+/// <reference types="react-scripts" />
 
 // import * as Electron from 'electron';
 // export interface ElectronWindow extends Window {

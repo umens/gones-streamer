@@ -31,7 +31,7 @@ export class IpcService {
       throw new Error(`Unable to require renderer process`);
     }
     this.ipcRenderer = window.ipcRenderer;
-  }  
+  }
 
   // private initializeIpcRenderer() {
   //   if (!window || !window.ipcRenderer) {
