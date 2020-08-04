@@ -1,4 +1,4 @@
 import { Settings } from './Settings';
-import { Dashboard } from './Dashboard';
+import { Cockpit } from './Cockpit';
 
-export { Settings, Dashboard };
+export { Settings, Cockpit };
