@@ -18,11 +18,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "downlevelIteration": true,
     "jsx": "react"
   },
   "include": [
     "src",
     "common.d.ts",
-    "shared"
+    // "shared"
   ]
 }

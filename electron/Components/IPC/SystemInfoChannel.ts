@@ -1,6 +1,6 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest } from "../../../shared/IpcRequest";
+import { IpcRequest,  } from "../../../src/Models";
 import { exec } from "child_process";
 
 export class SystemInfoChannel implements IpcChannelInterface {

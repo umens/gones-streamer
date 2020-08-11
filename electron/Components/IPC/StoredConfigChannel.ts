@@ -1,7 +1,6 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest } from "../../../shared/IpcRequest";
-import { StoreType, Quarter, TeamPossession } from "../../../shared";
+import { IpcRequest, StoreType, Quarter, TeamPossession } from "../../../src/Models";
 import * as Store from 'electron-store';
 
 export class StoredConfigChannel implements IpcChannelInterface {
@@ -17,7 +16,7 @@ export class StoredConfigChannel implements IpcChannelInterface {
       if (!request.responseChannel) {
         request.responseChannel = `${this.getName()}_response`;
       }
-      const GameStatus = await this.store.get("GameStatus", {
+      const GameStatut = await this.store.get("GameStatut", {
         AwayTeam: {
           city: 'Ville Equipe Exterieur',
           color: '#612323',
@@ -44,11 +43,11 @@ export class StoredConfigChannel implements IpcChannelInterface {
       const LiveSettings = await this.store.get("LiveSettings", {
         bitrate: 6000,
         buffer: 15,
-        streamKey: null
+        streamKey: ''
       });
       const BackgroundImage = await this.store.get("BackgroundImage", '');
       let storedConfig: StoreType = {
-        GameStatus,
+        GameStatut,
         LiveSettings,
         BackgroundImage
       };

@@ -1,17 +1,20 @@
 // import { autoUpdater } from "electron-updater";
 
 import { BrowserWindowConstructorOptions, BrowserWindow } from "electron";
-import { functions as log } from 'electron-log';
+import * as ElectronLog from 'electron-log';
 import * as path from 'path';
 
 export default class SplashScreen {
+
+  log: ElectronLog.LogFunctions;
 
   private config: BrowserWindowConstructorOptions | null = null;
   window: BrowserWindow | null = null;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor() {
-    log.verbose('[SplashScreen] Creating splashScreen');
+    this.log = ElectronLog.scope('SplashScreen');
+    this.log.verbose('Creating splashScreen');
     this.createSplashScreen();
     // const log = require("electron-log")
     // log.transports.file.level = "debug"
@@ -20,7 +23,7 @@ export default class SplashScreen {
   }
 
   private createSplashScreen() {
-    log.verbose('[SplashScreen] Creating splash Window config');
+    this.log.verbose('Creating splash Window config');
     this.config = {
       width: 500,
       height: 450,
@@ -28,7 +31,7 @@ export default class SplashScreen {
       frame: false,
       alwaysOnTop: true,
     };
-    log.info('%c[SplashScreen] Creating splash Window', 'color: blue');
+    this.log.info('%cCreating splash Window', 'color: blue');
     this.window = new BrowserWindow(this.config);
 
     this.window.on('closed', () => this.window = null);

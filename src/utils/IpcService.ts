@@ -1,5 +1,5 @@
 import { IpcRenderer } from 'electron';
-import { IpcRequest } from '../../shared/IpcRequest';
+import { IpcRequest } from '../Models';
 
 export class IpcService {
 
@@ -25,19 +25,11 @@ export class IpcService {
   }
 
   private initializeIpcRenderer() {
-    console.debug(window)
+    // console.debug(window)
     // if (!window || !window.process || !window.require) {
     if (!window || !window.ipcRenderer) {
       throw new Error(`Unable to require renderer process`);
     }
     this.ipcRenderer = window.ipcRenderer;
   }
-
-  // private initializeIpcRenderer() {
-  //   if (!window || !window.ipcRenderer) {
-  //     throw new Error(`Unable to require renderer process`);
-  //   }
-  //   // this.ipcRenderer = window.require('electron').ipcRenderer;
-  //   this.ipcRenderer = window.ipcRenderer
-  // }
 }

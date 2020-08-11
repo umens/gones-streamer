@@ -2,14 +2,14 @@
 import { ipcRenderer, IpcRenderer, contextBridge } from 'electron';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { functions, LogFunctions } from 'electron-log';
-import * as Store from 'electron-store';
+// import * as Store from 'electron-store';
 
 declare global {
   namespace NodeJS {
       interface  Global {
         ipcRenderer: IpcRenderer;
         log: LogFunctions;
-        store: Store;
+        // store: Store;
       }
   }
 }
@@ -17,7 +17,7 @@ declare global {
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
   global.log = functions
-  global.store = new Store()
+  // global.store = new Store()
 });
 
 // Expose protected methods that allow the renderer process to use
