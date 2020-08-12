@@ -2,7 +2,7 @@ import { Component } from "react";
 import OBSWebSocket from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType } from "../Models";
 import { IpcService } from "../utils/IpcService";
 
 const ipc = new IpcService();
@@ -30,6 +30,8 @@ type ObsRemoteState = {
   changeActiveCam: (name: string) => Promise<void>;
   updateLiveStatus: () => Promise<void>;
   updateTextProps: ({ props, value, homeTeam, bg }: { props: keyof Team & string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }) => Promise<void>;
+  updateSettings: (value: any) => Promise<void>;
+  setScore: (isHomeTeam: boolean, scoreType: ScoreType) => Promise<void>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -50,6 +52,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       changeActiveCam: this.changeActiveCam.bind(this),
       updateLiveStatus: this.updateLiveStatus.bind(this),
       updateTextProps: this.updateTextProps.bind(this),
+      updateSettings: this.updateSettings.bind(this),
+      setScore: this.setScore.bind(this),
     };
 
     obsWs.on('ConnectionClosed', async () => {
@@ -138,7 +142,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         AwayTeam,
         Options,
       }
-      const buffer = await (await obsWs.send('GetSourceSettings', { sourceName: 'Replay Video' })).sourceSettings as any;      
+      const buffer = await (await obsWs.send('GetSourceSettings', { sourceName: 'Replay Video' })).sourceSettings as any;
       const bitrate = +await ipc.send<string>('obs-settings', { params: { getter: true }});
       let LiveSettings: ILiveSettings = {
         bitrate,
@@ -153,6 +157,16 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
       };
       await this.setState({ store });
+    } catch (error) {
+
+    }
+  }
+
+  updateSettings = async (value: any): Promise<void> => {
+    try {
+      await obsWs.send('SetSourceSettings', { sourceName: 'Replay Video', sourceSettings: { duration: +value.buffer } });
+      await obsWs.send('SetStreamSettings', { type: 'rtmp_common', settings: { key: value.key }, save: true});
+      await ipc.send<void>('obs-settings', { params: { setter: true, bitrate: +value.bitrate }});
     } catch (error) {
 
     }
@@ -264,6 +278,17 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
     }
   }
+
+  
+  setScore = (isHomeTeam: boolean, scoreType: ScoreType) => {
+    try {
+      let store = this.state.store;
+      if()
+      store?.
+    } catch (error) {
+      
+    }
+  };
 
   disconnectObs = (): void => {
     obsWs.disconnect();

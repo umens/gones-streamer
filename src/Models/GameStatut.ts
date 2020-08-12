@@ -63,7 +63,7 @@ export enum SceneName {
   ScoreBackground = '* Score bg',
 }
 
-export enum Animation {
+export enum ScoreType {
   TOUCHDOWN = 'touchdown_animation',
   PAT = 'pat_animation',
   EXTRAPOINT = 'extrapoint_animation',

@@ -1,9 +1,9 @@
 import React from "react";
-import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown } from 'antd';
+import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm } from 'antd';
 import { IpcService } from "../../utils/IpcService";
 import { StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, Team } from "../../Components";
+import { Scenes, IObsRemote, Team, ScoreTable } from "../../Components";
 import './Cockpit.css';
 
 const ipc: IpcService = new IpcService();
@@ -89,8 +89,25 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
             <PageHeader
               className="site-page-header"
               tags={this.props.ObsRemote.live ? 
-                <Tag icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } onClick={this.changeLiveStatus} color="processing">Running</Tag> 
-                : <Tag icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } onClick={this.changeLiveStatus} color="default">Not running</Tag> }
+                <Popconfirm
+                  title="Voulez vous vraiment arrêter le live"
+                  onConfirm={this.changeLiveStatus}
+                  okText="Oui"
+                  cancelText="Non"
+                  placement="right"
+                >
+                  <Tag icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } color="processing">Running</Tag>
+                </Popconfirm>
+                : <Popconfirm
+                  title="Voulez vous vraiment démarrer le live"
+                  onConfirm={this.changeLiveStatus}
+                  okText="Oui"
+                  cancelText="Non"
+                  placement="right"
+                >
+                  <Tag icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } color="default">Not running</Tag>
+                </Popconfirm> 
+              }
               title="Stream is"
               extra={[
                 <Dropdown key="menu" overlay={menu}>
@@ -140,6 +157,19 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
           </Col>
           <Col span={16}>
             <Card loading={this.state.loadingSettings}>
+              <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
+                <Col span={24}>                  
+                  {/* <Scoreboard ObsRemote={this.props.ObsRemote} /> */}
+                </Col>
+              </Row>
+              <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
+                <Col span={12}>
+                  <ScoreTable key="homeTeamtable" ObsRemote={this.props.ObsRemote} isHomeTeam={true} />
+                </Col>
+                <Col span={12}>
+                  <ScoreTable key="awayTeamtable" ObsRemote={this.props.ObsRemote} isHomeTeam={false} />
+                </Col>
+              </Row>
             </Card>
           </Col>
         </Row>

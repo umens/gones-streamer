@@ -1,6 +1,6 @@
 import React from "react";
 import { IObsRemote } from "../../Components";
-import { Row, Col, message, Form, Input, Button } from "antd";
+import { Row, Col, message, Form, Input, Button, Select, Card } from "antd";
 import ReactDropzone from "react-dropzone";
 import { IpcService } from "../../utils/IpcService";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -13,6 +13,7 @@ type SettingsProps = {
 };
 type SettingsState = {
   loadingFile: boolean;
+  sendingForm: boolean;
 };
 class Settings extends React.Component<SettingsProps, SettingsState> {
   
@@ -22,6 +23,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     super(props);
     this.state = {
       loadingFile: false,
+      sendingForm: false,
     };
   }
 
@@ -50,8 +52,15 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     }
   };
 
-  onFinish = (values: any) => {
-    console.log(values);
+  onFinish = async (values: any) => {
+    try {
+      await this.setState({ sendingForm: true });
+      await this.props.ObsRemote.updateSettings(values);
+      await this.setState({ sendingForm: false });      
+      message.success({ content: 'Settings updated !', key: 'settingsupdated' });
+    } catch (error) {
+      await this.setState({ sendingForm: false });
+    }
   };
 
   render() {
@@ -66,51 +75,61 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     return (
       <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
         <Col span={10}>
-          <Form
-            layout='vertical'
-            ref={this.formRef}
-            name="control-ref" onFinish={this.onFinish}
-          >
-            {/* <Form.Item label="Form Layout" name="layout">
-              <Radio.Group value={formLayout}>
-                <Radio.Button value="horizontal">Horizontal</Radio.Button>
-                <Radio.Button value="vertical">Vertical</Radio.Button>
-                <Radio.Button value="inline">Inline</Radio.Button>
-              </Radio.Group>
-            </Form.Item> */}
-            <Form.Item label="Clé">
-              <Input placeholder="Clé de stream" defaultValue={this.props.ObsRemote.store?.LiveSettings?.streamKey}/>
-            </Form.Item>
-            <Form.Item label="Bitrate">
-              <Input type="number" min={0} max={20000} step={500} addonAfter='Kbps' defaultValue={this.props.ObsRemote.store?.LiveSettings?.bitrate} placeholder="Bitrate en Kbps" />
-            </Form.Item>
-            <Form.Item label="Buffer (durée des ralentis)">
-              <Input type="number"  min={0} max={50000} step={500} addonAfter='ms' placeholder="Durée en ms" defaultValue={this.props.ObsRemote.store?.LiveSettings?.buffer} />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
+          <Card title="Paramètres">
+            <Form
+              layout='vertical'
+              ref={this.formRef}
+              name="control-ref"
+              onFinish={this.onFinish}
+              initialValues={{
+                key: this.props.ObsRemote.store?.LiveSettings?.streamKey,
+                service: 'youtube',
+                buffer: this.props.ObsRemote.store?.LiveSettings?.buffer,
+                bitrate: this.props.ObsRemote.store?.LiveSettings?.bitrate,
+              }}
+            >
+              <Form.Item label="Service de streaming" name="service">
+                <Select style={{ width: '100%' }}>
+                  <Select.Option value="youtube">Youtube</Select.Option>
+                  <Select.Option value="facebook" disabled>Facebook</Select.Option>
+                </Select>
+              </Form.Item>
+              <Form.Item name="key" label="Clé">
+                <Input placeholder="Clé de stream"/>
+              </Form.Item>
+              <Form.Item name="bitrate" label="Bitrate">
+                <Input type="number" min={0} max={20000} step={500} addonAfter='Kbps' placeholder="Bitrate en Kbps" />
+              </Form.Item>
+              <Form.Item name="buffer" label="Buffer (durée des ralentis)">
+                <Input type="number"  min={0} max={50000} step={500} addonAfter='ms' placeholder="Durée en ms" />
+              </Form.Item>
+              <Form.Item>
+                <Button loading={this.state.sendingForm} type="primary" htmlType="submit">
+                  Envoyer
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
         </Col>
         <Col span={14}>
-          <ReactDropzone onDrop={this.onChangeHandler}>
-            {({getRootProps, getInputProps}: any) => (
-              <section className="container">
-                <span className="avatar-uploader ant-upload-picture-card-wrapper">
-                  <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', style: { width: '100%', height: 'auto' }})}>
-                    <input {...getInputProps({ multiple: false })} />
-                    <span tabIndex={0} className="ant-upload" role="button">
-                      <div>
-                        {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.store?.BackgroundImage} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
-                      </div>
-                    </span>
-                  </div>
-                </span>
-              </section>
-            )}
-          </ReactDropzone>
+          <Card title="Image d'arrière plan">
+            <ReactDropzone onDrop={this.onChangeHandler}>
+              {({getRootProps, getInputProps}: any) => (
+                <section className="container">
+                  <span className="avatar-uploader ant-upload-picture-card-wrapper">
+                    <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', style: { width: '100%', height: 'auto' }})}>
+                      <input {...getInputProps({ multiple: false })} />
+                      <span tabIndex={0} className="ant-upload" role="button">
+                        <div>
+                          {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.store?.BackgroundImage} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                        </div>
+                      </span>
+                    </div>
+                  </span>
+                </section>
+              )}
+            </ReactDropzone>
+          </Card>
         </Col>
       </Row>
     );

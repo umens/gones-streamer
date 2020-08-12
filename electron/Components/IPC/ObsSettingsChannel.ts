@@ -29,7 +29,7 @@ export class ObsSettingsChannel implements IpcChannelInterface {
         streamSettingsOBS.bitrate = request.params!['bitrate'];
         await fs.writeFile(
           join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/streamEncoder.json'),
-          JSON.stringify(streamSettingsOBS, null, 2)
+          JSON.stringify(streamSettingsOBS, null, 2),
         );
         event.sender.send(request.responseChannel, true);
       } else {

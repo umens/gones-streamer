@@ -2377,7 +2377,7 @@
                 "audio_device_id": "Microphone interne (Conexant ISST Audio):",
                 "deactivate_when_not_showing": false,
                 "directory": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles",
-                "duration": 11000,
+                "duration": 15000,
                 "end_action": 0,
                 "last_video_device_id": "HP HD Camera:\\\\?\\usb#22vid_04ca&pid_7063&mi_00#226&2f7bc114&0&0000#22{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",
                 "load_switch_scene": "Replay",
@@ -2451,7 +2451,7 @@
             "push-to-talk-delay": 0,
             "settings": {
                 "directory": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles",
-                "duration": 11000,
+                "duration": 15000,
                 "end_action": 0,
                 "load_switch_scene": "Replay",
                 "next_scene": "Live",
