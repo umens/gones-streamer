@@ -173,7 +173,9 @@ export default class Main {
       .then((name: any) => this.log.verbose(`Added Extension:  ${name}`))
       .catch((err: any) => this.log.verbose('An error occurred: ', err));
 
-      this.mainWindow.webContents.openDevTools();
+      this.mainWindow.webContents.once('dom-ready', () => {
+        this.mainWindow && this.mainWindow.webContents.openDevTools()
+      });
     }
 
     this.mainWindow.webContents.on('did-finish-load', () => {

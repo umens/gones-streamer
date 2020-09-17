@@ -3,7 +3,7 @@ import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Drop
 import { IpcService } from "../../utils/IpcService";
 import { StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, Team, ScoreTable } from "../../Components";
+import { Scenes, IObsRemote, Team, ScoreTable, GameControl } from "../../Components";
 import './Cockpit.css';
 
 const ipc: IpcService = new IpcService();
@@ -163,6 +163,11 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                 </Col>
               </Row>
               <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
+                <Col span={24}>                  
+                  <GameControl ObsRemote={this.props.ObsRemote} />
+                </Col>
+              </Row>
+              <Row gutter={[16, 0]}>
                 <Col span={12}>
                   <ScoreTable key="homeTeamtable" ObsRemote={this.props.ObsRemote} isHomeTeam={true} />
                 </Col>

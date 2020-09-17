@@ -19,7 +19,7 @@ type ObsRemoteState = {
   scenes: {
     messageId: string;
     status: "ok";
-    "current-scene": string;
+    "current-scene": string | null;
     scenes: OBSWebSocket.Scene[];
   } | null;
   store: StoreType | null;
@@ -31,7 +31,10 @@ type ObsRemoteState = {
   updateLiveStatus: () => Promise<void>;
   updateTextProps: ({ props, value, homeTeam, bg }: { props: keyof Team & string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }) => Promise<void>;
   updateSettings: (value: any) => Promise<void>;
-  setScore: (isHomeTeam: boolean, scoreType: ScoreType) => Promise<void>;
+  setScore: ({ isHomeTeam, scoreType, withAnimation }: { isHomeTeam: boolean; scoreType: ScoreType; withAnimation?: boolean; }) => Promise<void>;
+  changePossession: () => Promise<void>;
+  updateGameEventProps: ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession; }) => Promise<void>;
+  startReplay: () => Promise<void>;  
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -54,10 +57,28 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       updateTextProps: this.updateTextProps.bind(this),
       updateSettings: this.updateSettings.bind(this),
       setScore: this.setScore.bind(this),
+      changePossession: this.changePossession.bind(this),
+      updateGameEventProps: this.updateGameEventProps.bind(this),
+      startReplay: this.startReplay.bind(this),
     };
 
     obsWs.on('ConnectionClosed', async () => {
-      await this.setState({ connected2Obs: false });
+      try {
+        await this.setState({ connected2Obs: false });
+      } catch (error) {
+        
+      }
+    });
+    
+
+    obsWs.on('SwitchScenes', async (data) => {
+      try {
+        if(Object.values(SceneName).includes(data["scene-name"] as SceneName)) {
+          await this.changeActiveScene(data["scene-name"] as SceneName);
+        }
+      } catch (error) {
+        
+      }
     });
   }
 
@@ -76,6 +97,129 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       await this.disconnectObs();
     } catch (error) {
 
+    }
+  }
+
+  workOnEvent(event: any): void {
+    // tslint:disable-next-line: no-console
+    console.debug(event);
+    switch (event['update-type']) {
+      case 'SwitchScenes':
+        // if (event['scene-name'] === AvailableScenes.LIVE && this.replayPlaying) {
+        //   this.replayPlaying = false;
+        // }
+        // if (event['scene-name'] === AvailableScenes.REPLAY && !this.replayPlaying) {
+        //   this.replayPlaying = true;
+        // }
+        // if (this.scenes.find(scene => scene.name === event['scene-name']) !== undefined) {
+        //   this.scenes.find(scene => scene.active).active = false;
+        //   this.scenes.find(scene => scene.name === event['scene-name']).active = true;
+        // }
+        // // tslint:disable-next-line: no-string-literal
+        // // this.scenes.find(scene => scene.name === event['scene-name']).sources = event['sources'];
+        // // this.activeScene = event['scene-name'];
+        break;
+      case 'ScenesChanged':
+      case 'SceneCollectionChanged':
+      case 'SceneCollectionListChanged':
+      case 'SwitchTransition':
+      case 'TransitionListChanged':
+      case 'TransitionDurationChanged':
+      case 'ProfileChanged':
+      case 'ProfileListChanged':
+      case 'ProfileListChanged':
+        break;
+      case 'SceneItemVisibilityChanged':
+        // tslint:disable-next-line: max-line-length
+        // this.scenes.find(scene => scene.active).sources.find(source => source.name === event['item-name']).render = event['item-visible'];
+        break;
+      case 'StreamStatus':
+        // const streamStatus = new StreamStatus(event);
+        // // console.log(streamStatus);
+        // // const newData = [];
+        // this.streamTime = event['stream-timecode'];
+        // this.liveUpdateChartData.push({
+        //   value: [
+        //     new Date().toISOString(),
+        //     Math.round(streamStatus.cpuUsage),
+        //   ],
+        // });
+
+        // this.framesChartData[0].value = streamStatus.numDroppedFrames;
+        // this.framesChartData[1].value = streamStatus.numTotalFrames - streamStatus.numDroppedFrames;
+        // if (this.liveUpdateChartData.length > 50) {
+        //   this.liveUpdateChartData.shift();
+        // }
+        // // newData.push({ value: [new Date(), event['cpu-usage']] });
+        // this.liveUpdateChartData = [...this.liveUpdateChartData];
+        // this.framesChartData = [...this.framesChartData];
+        // this.isStreaming = streamStatus.streaming;
+        // // tslint:disable-next-line: no-string-literal
+        // // this.isStreaming = event['streaming'];
+        // // // tslint:disable-next-line: no-string-literal
+        // // this.isRecording = event['recording'];
+        // // this.streamLength = event['total-stream-time'];
+
+        // // // tslint:disable-next-line: no-string-literal
+        // // this.fps = event['fps'];
+        // // this.droppedFrames = event['num-dropped-frames'];
+        // // this.totalFrames = event['num-total-frames'];
+        // // // tslint:disable-next-line: no-string-literal
+        // // this.droppedFramesPercent = event['strain'];
+        // // this.transmittionSpeed = event['kbits-per-sec'];
+        // // this.transmittionSpeedB = event['bytes-per-sec'];
+        // // {
+        // //   bytes - per - sec: 63972
+        // //   fps: 30.000000300000007
+        // //   kbits - per - sec: 499
+        // //   num - dropped - frames: 1165
+        // //   num - total - frames: 1473
+        // //   preview - only: false
+        // //   recording: false
+        // //   strain: 1
+        // //   stream - timecode: "00:00:50.014"
+        // //   streaming: true
+        // //   total - stream - time: 50
+        // //   update - type: "StreamStatus"
+        // // }
+        break;
+
+      case 'TransitionBegin':
+        break;
+      case 'StudioModeSwitched':
+      case 'StreamStarting':
+      case 'StreamStopping':
+      case 'ReplayStarting':
+      case 'ReplayStarted':
+      case 'ReplayStopping':
+      case 'ReplayStopped':
+        // tslint:disable-next-line:no-console
+        // console.debug(event);
+        break;
+
+      case 'StreamStarted':
+        // this.isStreaming = true;
+
+        // // start replay buffer
+        // // this.obsWebsocket.StartReplayBuffer().catch((err: Error) => { console.error(err); });
+        break;
+
+      case 'StreamStopped':
+        // this.isStreaming = false;
+        // // reset charts datas
+        // this.liveUpdateChartData = [];
+        // this.framesChartData[0].value = 0;
+        // this.framesChartData[1].value = 0;
+        // this.framesChartData = [...this.framesChartData];
+        // // stop replay buffer
+        // // this.obsWebsocket.StopReplayBuffer().catch((err: Error) => { console.error(err); });
+        // this.obsWebsocket.setCurrentScene(AvailableScenes.STARTING).catch((err: Error) => { console.error(err); });
+        break;
+
+      default:
+        // tslint:disable-next-line:no-console
+        // console.debug(event);
+        break;
     }
   }
 
@@ -135,7 +279,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         flag: false,
         possession: TeamPossession.HOME,
         quarter: Quarter.ONE,
-        showScoreboard: false
+        showScoreboard: true
       }
       let GameStatut: IGameStatut = {
         HomeTeam,
@@ -164,7 +308,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   updateSettings = async (value: any): Promise<void> => {
     try {
-      await obsWs.send('SetSourceSettings', { sourceName: 'Replay Video', sourceSettings: { duration: +value.buffer } });
+      await obsWs.send('SetSourceSettings', { sourceName: 'Replay Video', sourceSettings: { duration: +value.buffer * 1000 } });
       await obsWs.send('SetStreamSettings', { type: 'rtmp_common', settings: { key: value.key }, save: true});
       await ipc.send<void>('obs-settings', { params: { setter: true, bitrate: +value.bitrate }});
     } catch (error) {
@@ -176,7 +320,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     try {
       await obsWs.send('SetCurrentScene', { "scene-name": name });
       let data = this.state.scenes;
-      data!["current-scene"] = name as string;
+      data!["current-scene"] = name.startsWith('*') ? null : name as string;
       await this.setState({ scenes: data });
     } catch (error) {
 
@@ -279,16 +423,102 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
 
-  
-  setScore = (isHomeTeam: boolean, scoreType: ScoreType) => {
+  updateGameEventProps = async ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession; }): Promise<void> => {
     try {
-      let store = this.state.store;
-      if()
-      store?.
+      let store = this.state.store!;
+      switch (props) {
+        case 'quarter':
+          store.GameStatut.Options.quarter = value as Quarter;
+          break;
+        case 'showScoreboard':
+          store.GameStatut.Options.showScoreboard = value as boolean;
+          await obsWs.send('SetSceneItemProperties', { item: 'scoreboard', visible: value as boolean, 'scene-name': SceneName.Live } as any);
+          break;
+        case 'flag':
+          store.GameStatut.Options.flag = value as boolean;
+          break;
+        case 'possession':
+          store.GameStatut.Options.possession = value as TeamPossession;
+          break;
+
+        default:
+          break;
+      }
+      await this.setState({ store });
+    } catch (error) {
+
+    }
+  }
+
+  
+  setScore = async ({ isHomeTeam, scoreType, withAnimation = false }: { isHomeTeam: boolean; scoreType: ScoreType; withAnimation?: boolean; }) => {
+    try {
+      let scoreAdded = 0;
+      switch (scoreType) {
+        case ScoreType.TOUCHDOWN:
+          scoreAdded = 6;
+          break;
+        case ScoreType.SAFETY:
+        case ScoreType.EXTRAPOINT:
+          scoreAdded = 2;
+          break;
+        case ScoreType.PAT:
+          scoreAdded = 1;
+          break;
+        case ScoreType.FIELDGOAL:
+          scoreAdded = 3;
+          break;
+      
+        default:
+          break;
+      }
+      let store = this.state.store!;
+      const scoreToDisplay = isHomeTeam ? store.GameStatut.HomeTeam.score + scoreAdded : store.GameStatut.AwayTeam.score + scoreAdded;
+      await this.updateTextProps({ props: 'score', value: scoreToDisplay, homeTeam: isHomeTeam });
+      if(withAnimation) {
+        await obsWs.send('SetSceneItemProperties', { item: scoreType, visible: true, 'scene-name': SceneName.Live } as any);
+        setTimeout(async () => {
+          await obsWs.send('SetSceneItemProperties', { item: scoreType, visible: false, 'scene-name': SceneName.Live } as any);
+        }, 5000);
+      }
     } catch (error) {
       
     }
   };
+
+  changePossession = async () => {
+    try {
+      let store = this.state.store!;
+      let value = TeamPossession.HOME;
+      if (store.GameStatut.Options.possession === TeamPossession.HOME) {
+        value = TeamPossession.AWAY;
+      } else if (store.GameStatut.Options.possession === TeamPossession.AWAY) {
+        value = TeamPossession.HOME;
+      }
+      await this.updateGameEventProps({ props: 'possession', value });
+    } catch (error) {
+      
+    }
+  }
+
+  /**
+   * @deprecated Waiting for obs-websocket to handle button click in plugin settings - https://github.com/Palakis/obs-websocket/issues/456
+   * temporary Fix : handling keydown event to save buffer then switch to Replay Scene
+   *
+   */
+  startReplay = async () => {
+    try {
+      if(this.state.scenes?.["current-scene"] !== SceneName.Replay) {
+        await obsWs.send('SaveReplayBuffer');
+        await this.changeActiveScene(SceneName.Replay);
+        setTimeout(async () => {
+          await this.changeActiveScene(SceneName.Live);
+        }, this.state.store?.LiveSettings.buffer);
+      }
+    } catch (error) {
+      
+    }
+  }
 
   disconnectObs = (): void => {
     obsWs.disconnect();

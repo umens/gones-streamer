@@ -84,7 +84,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
               initialValues={{
                 key: this.props.ObsRemote.store?.LiveSettings?.streamKey,
                 service: 'youtube',
-                buffer: this.props.ObsRemote.store?.LiveSettings?.buffer,
+                buffer: (this.props.ObsRemote.store?.LiveSettings?.buffer || 0) / 1000,
                 bitrate: this.props.ObsRemote.store?.LiveSettings?.bitrate,
               }}
             >
@@ -101,9 +101,9 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
                 <Input type="number" min={0} max={20000} step={500} addonAfter='Kbps' placeholder="Bitrate en Kbps" />
               </Form.Item>
               <Form.Item name="buffer" label="Buffer (durée des ralentis)">
-                <Input type="number"  min={0} max={50000} step={500} addonAfter='ms' placeholder="Durée en ms" />
+                <Input type="number" min={0} max={50} step={1} addonAfter='secondes' placeholder="Durée en secondes" />
               </Form.Item>
-              <Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
                 <Button loading={this.state.sendingForm} type="primary" htmlType="submit">
                   Envoyer
                 </Button>

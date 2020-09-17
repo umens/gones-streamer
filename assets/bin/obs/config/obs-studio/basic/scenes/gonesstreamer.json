@@ -1,6 +1,6 @@
 {
-    "current_program_scene": "Replay",
-    "current_scene": "Replay",
+    "current_program_scene": "Live",
+    "current_scene": "Live",
     "current_transition": "Coupure",
     "groups": [],
     "modules": {
@@ -230,7 +230,7 @@
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
-                "local_file": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles/Fieldgoal-C600FF.mov"
+                "local_file": "F:/Devs/gones-streamer/assets/appDatas/fieldgoal_animation.mov"
             },
             "sync": 0,
             "versioned_id": "ffmpeg_source",
@@ -323,7 +323,7 @@
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
-                "local_file": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles/Transfo-C600FF.mov"
+                "local_file": "F:/Devs/gones-streamer/assets/appDatas/extrapoint_animation.mov"
             },
             "sync": 0,
             "versioned_id": "ffmpeg_source",
@@ -384,7 +384,7 @@
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
-                "local_file": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles/Transfo-C600FF.mov",
+                "local_file": "F:/Devs/gones-streamer/assets/appDatas/pat_animation.mov",
                 "looping": false
             },
             "sync": 0,
@@ -721,7 +721,7 @@
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
-                "local_file": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles/Touchdown-C600FF.mov",
+                "local_file": "F:/Devs/gones-streamer/assets/appDatas/touchdown_animation.mov",
                 "looping": false
             },
             "sync": 0,
@@ -1065,7 +1065,7 @@
                 "fps_custom": false,
                 "height": 125,
                 "is_local_file": true,
-                "local_file": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles/scoreboard.html",
+                "local_file": "F:/Devs/gones-streamer/assets/appDatas/scoreboard.html",
                 "restart_when_active": false,
                 "shutdown": true,
                 "width": 1920
@@ -1112,7 +1112,7 @@
             "push-to-talk-delay": 0,
             "settings": {
                 "custom_size": false,
-                "id_counter": 13,
+                "id_counter": 15,
                 "items": [
                     {
                         "align": 5,
@@ -1237,7 +1237,7 @@
                             "y": 1080.0
                         },
                         "bounds_align": 0,
-                        "bounds_type": 2,
+                        "bounds_type": 1,
                         "crop_bottom": 0,
                         "crop_left": 0,
                         "crop_right": 0,
@@ -1266,7 +1266,7 @@
                             "y": 1080.0
                         },
                         "bounds_align": 0,
-                        "bounds_type": 2,
+                        "bounds_type": 1,
                         "crop_bottom": 0,
                         "crop_left": 0,
                         "crop_right": 0,
@@ -1922,7 +1922,7 @@
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
-                "file": "C:\\Users\\Ulysse\\Documents\\Projects\\gones-streamer\\appDatas\\assetsFiles\\bg.png"
+                "file": "F:\\Devs\\gones-streamer\\assets\\appDatas\\bg.png"
             },
             "sync": 0,
             "versioned_id": "image_source",
@@ -2302,7 +2302,7 @@
             "push-to-talk-delay": 0,
             "settings": {
                 "close_when_inactive": true,
-                "local_file": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles/Replay_instantReplay.mkv"
+                "local_file": "F:/Devs/gones-streamer/assets/appDatas/Replay instantReplay.mkv"
             },
             "sync": 0,
             "versioned_id": "ffmpeg_source",
@@ -2376,15 +2376,17 @@
                 "active": true,
                 "audio_device_id": "Microphone interne (Conexant ISST Audio):",
                 "deactivate_when_not_showing": false,
-                "directory": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles",
+                "directory": "F:/Devs/gones-streamer/assets/appDatas",
                 "duration": 15000,
                 "end_action": 0,
-                "last_video_device_id": "HP HD Camera:\\\\?\\usb#22vid_04ca&pid_7063&mi_00#226&2f7bc114&0&0000#22{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",
+                "file_format": "%CCYY-%MM-%DD %hh.%mm.%ss",
+                "last_video_device_id": "EpocCam Camera:\\\\?\\root#22media#220007#22{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\{4ee16166-f358-4f10-8889-93107806b7a7}",
                 "load_switch_scene": "Replay",
                 "next_scene": "Live",
+                "sound_trigger": false,
                 "source": "cam 1",
                 "use_custom_audio_device": false,
-                "video_device_id": "HP HD Camera:\\\\?\\usb#22vid_04ca&pid_7063&mi_00#226&2f7bc114&0&0000#22{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",
+                "video_device_id": "EpocCam Camera:\\\\?\\root#22media#220007#22{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\{4ee16166-f358-4f10-8889-93107806b7a7}",
                 "visibility_action": 0
             },
             "sync": 0,
@@ -2450,9 +2452,10 @@
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
-                "directory": "C:/Users/Ulysse/Documents/Projects/gones-streamer/appDatas/assetsFiles",
+                "directory": "F:/Devs/gones-streamer/assets/appDatas",
                 "duration": 15000,
                 "end_action": 0,
+                "file_format": "%CCYY-%MM-%DD %hh.%mm.%ss",
                 "load_switch_scene": "Replay",
                 "next_scene": "Live",
                 "source": "cam 1",

@@ -50,6 +50,7 @@ export enum Quarter {
   TWO = 2,
   THREE = 3,
   FOUR = 4,
+  OT = 5,
 };
 
 export enum SceneName {
@@ -61,6 +62,7 @@ export enum SceneName {
   Sponsors = 'Sponsors',
   Background = '* bg',
   ScoreBackground = '* Score bg',
+  Soundboard = '* Soundboard',
 }
 
 export enum ScoreType {
