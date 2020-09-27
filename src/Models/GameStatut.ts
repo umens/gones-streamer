@@ -46,10 +46,10 @@ export enum TeamPossession {
 };
 
 export enum Quarter {
-  ONE = 1,
-  TWO = 2,
-  THREE = 3,
-  FOUR = 4,
+  Q1 = 1,
+  Q2 = 2,
+  Q3 = 3,
+  Q4 = 4,
   OT = 5,
 };
 

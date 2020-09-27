@@ -499,7 +499,7 @@
                 "outline": false,
                 "read_from_file": false,
                 "source": "Home Score Text",
-                "text": "00",
+                "text": "14",
                 "valign": "center",
                 "vertical": false
             },
@@ -754,7 +754,7 @@
             "name": "Replay",
             "prev_ver": 419430408,
             "private_settings": {
-                "transition": "Coupure"
+                "transition": "Stinger - Replay"
             },
             "push-to-mute": false,
             "push-to-mute-delay": 0,
@@ -1105,14 +1105,16 @@
             "muted": false,
             "name": "Live",
             "prev_ver": 419430408,
-            "private_settings": {},
+            "private_settings": {
+                "transition": "Stinger - Live"
+            },
             "push-to-mute": false,
             "push-to-mute-delay": 0,
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
                 "custom_size": false,
-                "id_counter": 15,
+                "id_counter": 20,
                 "items": [
                     {
                         "align": 5,
@@ -2467,5 +2469,24 @@
         }
     ],
     "transition_duration": 300,
-    "transitions": []
+    "transitions": [
+        {
+            "id": "obs_stinger_transition",
+            "name": "Stinger - Replay",
+            "settings": {
+                "audio_monitoring": 2,
+                "path": "F:/Devs/gones-streamer/assets/appDatas/stinger_replay.webm",
+                "transition_point": 1000
+            }
+        },
+        {
+            "id": "obs_stinger_transition",
+            "name": "Stinger - Live",
+            "settings": {
+                "audio_monitoring": 2,
+                "path": "F:/Devs/gones-streamer/assets/appDatas/stinger_live.webm",
+                "transition_point": 1000
+            }
+        }
+    ]
 }

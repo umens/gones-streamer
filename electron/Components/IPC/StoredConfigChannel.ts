@@ -34,7 +34,7 @@ export class StoredConfigChannel implements IpcChannelInterface {
           timeout: 3
         },
         Options: {
-          quarter: Quarter.ONE,
+          quarter: Quarter.Q1,
           possession: TeamPossession.HOME,
           flag: false,
           showScoreboard: false,

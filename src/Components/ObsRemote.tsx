@@ -29,12 +29,13 @@ type ObsRemoteState = {
   changeActiveScene: (name: SceneName) => Promise<void>;
   changeActiveCam: (name: string) => Promise<void>;
   updateLiveStatus: () => Promise<void>;
-  updateTextProps: ({ props, value, homeTeam, bg }: { props: keyof Team & string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }) => Promise<void>;
+  updateTextProps: ({ props, value, homeTeam, bg }: { props: keyof Team & string | string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }) => Promise<void>;
   updateSettings: (value: any) => Promise<void>;
   setScore: ({ isHomeTeam, scoreType, withAnimation }: { isHomeTeam: boolean; scoreType: ScoreType; withAnimation?: boolean; }) => Promise<void>;
   changePossession: () => Promise<void>;
   updateGameEventProps: ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession; }) => Promise<void>;
-  startReplay: () => Promise<void>;  
+  startReplay: () => Promise<void>;
+  getScreenshot: () => Promise<{ img?: string }>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -60,6 +61,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       changePossession: this.changePossession.bind(this),
       updateGameEventProps: this.updateGameEventProps.bind(this),
       startReplay: this.startReplay.bind(this),
+      getScreenshot: this.getScreenshot.bind(this),
     };
 
     obsWs.on('ConnectionClosed', async () => {
@@ -126,7 +128,6 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       case 'TransitionListChanged':
       case 'TransitionDurationChanged':
       case 'ProfileChanged':
-      case 'ProfileListChanged':
       case 'ProfileListChanged':
         break;
       case 'SceneItemVisibilityChanged':
@@ -278,7 +279,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       let Options: GameEvent = {
         flag: false,
         possession: TeamPossession.HOME,
-        quarter: Quarter.ONE,
+        quarter: Quarter.Q1,
         showScoreboard: true
       }
       let GameStatut: IGameStatut = {
@@ -377,7 +378,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     });
   }
 
-  updateTextProps = async ({ props, value, homeTeam = false, bg = false }: { props: keyof Team & string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }): Promise<void> => {
+  updateTextProps = async ({ props, value, homeTeam = false, bg = false }: { props: keyof Team & string | string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }): Promise<void> => {
     try {
       let store = this.state.store!;
       switch (props) {
@@ -517,6 +518,16 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       }
     } catch (error) {
       
+    }
+  }
+
+  
+  getScreenshot = async (): Promise<{ img?: string }> => {
+    try {
+      let data = await obsWs.send('TakeSourceScreenshot', { sourceName: this.state.scenes?.["current-scene"]!, embedPictureFormat: 'jpeg', width: 450, height: 254 });
+      return data;
+    } catch (error) {
+      return {};
     }
   }
 

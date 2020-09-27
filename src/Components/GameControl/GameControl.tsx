@@ -1,5 +1,5 @@
 import React from "react";
-import { IObsRemote } from "../";
+import { IObsRemote, ScoreTable } from "../";
 import { Button, Row, Col, Radio } from "antd";
 import { EyeOutlined, EyeInvisibleOutlined, FlagOutlined, PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import './GameControl.css';
@@ -75,22 +75,22 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
     const scoreboardButton = this.props.ObsRemote.store?.GameStatut.Options.showScoreboard ? <Button onClick={this.toggleScoreboardVisibility} type="primary" block><EyeOutlined /> Scoreboard</Button> : <Button onClick={this.toggleScoreboardVisibility} block><EyeInvisibleOutlined /> Scoreboard</Button>;
 
     const options = [
-      { label: 'Q1', value: Quarter.ONE },
-      { label: 'Q2', value: Quarter.TWO },
-      { label: 'Q3', value: Quarter.THREE },
-      { label: 'Q4', value: Quarter.FOUR },
+      { label: 'Q1', value: Quarter.Q1 },
+      { label: 'Q2', value: Quarter.Q2 },
+      { label: 'Q3', value: Quarter.Q3 },
+      { label: 'Q4', value: Quarter.Q4 },
       { label: 'Overtime', value: Quarter.OT },
     ];
 
     return (
       <>        
-        <Row gutter={[16, 0]}>
+        <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
           <Col span={8}>
             <Radio.Group
               options={options}
               onChange={this.changeQuarter}
               value={this.props.ObsRemote.store?.GameStatut.Options.quarter}
-              defaultValue={Quarter.ONE}
+              defaultValue={Quarter.Q1}
               optionType="button"
               buttonStyle="solid"
             />
@@ -103,6 +103,14 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
           </Col>
           <Col span={5}>
             {flagButton}
+          </Col>
+        </Row>
+        <Row gutter={[16, 0]}>
+          <Col span={12}>
+            <ScoreTable key="homeTeamtable" ObsRemote={this.props.ObsRemote} isHomeTeam={true} />
+          </Col>
+          <Col span={12}>
+            <ScoreTable key="awayTeamtable" ObsRemote={this.props.ObsRemote} isHomeTeam={false} />
           </Col>
         </Row>
       </>

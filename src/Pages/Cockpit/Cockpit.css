@@ -1,3 +1,7 @@
 .site-page-header {
   border: 1px solid #303030;
 }
+
+.contentHeaderCockpit {
+  display: flex;
+}
