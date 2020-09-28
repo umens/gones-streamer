@@ -1,7 +1,7 @@
-import React, { ChangeEvent, createRef, SyntheticEvent } from "react";
-import { IObsRemote, Editable } from "../";
-import { Input, Avatar, InputNumber, Modal, Row, Col, Space, message, Button, Form } from "antd";
-import { LoadingOutlined, PlusOutlined, BgColorsOutlined } from '@ant-design/icons';
+import React, { ChangeEvent, SyntheticEvent } from "react";
+import { IObsRemote } from "../";
+import { Input, InputNumber, Modal, message, Form } from "antd";
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import classNames from "classnames";
 import './TeamScorboardEditable.css';
 import ReactDropzone from "react-dropzone";
@@ -63,7 +63,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
   };
 
   handleOk = async () => {
-    try {      
+    try {
       await this.setState({ confirmLoading: true });
       await this.props.ObsRemote.updateTextProps({ props: 'score', value: this.state.updatedScore, homeTeam: this.props.isHomeTeam});
       await this.setState({ visibleModal: false, confirmLoading: false });
@@ -73,7 +73,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
   };
 
   handleOkTeam = async () => {
-    try {      
+    try {
       await this.setState({ confirmLoadingTeam: true });
       await this.props.ObsRemote.updateTextProps({ props: 'name', value: this.state.updatedName, homeTeam: this.props.isHomeTeam});
       await this.props.ObsRemote.updateTextProps({ props: 'city', value: this.state.updatedCity, homeTeam: this.props.isHomeTeam});
@@ -82,15 +82,15 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
       await this.setState({ visibleModalTeam: false, confirmLoadingTeam: false });
     }
   };
-  
+
   handleCancel = () => {
     this.setState({ visibleModal: false });
   };
-  
+
   handleCancelTeam = () => {
     this.setState({ visibleModalTeam: false });
   };
-  
+
   onChange = (value: any) => {
     this.setState({ updatedScore: +value });
   };
@@ -129,7 +129,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
         await this.setState({ loadingFile: false });
       }
     } catch (error) {
-      
+
     }
   };
 
@@ -145,14 +145,12 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
     try {
       await this.props.ObsRemote.updateTextProps({ props: 'color', value: color.hex, homeTeam: this.props.isHomeTeam});
     } catch (error) {
-      
+
     }
   };
-  
+
   render() {
     let team = (this.props.isHomeTeam) ? this.props.ObsRemote.store?.GameStatut?.HomeTeam : this.props.ObsRemote.store?.GameStatut?.AwayTeam;
-    // const inputNameRef = createRef<Input>();
-    // const inputCityRef = createRef<Input>();
 
     const uploadButton = (
       <div>
@@ -162,14 +160,14 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
     );
 
     return (
-      <>      
-        { this.state.displayColorPicker ? 
+      <>
+        { this.state.displayColorPicker ?
           <div style={{ position: 'absolute', zIndex: 99, top: 25, left: 325 }}>
             <div style={{ position: 'fixed', top: '0px', bottom: '0px', left: '0px', right: '0px', }} onClick={ this.handleCloseColorpicker }/>
             <ChromePicker key={ this.props.isHomeTeam ? 'colorHome': 'colorAway' } color={ team?.color } onChange={ this.handleChangeColorpicker } />
-          </div> 
-          : 
-          null 
+          </div>
+          :
+          null
         }
         <Modal
           title={this.props.isHomeTeam ? 'Home Team Score' : 'Away Team Score'}
@@ -231,14 +229,10 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
                 'border-warning': timeout > team?.timeout!
               })}></div>
             })}
-
-            {/* { team?.timeout && team?.timeout >= 1 && <div onClick={this.handleTimeout(Timeout.ONE, team!)} className="teamtimeout-scoreboard bg-warning"></div> }
-            { team?.timeout && team?.timeout >= 2 && <div onClick={this.handleTimeout(Timeout.TWO, team!)} className="teamtimeout-scoreboard bg-warning"></div> }
-            { team?.timeout && team?.timeout >= 3 && <div onClick={this.handleTimeout(Timeout.THREE, team!)} className="teamtimeout-scoreboard bg-warning"></div> } */}
           </div>
           { this.props.ObsRemote.store?.GameStatut.Options.possession === (this.props.isHomeTeam ? TeamPossession.HOME : TeamPossession.AWAY) && <div className="teampossession-scoreboard bg-warning"></div> }
         </div>
-      </>    
+      </>
     );
   }
 };

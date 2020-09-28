@@ -3,7 +3,7 @@ import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Drop
 import { IpcService } from "../../utils/IpcService";
 import { StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, Team, GameControl, Preview, Editable, Scoreboard, ScoreboardEditable } from "../../Components";
+import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable } from "../../Components";
 import './Cockpit.css';
 
 const ipc: IpcService = new IpcService();
@@ -72,7 +72,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
         this.setState({ loadingLiveStatus: false });
       }
     } catch (error) {
-      
+
     }
   }
 
@@ -84,7 +84,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     try {
       await this.setState({ displayPreview: !this.state.displayPreview });
     } catch (error) {
-      
+
     }
   }
 
@@ -131,7 +131,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
           <Col span={24}>
             <PageHeader
               className="site-page-header"
-              tags={this.props.ObsRemote.live ? 
+              tags={this.props.ObsRemote.live ?
                 <Popconfirm
                   title="Voulez vous vraiment arrêter le live"
                   onConfirm={this.changeLiveStatus}
@@ -149,7 +149,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   placement="right"
                 >
                   <Tag icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } color="default">Not running</Tag>
-                </Popconfirm> 
+                </Popconfirm>
               }
               title="Stream is"
               extra={[
@@ -166,7 +166,6 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   <Statistic
                     title="Dropped Frame"
                     prefix={ true ? <ArrowUpOutlined /> : <ArrowDownOutlined /> }
-                    // suffix="img"
                     suffix="%"
                     value="0.32"
                     valueStyle={ true ? { color: '#cf1322' } : { color: '#3f8600' } }
@@ -191,49 +190,18 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   </Descriptions>
                 </Col>
               </Row>
-              {/* <div className="contentHeaderCockpit">
-                <div className="main">                  
-                  <Descriptions size="small" column={1}>
-                    <Descriptions.Item label="Compétition">D2</Descriptions.Item>
-                    <Descriptions.Item label="Journée">Week 3</Descriptions.Item>
-                  </Descriptions>
-                </div>
-                <div className="extra">
-                  <div
-                    style={{
-                      display: 'flex',
-                      width: 'max-content',
-                      justifyContent: 'flex-end',
-                    }}
-                  >
-                    <Statistic title="Length" value="00:00m" />
-                    <Statistic
-                      title="Dropped Frame"
-                      prefix={ true ? <ArrowUpOutlined /> : <ArrowDownOutlined /> }
-                      // suffix="img"
-                      suffix="%"
-                      value="0.32"
-                      valueStyle={ true ? { color: '#cf1322' } : { color: '#3f8600' } }
-                      style={{
-                        margin: '0 32px',
-                      }}
-                    />
-                  </div>
-                </div>
-              </div> */}
-              
             </PageHeader>
           </Col>
         </Row>
         <Row gutter={[16, 0]}>
-          <Col span={8}>            
+          <Col span={8}>
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
-              <Col span={24}>            
+              <Col span={24}>
                 <Card title="Preview" loading={this.state.loadingSettings} extra={this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }>
                   <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
                 </Card>
               </Col>
-            </Row>          
+            </Row>
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={24}>
                 <Scenes ObsRemote={this.props.ObsRemote} />
@@ -242,56 +210,31 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
           </Col>
           <Col span={16}>
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
-              <Col span={12}>
-                <Card style={{ color: '#000000', background: `linear-gradient(150deg, #ffffff 40%, ${this.props.ObsRemote.store?.GameStatut?.HomeTeam.color} 80%)`}} loading={this.state.loadingSettings}>
-                  <Team key="homeTeam" ObsRemote={this.props.ObsRemote} isHomeTeam={true} />
-                </Card>
-              </Col> 
-              <Col span={12}>
-                <Card style={{ color: '#000000', background: `linear-gradient(150deg, #ffffff 40%, ${this.props.ObsRemote.store?.GameStatut?.AwayTeam.color} 80%)`}} loading={this.state.loadingSettings}>
-                  <Team key="awayTeam" ObsRemote={this.props.ObsRemote} isHomeTeam={false} />
+              <Col span={24}>
+                <Card
+                  bordered={false}
+                  loading={this.state.loadingSettings}
+                >
+                  <ScoreboardEditable ObsRemote={this.props.ObsRemote} />
                 </Card>
               </Col>
             </Row>
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={24}>
-                <Card loading={this.state.loadingSettings}>
-                  <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
-                    <Col span={24}>                  
-                      <ScoreboardEditable ObsRemote={this.props.ObsRemote} />
-                    </Col>
-                  </Row>
-                  <Row gutter={[0, 0]}>
-                    <Col span={24}>
-                      <Card
-                        style={{ width: 'calc(100% + 48px)', margin: '0 -24px' }}
-                        tabList={tabList}
-                        activeTabKey={this.state.TabKey}
-                        bordered={false}
-                        onTabChange={key => {
-                          this.setState({ 'TabKey' : key });
-                        }}
-                      >
-                        { contentList[this.state.TabKey] }
-                      </Card>
-                    </Col>
-                  </Row>
+                <Card
+                  loading={this.state.loadingSettings}
+                  tabList={tabList}
+                  activeTabKey={this.state.TabKey}
+                  onTabChange={key => {
+                    this.setState({ 'TabKey' : key });
+                  }}
+                >
+                  { contentList[this.state.TabKey] }
                 </Card>
               </Col>
             </Row>
           </Col>
         </Row>
-        {/* <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
-          <Col span={8}>
-            <Scenes ObsRemote={this.props.ObsRemote} />
-          </Col>
-          <Col span={16}>
-            
-          </Col>
-        </Row> */}
-        {/* <Affix style={{position:'fixed',bottom:25,right:25}}>
-          {obsState}
-        </Affix> */}
       </>
     );
   }
