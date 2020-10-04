@@ -2,7 +2,7 @@ import { Component } from "react";
 import OBSWebSocket from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType } from "../Models";
 import { IpcService } from "../utils/IpcService";
 
 const ipc = new IpcService();
@@ -16,6 +16,7 @@ type ObsRemoteState = {
   live: boolean;
   connectingObs: boolean;
   connected2Obs: boolean;
+  firstDatasLoaded: boolean;
   scenes: {
     messageId: string;
     status: "ok";
@@ -23,22 +24,31 @@ type ObsRemoteState = {
     scenes: OBSWebSocket.Scene[];
   } | null;
   store: StoreType | null;
+  timeoutConnection?: NodeJS.Timeout;
 
   reconnectObs: () => Promise<void>;
   goLive: () => Promise<void>;
   changeActiveScene: (name: SceneName) => Promise<void>;
   changeActiveCam: (name: string) => Promise<void>;
   updateLiveStatus: () => Promise<void>;
-  updateTextProps: ({ props, value, homeTeam, bg }: { props: keyof Team & string | string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }) => Promise<void>;
+  updateTextProps: ({ props, value, homeTeam, bg, withAnimation  }: { props: keyof Team; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; withAnimation?: boolean;  }) => Promise<void>;
   updateSettings: (value: any) => Promise<void>;
   setScore: ({ isHomeTeam, scoreType, withAnimation }: { isHomeTeam: boolean; scoreType: ScoreType; withAnimation?: boolean; }) => Promise<void>;
   changePossession: () => Promise<void>;
-  updateGameEventProps: ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession; }) => Promise<void>;
+  updateGameEventProps: ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession | string; }) => Promise<void>;
   startReplay: () => Promise<void>;
   getScreenshot: () => Promise<{ img?: string }>;
+  resetGame: () => Promise<void>;
+  newGame: ({ name1, name2, city1, city2, logo1, logo2 }: { name1: string, name2: string, city1?: string, city2?: string, logo1?: string, logo2?: string }) => Promise<void>;
+  startStopClock: (isTimeout?: boolean) => Promise<void>;
+  resetClock: () => Promise<void>;
+  toggleClock: () => Promise<void>;
+  setGameClock: ({ minutes, seconds }: { minutes: number; seconds: number; }) => Promise<void>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
+
+  intervalClockId?: NodeJS.Timeout;
 
   constructor(props: Readonly<ObsRemoteProps>) {
     super(props);
@@ -46,6 +56,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       live: false,
       connectingObs: false,
       connected2Obs: false,
+      firstDatasLoaded: false,
       scenes: null,
       // homeTeam: null,
       // awayTeam: null,
@@ -62,6 +73,12 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       updateGameEventProps: this.updateGameEventProps.bind(this),
       startReplay: this.startReplay.bind(this),
       getScreenshot: this.getScreenshot.bind(this),
+      resetGame: this.resetGame.bind(this),
+      newGame: this.newGame.bind(this),
+      startStopClock: this.startStopClock.bind(this),
+      resetClock: this.resetClock.bind(this),
+      toggleClock: this.toggleClock.bind(this),
+      setGameClock: this.setGameClock.bind(this),
     };
 
     obsWs.on('ConnectionClosed', async () => {
@@ -86,11 +103,25 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   componentDidMount = async (): Promise<void> => {
     try {
+      await this.startApp();
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  startApp = async() => {
+    try {
       await this.connectObs();
       await this.getScenes();
       await this.initGameStatut();
+      if(this.state.timeoutConnection) {
+        await this.setState({ timeoutConnection: undefined });
+      }
     } catch (error) {
-
+      let timeout = setTimeout(async() => {
+        await this.startApp();
+      }, 5000);
+      await this.setState({ timeoutConnection: timeout });      
     }
   }
 
@@ -236,11 +267,12 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       await this.setState({ connectingObs: false, connected2Obs: true });
     } catch (error) {
       notification['error']({
-        message: 'Connection à OBS impossible',
+        message: 'Connection à OBS impossible, Retrying...',
         description: `${error.description}`,
         placement: 'bottomRight',
       });
       await this.setState({ connectingObs: false });
+      throw error;      
     }
   }
 
@@ -258,6 +290,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   initGameStatut = async (): Promise<void> => {
     try {
+      const defaultConfig = GetDefaultConfig();
       let logoH = await (await obsWs.send('GetSourceSettings', { sourceName: 'Home Logo' })).sourceSettings as any;
       const HomeTeam: Team = {
         name: await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Home Name Text' })).text,
@@ -266,7 +299,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         logo: logoH.file,
         color: "#133155",
         timeout: Timeout.THREE
-      }
+      };
       let logoA = await (await obsWs.send('GetSourceSettings', { sourceName: 'Away Logo' })).sourceSettings as any;
       const AwayTeam: Team = {
         name: await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Away Name Text' })).text,
@@ -275,33 +308,45 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         logo: logoA.file,
         color: "#612323",
         timeout: Timeout.THREE
-      }
-      let Options: GameEvent = {
-        flag: false,
-        possession: TeamPossession.HOME,
-        quarter: Quarter.Q1,
-        showScoreboard: true
-      }
+      };
+      const competWeek = await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Week Text' })).text.split(' - ');
+      let Options: GameEvent = { 
+        ...defaultConfig.GameStatut.Options, 
+        ...{ 
+          competition: competWeek[0],
+          journee: competWeek[1]
+        }
+      };
       let GameStatut: IGameStatut = {
         HomeTeam,
         AwayTeam,
         Options,
-      }
+      };
       const buffer = await (await obsWs.send('GetSourceSettings', { sourceName: 'Replay Video' })).sourceSettings as any;
       const bitrate = +await ipc.send<string>('obs-settings', { params: { getter: true }});
       let LiveSettings: ILiveSettings = {
         bitrate,
         buffer: buffer.duration,
         streamKey: await (await obsWs.send('GetStreamSettings')).settings.key,
-      }
-      let bgImg = await (await obsWs.send('GetSourceSettings', { sourceName: 'Background' })).sourceSettings as any;
+        sport: StreamingSport.Football,
+        streamingService: StreamingService.Youtube,
+      };
+      let bgImg = await (await obsWs.send('GetSourceSettings', { sourceName: 'Background' })).sourceSettings as any; 
+      /**
+       * TODO: wait for GetSceneItemList to be release to list all cams
+       * Same for DeleteSceneItem (Available) & DuplicateSceneItem (Available) to implemente adding and removing cams
+       * configuring them with SetSceneItemProperties (Available) and navigator.mediaDevices.enumerateDevices()
+       * use GetSourceSettings to check video input of the cam
+       */
+      // let cameras = await obsWs.send('GetSceneItemList');
       let store: StoreType = {
         GameStatut,
         LiveSettings,
-        BackgroundImage: bgImg.file
-
+        BackgroundImage: bgImg.file,
+        CamerasHardware: defaultConfig.CamerasHardware,
       };
-      await this.setState({ store });
+      await this.setState({ store, firstDatasLoaded: true });
+      await this.sendUpdateToScoreboardWindow();
     } catch (error) {
 
     }
@@ -330,6 +375,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   changeActiveCam = async (name: string): Promise<void> => {
     try {
+      // TODO: when changing cam, also change the replay source cam
       let oldCam: string = '';
       const indexLive = this.state.scenes?.scenes.findIndex(scene => scene.name === SceneName.Live)!;
       this.state.scenes?.scenes[indexLive].sources.forEach(item => {
@@ -343,8 +389,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           }
         }
       });
-      await obsWs.send('SetSceneItemProperties', { item: name, visible: true, 'scene-name': SceneName.Live } as any);
-      await obsWs.send('SetSceneItemProperties', { item: oldCam, visible: false, 'scene-name': SceneName.Live } as any);
+      await obsWs.send('SetSceneItemProperties', { item: { name }, visible: true, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+      await obsWs.send('SetSceneItemProperties', { item: { name: oldCam }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
       await this.setState({ scenes: this.state.scenes });
     } catch (error) {
 
@@ -378,7 +424,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     });
   }
 
-  updateTextProps = async ({ props, value, homeTeam = false, bg = false }: { props: keyof Team & string | string; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; }): Promise<void> => {
+  updateTextProps = async ({ props, value, homeTeam = false, bg = false, withAnimation = false }: { props: keyof Team; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; withAnimation?: boolean;  }): Promise<void> => {
     try {
       let store = this.state.store!;
       switch (props) {
@@ -411,20 +457,27 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           homeTeam ? await obsWs.send('SetTextGDIPlusProperties', { source: 'Home Score Text', text: score.padStart(2, '0') }) : await obsWs.send('SetTextGDIPlusProperties', { source: 'Away Score Text', text: score.padStart(2, '0') });
           break;
         case 'timeout':
-          homeTeam ? store.GameStatut.HomeTeam.timeout = value as Timeout : store.GameStatut.AwayTeam.timeout = value as Timeout ;
-          // homeTeam ? await obsWs.send('SetTextGDIPlusProperties', { source: 'Home Name Text', text: value }) : await obsWs.send('SetTextGDIPlusProperties', { source: 'Away Name Text', text: value });
+          let animate = withAnimation && (homeTeam ? store.GameStatut.HomeTeam.timeout > value : store.GameStatut.AwayTeam.timeout > value);
+          homeTeam ? store.GameStatut.HomeTeam.timeout = value as Timeout : store.GameStatut.AwayTeam.timeout = value as Timeout ;          
+          if(animate) {
+            await obsWs.send('SetSceneItemProperties', { item: { name: AnimationType.TIMEOUT }, visible: true, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+            setTimeout(async () => {
+              await obsWs.send('SetSceneItemProperties', { item: { name: AnimationType.TIMEOUT }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+            }, 4000);
+          }
           break;
 
         default:
           break;
       }
       await this.setState({ store });
+      await this.sendUpdateToScoreboardWindow();
     } catch (error) {
 
     }
   }
 
-  updateGameEventProps = async ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession; }): Promise<void> => {
+  updateGameEventProps = async ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession | string; }): Promise<void> => {
     try {
       let store = this.state.store!;
       switch (props) {
@@ -433,7 +486,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           break;
         case 'showScoreboard':
           store.GameStatut.Options.showScoreboard = value as boolean;
-          await obsWs.send('SetSceneItemProperties', { item: 'scoreboard', visible: value as boolean, 'scene-name': SceneName.Live } as any);
+          await obsWs.send('SetSceneItemProperties', { item: { name: 'scoreboard' }, visible: value as boolean, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
           break;
         case 'flag':
           store.GameStatut.Options.flag = value as boolean;
@@ -441,16 +494,24 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         case 'possession':
           store.GameStatut.Options.possession = value as TeamPossession;
           break;
+        case 'competition':
+          store.GameStatut.Options.competition = value as string;
+          await obsWs.send('SetTextGDIPlusProperties', { source: 'Week Text', text: value as string + ' - ' + store.GameStatut.Options.journee });
+          break;
+        case 'journee':
+          store.GameStatut.Options.journee = value as string;
+          await obsWs.send('SetTextGDIPlusProperties', { source: 'Week Text', text: store.GameStatut.Options.competition + ' - ' + value as string });
+          break;
 
         default:
           break;
       }
       await this.setState({ store });
+      await this.sendUpdateToScoreboardWindow();
     } catch (error) {
 
     }
   }
-
   
   setScore = async ({ isHomeTeam, scoreType, withAnimation = false }: { isHomeTeam: boolean; scoreType: ScoreType; withAnimation?: boolean; }) => {
     try {
@@ -477,9 +538,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       const scoreToDisplay = isHomeTeam ? store.GameStatut.HomeTeam.score + scoreAdded : store.GameStatut.AwayTeam.score + scoreAdded;
       await this.updateTextProps({ props: 'score', value: scoreToDisplay, homeTeam: isHomeTeam });
       if(withAnimation) {
-        await obsWs.send('SetSceneItemProperties', { item: scoreType, visible: true, 'scene-name': SceneName.Live } as any);
+        await obsWs.send('SetSceneItemProperties', { item: { name: scoreType }, visible: true, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
         setTimeout(async () => {
-          await obsWs.send('SetSceneItemProperties', { item: scoreType, visible: false, 'scene-name': SceneName.Live } as any);
+          await obsWs.send('SetSceneItemProperties', { item: { name: scoreType }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
         }, 5000);
       }
     } catch (error) {
@@ -528,6 +589,193 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       return data;
     } catch (error) {
       return {};
+    }
+  }
+  
+  resetGame = async(): Promise<void> => {
+    try {
+      const defaultConfig = GetDefaultConfig();
+      // score reset
+      await await this.updateTextProps({ props: 'score', value: 0, homeTeam: true });
+      await await this.updateTextProps({ props: 'score', value: 0, homeTeam: false });
+      // scoreboard
+      await this.updateGameEventProps({ props: "showScoreboard", value: defaultConfig.GameStatut.Options.showScoreboard });
+      // Compet Day
+      await this.updateGameEventProps({ props: "competition", value: defaultConfig.GameStatut.Options.competition });
+      await this.updateGameEventProps({ props: "journee", value: defaultConfig.GameStatut.Options.journee });
+      // home Team
+      await this.updateTextProps({ props: "city", value: defaultConfig.GameStatut.HomeTeam.city, homeTeam: true });
+      await this.updateTextProps({ props: "name", value: defaultConfig.GameStatut.HomeTeam.name, homeTeam: true });
+      await this.updateTextProps({ props: "logo", value: defaultConfig.GameStatut.HomeTeam.logo, homeTeam: true });
+      // away Team
+      await this.updateTextProps({ props: "city", value: defaultConfig.GameStatut.AwayTeam.city });
+      await this.updateTextProps({ props: "name", value: defaultConfig.GameStatut.AwayTeam.name });
+      await this.updateTextProps({ props: "logo", value: defaultConfig.GameStatut.AwayTeam.logo });
+
+      // background image
+      await this.updateTextProps({ props: "logo", value: defaultConfig.BackgroundImage!, bg: true });
+      
+      // set beginning scene
+      await obsWs.send('SetCurrentScene', { "scene-name": SceneName.Starting });
+
+      await this.setState({ store: defaultConfig });
+      await this.sendUpdateToScoreboardWindow();
+    } catch (error) {
+      
+    }
+  }
+  
+  newGame = async({ name1, name2, city1, city2, logo1, logo2 }: { name1: string, name2: string, city1?: string, city2?: string, logo1?: string, logo2?: string }): Promise<void> => {
+    try {
+      // score reset
+      await await this.updateTextProps({ props: 'score', value: 0, homeTeam: true });
+      await await this.updateTextProps({ props: 'score', value: 0, homeTeam: false });
+      // home Team
+      await this.updateTextProps({ props: "name", value: name1, homeTeam: true });
+      if (city1) {
+        await this.updateTextProps({ props: "city", value: city1, homeTeam: true });
+      }
+      if (logo1) {
+        await this.updateTextProps({ props: "logo", value: logo1, homeTeam: true });
+      }
+      // away Team
+      await this.updateTextProps({ props: "name", value: name2 });      
+      if (city2) {
+        await this.updateTextProps({ props: "city", value: city2 });
+      }
+      if (logo2) {
+        await this.updateTextProps({ props: "logo", value: logo2 });
+      }
+      
+      // set beginning scene
+      await obsWs.send('SetCurrentScene', { "scene-name": SceneName.Starting });
+    } catch (error) {
+      
+    }
+  }
+  
+  startStopClock = async (isTimeout: boolean = false): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      const { clock } = store.GameStatut.Options;
+      if(clock.active) {
+        if (clock.isOn || isTimeout) {
+          clock.isOn = false;
+          if(this.intervalClockId) {
+            clearInterval(this.intervalClockId);
+            this.intervalClockId = undefined;
+          }
+          await this.setState({ store });
+        } else {
+          clock.isOn = true;
+          this.intervalClockId = setInterval(async () => {
+            try {
+              let store = this.state.store!;
+              const { clock } = store.GameStatut.Options;
+              if (clock.seconds > 0) {
+                clock.seconds -= 1;
+                  // this.setState(({ seconds }) => ({
+                  //     seconds: seconds - 1
+                  // }))
+              }
+              else {
+                if (clock.minutes === 0) {
+                  clock.isOn = false;
+                  if(this.intervalClockId) {
+                    clearInterval(this.intervalClockId);
+                    this.intervalClockId = undefined;
+                  }
+                } else {
+                  clock.minutes -= 1;
+                  clock.seconds = 59;
+                }
+              }
+              await this.setState({ store });
+              await this.sendUpdateToScoreboardWindow();
+            } catch (error) {
+              
+            }
+          }, 1000); 
+          await this.setState({ store });
+        }
+      }
+    } catch (error) {
+      
+    }
+  }
+
+  resetClock = async (): Promise<void> => {
+    try {      
+      const defaultConfig = GetDefaultConfig();
+      let store = this.state.store!;
+      if(this.intervalClockId) {
+        clearInterval(this.intervalClockId);
+        this.intervalClockId = undefined;
+      }
+      store.GameStatut.Options.clock = {
+        ...store.GameStatut.Options.clock,
+        ...{
+          minutes: defaultConfig.GameStatut.Options.clock.minutes,
+          seconds: defaultConfig.GameStatut.Options.clock.seconds,
+          isOn: false,
+        }
+      };
+      await this.setState({ store });
+      await this.sendUpdateToScoreboardWindow();
+    } catch (error) {
+      
+    }    
+  }
+
+  toggleClock = async (): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      store.GameStatut.Options.clock.active = !store.GameStatut.Options.clock.active;
+      if (store.GameStatut.Options.clock.isOn) {
+        store.GameStatut.Options.clock.isOn = false; 
+        if(this.intervalClockId) {
+          clearInterval(this.intervalClockId);
+          this.intervalClockId = undefined;
+        }
+      }
+      await this.setState({ store });
+      await this.sendUpdateToScoreboardWindow();
+    } catch (error) {
+      
+    }
+  }
+
+  setGameClock = async ({ minutes, seconds }: { minutes: number, seconds: number }): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      store.GameStatut.Options.clock = {
+        ...store.GameStatut.Options.clock,
+        ...{
+          minutes,
+          seconds,
+        }
+      };
+      await this.setState({ store });
+      await this.sendUpdateToScoreboardWindow();
+    } catch (error) {
+      
+    }
+  }
+
+  sendUpdateToScoreboardWindow = async (): Promise<void> => {
+    try {      
+      const store = this.state.store!;
+      await ipc.sendWithoutResponse('scoreboard-info', { 
+        responseChannel: 'scoreboard-update', 
+        params: {
+          body: {
+            GameStatut: store.GameStatut,
+            LiveSettings: store.LiveSettings,
+          }
+        }
+      });
+    } catch (error) {
+      
     }
   }
 

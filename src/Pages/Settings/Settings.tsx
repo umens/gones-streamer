@@ -1,10 +1,11 @@
 import React from "react";
 import { IObsRemote } from "../../Components";
-import { Row, Col, message, Form, Input, Button, Select, Card } from "antd";
+import { Row, Col, message, Form, Input, Button, Select, Card, List } from "antd";
 import ReactDropzone from "react-dropzone";
 import { IpcService } from "../../utils/IpcService";
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { LoadingOutlined, PlusOutlined, PoweroffOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
+import { StreamingService, StreamingSport } from "../../Models";
 
 const ipc = new IpcService();
 
@@ -14,6 +15,8 @@ type SettingsProps = {
 type SettingsState = {
   loadingFile: boolean;
   sendingForm: boolean;
+  key: string;
+  loadingCams: boolean[];
 };
 class Settings extends React.Component<SettingsProps, SettingsState> {
   
@@ -24,7 +27,14 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     this.state = {
       loadingFile: false,
       sendingForm: false,
+      key: 'background',
+      loadingCams: [],
     };
+  }
+
+  componentDidMount = async () => {    
+    // let devices = await navigator.mediaDevices.enumerateDevices();
+    // console.log(devices.filter(({ kind }) => kind === "videoinput"));
   }
 
   beforeUpload = (file: File) => {
@@ -63,6 +73,27 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     }
   };
 
+  activateCam = async (index: number) => {
+    this.setState(({ loadingCams }) => {
+      const newLoadings = [...loadingCams];
+      newLoadings[index] = true;
+
+      return {
+        loadingCams: newLoadings,
+      };
+    });
+    setTimeout(() => {
+      this.setState(({ loadingCams }) => {
+        const newLoadings = [...loadingCams];
+        newLoadings[index] = false;
+
+        return {
+          loadingCams: newLoadings,
+        };
+      });
+    }, 6000);
+  }
+
   render() {
     
     const uploadButton = (
@@ -71,6 +102,72 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
         <div className="ant-upload-text">Upload</div>
       </div>
     );
+
+    // const data = this.props.ObsRemote.store?.CamerasHardware.map(async (cam, index) => {
+    //   // cam.img = await (await this.props.ObsRemote.getScreenshot()).img;
+    //   return cam;
+    // });
+    const data = this.props.ObsRemote.store?.CamerasHardware;
+    
+    const tabList = [
+      {
+        key: 'background',
+        tab: 'Image d\'arrière plan',
+      },
+      {
+        key: 'cameras',
+        tab: 'Cameras',
+      },
+    ];
+
+    const contentList: { [key: string]: JSX.Element } = {
+      background: <ReactDropzone onDrop={this.onChangeHandler}>
+      {({getRootProps, getInputProps}: any) => (
+        <section className="container">
+          <span className="avatar-uploader ant-upload-picture-card-wrapper">
+            <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', style: { width: '100%', height: 'auto' }})}>
+              <input {...getInputProps({ multiple: false })} />
+              <span tabIndex={0} className="ant-upload" role="button">
+                <div>
+                  {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.store?.BackgroundImage} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                </div>
+              </span>
+            </div>
+          </span>
+        </section>
+      )}
+    </ReactDropzone>,
+      cameras: <List
+      grid={{
+        gutter: 16,        
+        xs: 1,
+        sm: 2,
+        md: 2,
+        lg: 2,
+        xl: 2,
+        xxl: 2
+      }}
+      dataSource={data}
+      renderItem={(item, index) => (
+        <List.Item>
+          <Card title={item.title}>
+            { item.active ?
+              <p>à venir</p>
+              :
+              <Button
+                type="primary"
+                icon={<PoweroffOutlined />}
+                loading={this.state.loadingCams[index]}
+                onClick={() => this.activateCam(index)}
+              >
+                Activate Camera {index + 1}
+              </Button>
+            }          
+          </Card>
+        </List.Item>
+      )}
+    />,
+    };
 
     return (
       <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
@@ -83,15 +180,24 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
               onFinish={this.onFinish}
               initialValues={{
                 key: this.props.ObsRemote.store?.LiveSettings?.streamKey,
-                service: 'youtube',
+                service: this.props.ObsRemote.store?.LiveSettings?.streamingService,
+                sport: this.props.ObsRemote.store?.LiveSettings?.sport,
                 buffer: (this.props.ObsRemote.store?.LiveSettings?.buffer || 0) / 1000,
                 bitrate: this.props.ObsRemote.store?.LiveSettings?.bitrate,
               }}
             >
+              <Form.Item label="Sport" name="sport">
+                <Select style={{ width: '100%' }}>
+                  <Select.Option value={StreamingSport.Football}>Football Americain</Select.Option>
+                  <Select.Option value={StreamingSport.Soccer} disabled>Football</Select.Option>
+                  <Select.Option value={StreamingSport.Basketball} disabled>Basketball</Select.Option>
+                  <Select.Option value={StreamingSport.Handball} disabled>Handball</Select.Option>
+                </Select>
+              </Form.Item>
               <Form.Item label="Service de streaming" name="service">
                 <Select style={{ width: '100%' }}>
-                  <Select.Option value="youtube">Youtube</Select.Option>
-                  <Select.Option value="facebook" disabled>Facebook</Select.Option>
+                  <Select.Option value={StreamingService.Youtube}>Youtube</Select.Option>
+                  <Select.Option value={StreamingService.Facebook} disabled>Facebook</Select.Option>
                 </Select>
               </Form.Item>
               <Form.Item name="key" label="Clé">
@@ -112,23 +218,12 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
           </Card>
         </Col>
         <Col span={14}>
-          <Card title="Image d'arrière plan">
-            <ReactDropzone onDrop={this.onChangeHandler}>
-              {({getRootProps, getInputProps}: any) => (
-                <section className="container">
-                  <span className="avatar-uploader ant-upload-picture-card-wrapper">
-                    <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', style: { width: '100%', height: 'auto' }})}>
-                      <input {...getInputProps({ multiple: false })} />
-                      <span tabIndex={0} className="ant-upload" role="button">
-                        <div>
-                          {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.store?.BackgroundImage} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
-                        </div>
-                      </span>
-                    </div>
-                  </span>
-                </section>
-              )}
-            </ReactDropzone>
+          <Card
+            tabList={tabList}
+            activeTabKey={this.state.key}
+            onTabChange={ newKey => { this.setState({key: newKey}); }}
+          >
+            { contentList[this.state.key] }
           </Card>
         </Col>
       </Row>

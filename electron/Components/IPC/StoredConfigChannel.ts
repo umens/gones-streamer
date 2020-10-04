@@ -1,6 +1,6 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest, StoreType, Quarter, TeamPossession } from "../../../src/Models";
+import { IpcRequest, StoreType, GetDefaultConfig } from "../../../src/Models";
 import * as Store from 'electron-store';
 
 export class StoredConfigChannel implements IpcChannelInterface {
@@ -16,40 +16,16 @@ export class StoredConfigChannel implements IpcChannelInterface {
       if (!request.responseChannel) {
         request.responseChannel = `${this.getName()}_response`;
       }
-      const GameStatut = await this.store.get("GameStatut", {
-        AwayTeam: {
-          city: 'Ville Equipe Exterieur',
-          color: '#612323',
-          logo: 'https://placekitten.com/450/450',
-          name: 'Nom Equipe Exterieur',
-          score: 0,
-          timeout: 3
-        },
-        HomeTeam: {
-          city: 'Ville Equipe Domicile',
-          color: '#133155',
-          logo: 'https://placekitten.com/450/450',
-          name: 'Nom Equipe Domicile',
-          score: 0,
-          timeout: 3
-        },
-        Options: {
-          quarter: Quarter.Q1,
-          possession: TeamPossession.HOME,
-          flag: false,
-          showScoreboard: false,
-        }
-      });
-      const LiveSettings = await this.store.get("LiveSettings", {
-        bitrate: 6000,
-        buffer: 15,
-        streamKey: ''
-      });
-      const BackgroundImage = await this.store.get("BackgroundImage", '');
+      const defaultConfig = GetDefaultConfig();
+      const GameStatut = await this.store.get("GameStatut", defaultConfig.GameStatut);
+      const LiveSettings = await this.store.get("LiveSettings", defaultConfig.LiveSettings);
+      const BackgroundImage = await this.store.get("BackgroundImage", defaultConfig.BackgroundImage);
+      const CamerasHardware = await this.store.get("CamerasHardware", defaultConfig.CamerasHardware);
       let storedConfig: StoreType = {
         GameStatut,
         LiveSettings,
-        BackgroundImage
+        BackgroundImage,
+        CamerasHardware,
       };
       event.sender.send(request.responseChannel, { storedConfig });
     } catch (error) {

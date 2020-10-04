@@ -45,6 +45,7 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
       <>
         <List
           bordered
+          loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} 
           dataSource={this.props.ObsRemote.scenes?.scenes}
           renderItem={item => {
             let extra: any = '';
@@ -54,7 +55,7 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
                 return item.name === SceneName.Live
               });
               let cams = (data[0]).sources.filter(item => {
-                return item.name.startsWith('cam');
+                return item.name.startsWith('Camera');
               });
               cams = cams.sort(function(a, b) {
                 var textA = a.name.toUpperCase();

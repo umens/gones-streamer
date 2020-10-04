@@ -1,10 +1,12 @@
 import React, { createRef } from "react";
-import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input } from 'antd';
+import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
 import { IpcService } from "../../utils/IpcService";
-import { StoreType } from "../../Models";
-import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { GameEvent, StoreType } from "../../Models";
+import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable } from "../../Components";
+// import ReactDropzone from "react-dropzone";
 import './Cockpit.css';
+import { FormInstance } from "antd/lib/form";
 
 const ipc: IpcService = new IpcService();
 
@@ -13,12 +15,12 @@ type CockpitProps = {
 };
 type CockpitState = {
   loading: boolean;
-
   StoredConfig: StoreType | null;
   loadingSettings: boolean;
   loadingLiveStatus: boolean;
   displayPreview: boolean;
   TabKey: string;
+  newGameModalVisible: boolean;
 };
 class Cockpit extends React.Component<CockpitProps, CockpitState> {
 
@@ -31,6 +33,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       loadingLiveStatus: false,
       displayPreview: false,
       TabKey: 'GameControl',
+      newGameModalVisible: false,
     };
   }
 
@@ -53,14 +56,9 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       // setTimeout(async () => {
         await this.setState({ StoredConfig: data.StoredConfig, loadingSettings: false });
         message.success({ content: 'Settings loaded !', duration: 2, key: 'loadingSettings' });
-      // }, 2000);
+      // }, 1500);
     } catch (error) {
-      // notification['error']({
-      //   message: 'Connection à OBS via Websocket impossible',
-      //   description: `${error.error}\n\n${error.description}\n\nRetrying in 10s...`,
-      //   placement: 'bottomRight',
-      // });
-      // throw error;
+
     }
   }
 
@@ -76,8 +74,27 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     }
   }
 
-  handleMenuClick = (e: any) => {
-    console.log('click', e);
+  handleMenuClick = async (e: any) => {
+    let _this = this;
+    switch (e.key) {
+      case 'reset':
+        Modal.confirm({
+          title: 'Etes vous sûr ?',
+          icon: <ExclamationCircleOutlined />,
+          content: 'En cliquant sur OK, toutes les données du match seront remise à zéro',
+          async onOk() {
+            await _this.props.ObsRemote.resetGame();
+          },
+          onCancel() {},
+        });
+        break;
+      case 'new':
+        await this.setState({ newGameModalVisible: true });
+        break;
+    
+      default:
+        break;
+    }
   }
 
   togglePreview = async (e: any) => {
@@ -88,12 +105,22 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     }
   }
 
-  changeText = async (prop: string, value: string) => {
+  changeText = async (prop: keyof GameEvent, value: string) => {
     try {
-      await this.props.ObsRemote.updateTextProps({ props: prop, value });
+      await this.props.ObsRemote.updateGameEventProps({ props: prop, value });
     } catch (error) {
     }
   }
+
+  onCreate = async (values: any) => {
+    try {
+      console.log('Received values of form: ', values);
+      this.props.ObsRemote.newGame(values);
+      await this.setState({ newGameModalVisible: false });
+    } catch (error) {
+      
+    }
+  };
 
   render() {
 
@@ -117,13 +144,16 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       'SponsorControl': <p>Coming soon</p>,
     };
 
+    const formRef = React.createRef<FormInstance>();
+
     const menu = (
-      <Menu onClick={this.handleMenuClick}>
+      <Menu onClick={async(e) => await this.handleMenuClick(e)}>
         <Menu.Item key="new">Start New Game</Menu.Item>
         <Menu.Item key="reset">Reset Game</Menu.Item>
       </Menu>
     );
-    const inputNameRef = createRef<Input>();
+    const inputCompetRef = createRef<Input>();
+    const inputWeekRef = createRef<Input>();
 
     return (
       <>
@@ -177,16 +207,25 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                 <Col span={8}>
                   <Descriptions size="small" column={1}>
                     <Descriptions.Item label="Compétition">
-                    <Editable
-                      text='D2'
-                      placeholder='Compétition'
-                      childref={inputNameRef}
-                      type="input"
-                    >
-                      <Input ref={inputNameRef} type="text" name="competition" placeholder='Compétition' value='D2' onChange={(e) => this.changeText('competition', e.target.value)}/>
-                    </Editable>
+                      <Editable
+                        text={this.props.ObsRemote.store?.GameStatut.Options.competition}
+                        placeholder='Compétition'
+                        childRef={inputCompetRef}
+                        type="input"
+                      >
+                        <Input size="small" ref={inputCompetRef} type="text" name="competition" placeholder='Compétition' value={this.props.ObsRemote.store?.GameStatut.Options.competition} onChange={(e) => this.changeText('competition', e.target.value)}/>
+                      </Editable>
                     </Descriptions.Item>
-                    <Descriptions.Item label="Journée">Week 3</Descriptions.Item>
+                    <Descriptions.Item label="Journée">
+                    <Editable
+                        text={this.props.ObsRemote.store?.GameStatut.Options.journee}
+                        placeholder='Journée'
+                        childRef={inputWeekRef}
+                        type="input"
+                      >
+                        <Input size="small" ref={inputWeekRef} type="text" name="journee" placeholder='Journée' value={this.props.ObsRemote.store?.GameStatut.Options.journee} onChange={(e) => this.changeText('journee', e.target.value)}/>
+                      </Editable>
+                    </Descriptions.Item>
                   </Descriptions>
                 </Col>
               </Row>
@@ -197,7 +236,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
           <Col span={8}>
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={24}>
-                <Card title="Preview" loading={this.state.loadingSettings} extra={this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }>
+                <Card title="Preview" loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} extra={this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }>
                   <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
                 </Card>
               </Col>
@@ -213,7 +252,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
               <Col span={24}>
                 <Card
                   bordered={false}
-                  loading={this.state.loadingSettings}
+                  loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded}
                 >
                   <ScoreboardEditable ObsRemote={this.props.ObsRemote} />
                 </Card>
@@ -222,7 +261,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={24}>
                 <Card
-                  loading={this.state.loadingSettings}
+                  loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded}
                   tabList={tabList}
                   activeTabKey={this.state.TabKey}
                   onTabChange={key => {
@@ -235,6 +274,97 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
             </Row>
           </Col>
         </Row>
+
+        <Modal
+          visible={this.state.newGameModalVisible}
+          title="Nouveau match"
+          okText="Enregistrer"
+          cancelText="Annuler"
+          onCancel={() => /*this.setState({ imgAwayLogo: undefined, imgHomeLogo: undefined, newGameModalVisible: false })*/this.setState({ newGameModalVisible: false })}
+          onOk={() => {
+            formRef.current!
+              .validateFields()
+              .then(async values => {
+                try {
+                  formRef.current!.resetFields();
+                  await this.onCreate(values);
+                } catch (error) {
+                  console.log(error);
+                }
+              })
+              .catch(info => {
+                console.log('Validate Failed:', info);
+              });
+          }}
+        >
+          <Form
+            // form={form}
+            ref={formRef} 
+            layout="horizontal"
+            name="form_in_modal"
+            initialValues={{ modifier: 'public' }}
+          >
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <h3>Equipe 1</h3>
+              </Col>
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col span={11}>
+                <Form.Item
+                  style={{ marginBottom: 0 }}
+                  name="name1"
+                  label="Nom"
+                  rules={[{ required: true, message: 'Le nom est obligatoire' }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col span={11} offset={2}>                
+                <Form.Item
+                  style={{ marginBottom: 0 }}
+                  name="city1"
+                  label="Ville"
+                  rules={[{ required: true, message: 'La ville est obligatoire' }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <div className="separator">Contre</div>
+              </Col>
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <h3>Equipe 2</h3>
+              </Col>
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col span={11}>
+              <Form.Item
+                  style={{ marginBottom: 0 }}
+                  name="name2"
+                  label="Nom"
+                  rules={[{ required: true, message: 'Le nom est obligatoire' }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col span={11} offset={2}>                
+                <Form.Item
+                  style={{ marginBottom: 0 }}
+                  name="city2"
+                  label="Ville"
+                  rules={[{ required: true, message: 'La ville est obligatoire' }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Modal>
       </>
     );
   }

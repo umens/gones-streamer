@@ -1,7 +1,7 @@
 import React from "react";
 import { IObsRemote, ScoreTable } from "../";
-import { Button, Row, Col, Radio } from "antd";
-import { EyeOutlined, EyeInvisibleOutlined, FlagOutlined, PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
+import { Button, Row, Col, Radio, Tooltip } from "antd";
+import { EyeOutlined, EyeInvisibleOutlined, FlagOutlined, PlayCircleOutlined, PauseCircleOutlined, PauseOutlined, CaretRightOutlined, SyncOutlined } from '@ant-design/icons';
 import './GameControl.css';
 import { Quarter, SceneName } from "../../Models";
 
@@ -9,12 +9,14 @@ type GameControlProps = {
   ObsRemote: IObsRemote;
 };
 type GameControlState = {
+  loadingsclock: boolean[];
 };
 class GameControl extends React.Component<GameControlProps, GameControlState> {
 
   constructor(props: Readonly<GameControlProps>) {
     super(props);
     this.state = {
+      loadingsclock: [],
     };
   }
 
@@ -62,6 +64,81 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
     }
   };
   
+  startStopClock = async (e: any) => {
+    try {
+      await this.setState(({ loadingsclock }) => {
+        const newLoadings = [...loadingsclock];
+        newLoadings[0] = true;
+  
+        return {
+          loadingsclock: newLoadings,
+        };
+      });
+      await this.props.ObsRemote.startStopClock();
+      await this.setState(({ loadingsclock }) => {
+        const newLoadings = [...loadingsclock];
+        newLoadings[0] = false;
+  
+        return {
+          loadingsclock: newLoadings,
+        };
+      });
+    } catch (error) {
+      
+    }
+  };
+  
+  toggleClock = async (e: any) => {
+    try {
+      await this.setState(({ loadingsclock }) => {
+        const newLoadings = [...loadingsclock];
+        newLoadings[1] = true;
+  
+        return {
+          loadingsclock: newLoadings,
+        };
+      });
+      await this.props.ObsRemote.toggleClock();
+      await this.setState(({ loadingsclock }) => {
+        const newLoadings = [...loadingsclock];
+        newLoadings[1] = false;
+  
+        return {
+          loadingsclock: newLoadings,
+        };
+      });
+    } catch (error) {
+      
+    }
+  };
+  
+  resetClock = async (e: any) => {
+    try {
+      await this.setState(({ loadingsclock }) => {
+        const newLoadings = [...loadingsclock];
+        newLoadings[2] = true;
+  
+        return {
+          loadingsclock: newLoadings,
+        };
+      });
+      await this.props.ObsRemote.resetClock();
+      await this.setState(({ loadingsclock }) => {
+        const newLoadings = [...loadingsclock];
+        newLoadings[2] = false;
+  
+        return {
+          loadingsclock: newLoadings,
+        };
+      });
+    } catch (error) {
+      
+    }
+  };
+
+  // Clock management
+
+  
   render() {
     // const menu = (
     //   <Menu>
@@ -71,7 +148,7 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
     // );
 
     const flagButton = this.props.ObsRemote.store?.GameStatut.Options.flag ? <Button style={{ backgroundColor: '#ffe066', color: '#000000', borderColor: '#fab005', }} onClick={this.toggleFlagVisibility} type="primary" block><FlagOutlined /> Flag</Button> : <Button onClick={this.toggleFlagVisibility} block><FlagOutlined /> Flag</Button>;
-    const replayButton = this.props.ObsRemote.scenes?.["current-scene"] === SceneName.Replay ? <Button onClick={async () => await this.props.ObsRemote.changeActiveScene(SceneName.Live)} type="primary" block><PauseCircleOutlined /> Stop Replay</Button> : <Button disabled onClick={this.startReplay} block><PlayCircleOutlined /> Start Replay</Button>;
+    const replayButton = this.props.ObsRemote.scenes?.["current-scene"] === SceneName.Replay ? <Button onClick={async () => await this.props.ObsRemote.changeActiveScene(SceneName.Live)} type="primary" block><PauseCircleOutlined /> Stop Replay</Button> : <Tooltip title="Appuyer sur F10 pour lancer le ralenti"><Button disabled onClick={this.startReplay} block><PlayCircleOutlined /> Start Replay</Button></Tooltip>;
     const scoreboardButton = this.props.ObsRemote.store?.GameStatut.Options.showScoreboard ? <Button onClick={this.toggleScoreboardVisibility} type="primary" block><EyeOutlined /> Scoreboard</Button> : <Button onClick={this.toggleScoreboardVisibility} block><EyeInvisibleOutlined /> Scoreboard</Button>;
 
     const options = [
@@ -84,6 +161,40 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
 
     return (
       <>        
+        <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
+          <Col span={8}>
+            <Button
+              block
+              icon={this.props.ObsRemote.store?.GameStatut.Options.clock.active ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              loading={this.state.loadingsclock[0]}
+              onClick={this.toggleClock}
+            >{this.props.ObsRemote.store?.GameStatut.Options.clock.active ? 'Disable Clock' : 'Enable Clock'}</Button>
+          </Col>
+          <Col span={8}>
+            { this.props.ObsRemote.store?.GameStatut.Options.clock.active && 
+              <Button
+                block
+                icon={this.props.ObsRemote.store?.GameStatut.Options.clock.isOn ? <PauseOutlined /> : <CaretRightOutlined />}
+                loading={this.state.loadingsclock[1]}
+                onClick={this.startStopClock}
+              >
+                {this.props.ObsRemote.store?.GameStatut.Options.clock.isOn ? 'Stop Clock' : 'Start Clock'}
+              </Button>
+            }
+          </Col>
+          <Col span={8}>
+            { this.props.ObsRemote.store?.GameStatut.Options.clock.active && 
+            <Button
+              block
+              icon={<SyncOutlined />}
+              loading={this.state.loadingsclock[2]}
+              onClick={this.resetClock}
+            >
+              Reset Clock
+            </Button>
+          }
+          </Col>
+        </Row>
         <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
           <Col span={8}>
             <Radio.Group

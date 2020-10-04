@@ -4,10 +4,20 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import {
+  HashRouter as Router,
+  Switch,
+  Route
+} from "react-router-dom";
+import { Scoreboard } from './Components';
+
 ReactDOM.render(
-  // <React.StrictMode>
-    <App />,
-  // </React.StrictMode>,
+  <Router>
+    <Switch>
+      <Route exact path="/" component={App} />
+      <Route exact path="/scoreboard" component={Scoreboard} />
+    </Switch>
+  </Router>, 
   document.getElementById('root')
 );
 

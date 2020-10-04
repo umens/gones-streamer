@@ -157,7 +157,7 @@ class Team extends React.Component<TeamProps, TeamState> {
             <Editable
               text={team?.name}
               placeholder={this.props.isHomeTeam ? 'Home Team Name' : 'Away Team Name'}
-              childref={inputNameRef}
+              childRef={inputNameRef}
               type="input"
             >
               <Input style={{ color: '#000000' }} ref={inputNameRef} type="text" name="name" placeholder={this.props.isHomeTeam ? 'Home Team Name' : 'Away Team Name'} value={team?.name} onChange={(e) => this.changeText('name', e.target.value)}/>
@@ -165,7 +165,7 @@ class Team extends React.Component<TeamProps, TeamState> {
             <Editable
               text={team?.city}
               placeholder={this.props.isHomeTeam ? 'Home Team City' : 'Away Team City'}
-              childref={inputCityRef}
+              childRef={inputCityRef}
               type="input"
             >
               <Input style={{ color: '#000000' }} ref={inputCityRef} type="text" name="city" placeholder={this.props.isHomeTeam ? 'Home Team City' : 'Away Team City'} value={team?.city} onChange={(e) => this.changeText('city', e.target.value)}/>

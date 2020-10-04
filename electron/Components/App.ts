@@ -9,10 +9,11 @@ import * as firstRun from 'electron-first-run';
 import * as url from 'url';
 import installExtension, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import SplashScreen from "./SplashScreen";
-import { StoreType, Quarter, TeamPossession } from "../../src/Models";
+import { StoreType, GetDefaultConfig } from "../../src/Models";
 import IPCChannels from "./IPCChannels";
 import ObsProcess from "./ObsProcess";
 import { promises as fs } from 'fs';
+import ScoreboardWindow from "./ScoreboardWindow";
 
 const isPackaged = require('electron-is-packaged').isPackaged;
 // const rootPath = require('electron-root-path').rootPath;
@@ -31,40 +32,10 @@ export default class Main {
   private mainConfig: BrowserWindowConstructorOptions | null = null;
   private mainWindow: BrowserWindow | null = null;
   private splashScreen: SplashScreen | null = null;
+  private scoreboardWindow: ScoreboardWindow | null = null;
   private IpcChannels: IPCChannels | null = null;
   private store: Store<StoreType> = new Store<StoreType>({
-		defaults: {
-			GameStatut: {
-        AwayTeam: {
-          city: 'Ville Equipe Exterieur',
-          color: '#612323',
-          logo: 'https://placekitten.com/450/450',
-          name: 'Nom Equipe Exterieur',
-          score: 0,
-          timeout: 3
-        },
-        HomeTeam: {
-          city: 'Ville Equipe Domicile',
-          color: '#133155',
-          logo: 'https://placekitten.com/450/450',
-          name: 'Nom Equipe Domicile',
-          score: 0,
-          timeout: 3
-        },
-        Options: {
-          quarter: Quarter.Q1,
-          possession: TeamPossession.HOME,
-          flag: false,
-          showScoreboard: false,
-        }
-      },
-      LiveSettings: {
-        bitrate: 6000,
-        buffer: 15,
-        streamKey: ''
-      },
-      BackgroundImage: null
-		}
+		defaults: GetDefaultConfig()
   });
 
   constructor() {
@@ -104,9 +75,6 @@ export default class Main {
     app.on('ready', this.createWindow);
     app.on('window-all-closed', this.onWindowAllClosed);
     app.on('activate', this.onActivate);
-
-    this.log.info('%cRegister IPc Channels', 'color: blue');
-    this.IpcChannels = new IPCChannels(this.paths);
     } catch (error) {
       console.log(error)
     }
@@ -121,6 +89,8 @@ export default class Main {
 
     this.log.verbose('Creating splashScreen');
     this.splashScreen = new SplashScreen();
+    this.log.verbose('Creating scoreboard Window');
+    this.scoreboardWindow = new ScoreboardWindow();
     this.log.verbose('Creating main Window config');
     const size = screen.getPrimaryDisplay().workAreaSize;
     this.mainConfig = {
@@ -130,6 +100,7 @@ export default class Main {
       height: size.height,
       title: 'Gones Streamer',
       backgroundColor: '#17242D',
+      // alwaysOnTop: true,
       // icon: path.join(__dirname, `/../../dist/assets/logos/logo-raw.png`),
       show: false,
       webPreferences: {
@@ -157,6 +128,11 @@ export default class Main {
       }));
     }
 
+    this.mainWindow.on('close', () => {      
+      this.log.info('%cclose scoreboard Window', 'color: blue');
+      this.scoreboardWindow && this.scoreboardWindow.window && this.scoreboardWindow.window.destroy();
+    });
+
     this.mainWindow.on('closed', () => this.mainWindow = null);
 
     // Hot Reloading
@@ -179,6 +155,10 @@ export default class Main {
     }
 
     this.mainWindow.webContents.on('did-finish-load', () => {
+
+      this.log.info('%cRegister IPc Channels', 'color: blue');
+      this.IpcChannels = new IPCChannels(this.paths, this.scoreboardWindow?.window?.webContents!);
+
       this.log.info('%cclose Splash Window', 'color: blue');
       this.splashScreen && this.splashScreen.window && this.splashScreen.window.destroy();
       this.log.info('%cShow Main Window', 'color: blue');

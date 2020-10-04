@@ -1,5 +1,5 @@
 import React from "react";
-import { IObsRemote } from "../";
+import { GameClockEditable, IObsRemote } from "../";
 import { Row, Col } from "antd";
 import { Quarter } from "../../Models";
 import './ScoreboardEditable.css';
@@ -29,11 +29,23 @@ class ScoreboardEditable extends React.Component<ScoreboardEditableProps, Scoreb
 
             <TeamScorboardEditable ObsRemote={this.props.ObsRemote} isHomeTeam={false} />
 
-            <div className="teamblock-scoreboard" style={{ marginLeft: '5px', width: '145px', background: '#333333', position: 'relative', overflow: "hidden" }}>
+            <div className="teamblock-scoreboard" style={{ marginLeft: '5px', width: this.props.ObsRemote.store?.GameStatut.Options.clock.active ? 180 : 145, background: '#333333', position: 'relative', overflow: "hidden" }}>
               <div className="quarter-scoreboard" style={{ textAlign: "center", fontWeight: 700, color: 'white'}}>
-                <p style={{ transform: 'skewX(25deg)', margin: 0 }}>{ this.props.ObsRemote.store?.GameStatut.Options.quarter === Quarter.OT ? 'OT' : 'Q' + this.props.ObsRemote.store?.GameStatut.Options.quarter }</p>
+                <p style={{ transform: 'skewX(25deg)', margin: 0 }}>
+                  { this.props.ObsRemote.store?.GameStatut.Options.clock.active && <GameClockEditable ObsRemote={this.props.ObsRemote}></GameClockEditable> }
+                  <span>{ this.props.ObsRemote.store?.GameStatut.Options.quarter === Quarter.OT ? 'OT' : 'Q' + this.props.ObsRemote.store?.GameStatut.Options.quarter }</span>
+                </p>
               </div>
-              <div className="quarter-scoreboard bg-warning" style={{ textAlign: "center", fontWeight: 700, color: "black", position: "absolute", top: 0, right: this.props.ObsRemote.store?.GameStatut.Options.flag ? 0 : 145, width: 145, transition: "all ease 0.8s" }}>
+              <div className="quarter-scoreboard bg-warning" style={{ 
+                textAlign: "center", 
+                fontWeight: 700, 
+                color: "black", 
+                position: "absolute", 
+                top: 0, 
+                right: this.props.ObsRemote.store?.GameStatut.Options.flag ? 0 : this.props.ObsRemote.store?.GameStatut.Options.clock.active ? 180 : 145, 
+                width: this.props.ObsRemote.store?.GameStatut.Options.clock.active ? 180 : 145, 
+                transition: "all ease 0.8s" 
+              }}>
                 <p style={{ transform: 'skewX(25deg)', margin: 0 }}>FLAG</p>
               </div>
             </div>

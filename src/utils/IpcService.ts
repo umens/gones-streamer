@@ -23,6 +23,38 @@ export class IpcService {
       ipcRenderer.once(request.responseChannel!, (event, response) => resolve(response));
     });
   }
+  
+  public sendWithoutResponse<T>(channel: string, request: IpcRequest = {}): void {
+    // If the ipcRenderer is not available try to initialize it
+    if (!this.ipcRenderer) {
+      this.initializeIpcRenderer();
+    }
+    // If there's no responseChannel let's auto-generate it
+    if (!request.responseChannel) {
+      request.responseChannel = `${channel}_response_${new Date().getTime()}`
+    }
+
+    const ipcRenderer = this.ipcRenderer;
+    ipcRenderer.send(channel, request);
+  }
+  
+  public receiveUpdate<T>(channel: string, request: IpcRequest = {}): IpcRenderer {
+    // If the ipcRenderer is not available try to initialize it
+    if (!this.ipcRenderer) {
+      this.initializeIpcRenderer();
+    }
+    // If there's no responseChannel let's auto-generate it
+    if (!request.responseChannel) {
+      request.responseChannel = `${channel}_response_${new Date().getTime()}`
+    }
+
+    const ipcRenderer = this.ipcRenderer;
+    return ipcRenderer;
+    
+    // return new Promise(resolve => {
+    //   ipcRenderer.on(request.responseChannel!, (event, response) => resolve(response));
+    // });
+  }
 
   private initializeIpcRenderer() {
     // console.debug(window)

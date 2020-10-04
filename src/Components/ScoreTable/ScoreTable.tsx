@@ -1,21 +1,23 @@
 import React from "react";
 import { IObsRemote } from "../";
 import { Button, Menu, Dropdown, Row, Col } from "antd";
-import { DownOutlined, CrownOutlined } from '@ant-design/icons';
+import { DownOutlined, CrownOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import './ScoreTable.css';
-import { ScoreType, TeamPossession } from "../../Models";
+import { ScoreType, TeamPossession, Timeout } from "../../Models";
 
 type ScoreTableProps = {
   ObsRemote: IObsRemote;
   isHomeTeam: boolean;
 };
 type ScoreTableState = {
+  timeoutLoading: boolean[];
 };
 class ScoreTable extends React.Component<ScoreTableProps, ScoreTableState> {
 
   constructor(props: Readonly<ScoreTableProps>) {
     super(props);
     this.state = {
+      timeoutLoading: [],
     };
   }
 
@@ -33,7 +35,40 @@ class ScoreTable extends React.Component<ScoreTableProps, ScoreTableState> {
     } catch (error) {
       
     }
-  }
+  }  
+  
+  changeTimeout = async (decrease: boolean, index: number) => {
+    try {
+      await this.setState(({ timeoutLoading }) => {
+        const newLoadings = [...timeoutLoading];
+        timeoutLoading[index] = true;
+  
+        return {
+          timeoutLoading: newLoadings,
+        };
+      });      
+      let team = this.props.isHomeTeam ? this.props.ObsRemote.store?.GameStatut.HomeTeam! : this.props.ObsRemote.store?.GameStatut.AwayTeam!;
+      let value: Timeout;
+      if(decrease) {
+        value = team.timeout - 1;      
+        await this.props.ObsRemote.startStopClock(true);
+      }
+      else {
+        value = team.timeout + 1;
+      }
+      await this.props.ObsRemote.updateTextProps({ props: 'timeout', value, homeTeam: this.props.isHomeTeam, withAnimation: decrease});
+      await this.setState(({ timeoutLoading }) => {
+        const newLoadings = [...timeoutLoading];
+        newLoadings[index] = false;
+  
+        return {
+          timeoutLoading: newLoadings,
+        };
+      });
+    } catch (error) {
+      
+    }
+  };
   
   render() {
     const menu = (
@@ -59,6 +94,34 @@ class ScoreTable extends React.Component<ScoreTableProps, ScoreTableState> {
             >
               {text}
             </Button>
+          </Col>
+        </Row>
+        
+        <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
+          <Col span={3} offset={2}>
+            <Button 
+              icon={<MinusOutlined />}
+              key={`timeout-${(this.props.isHomeTeam) ? 'home': 'away'}`}
+              loading={this.state.timeoutLoading[0]}
+              onClick={async () => await this.changeTimeout(true, 0)} 
+              disabled={(this.props.isHomeTeam && this.props.ObsRemote.store?.GameStatut.HomeTeam.timeout! === 0) || (!this.props.isHomeTeam && this.props.ObsRemote.store?.GameStatut.AwayTeam.timeout! === 0)} 
+              type="primary"
+              block
+            />
+          </Col>
+          <Col span={14}>
+            <p style={{ textAlign: "center" }}>Timeout</p>
+          </Col>
+          <Col span={3}>
+            <Button
+              icon={<PlusOutlined />}
+              key={`timeout-${(this.props.isHomeTeam) ? 'home': 'away'}`} 
+              loading={this.state.timeoutLoading[1]}
+              onClick={async () => await this.changeTimeout(false, 1)} 
+              disabled={(this.props.isHomeTeam && this.props.ObsRemote.store?.GameStatut.HomeTeam.timeout! > 2) || (!this.props.isHomeTeam && this.props.ObsRemote.store?.GameStatut.AwayTeam.timeout! > 2)} 
+              type="primary" 
+              block
+            />
           </Col>
         </Row>
         
