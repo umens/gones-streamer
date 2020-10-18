@@ -1,10 +1,10 @@
 // import { autoUpdater } from "electron-updater";
 
 import { BrowserWindowConstructorOptions, BrowserWindow, protocol } from "electron";
-import * as ElectronLog from 'electron-log';
+import ElectronLog from 'electron-log';
 import { join } from "path";
-import * as url from 'url';
-import * as isDev from 'electron-is-dev';
+import url from 'url';
+import isDev from 'electron-is-dev';
 
 export default class ScoreboardWindow {
 

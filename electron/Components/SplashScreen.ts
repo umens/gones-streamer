@@ -1,8 +1,8 @@
 // import { autoUpdater } from "electron-updater";
 
 import { BrowserWindowConstructorOptions, BrowserWindow } from "electron";
-import * as ElectronLog from 'electron-log';
-import * as path from 'path';
+import ElectronLog from 'electron-log';
+import path from 'path';
 
 export default class SplashScreen {
 

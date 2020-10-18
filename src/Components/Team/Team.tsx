@@ -5,7 +5,7 @@ import { LoadingOutlined, PlusOutlined, BgColorsOutlined } from '@ant-design/ico
 import classNames from "classnames";
 import './Team.css';
 import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../utils/IpcService";
+import { IpcService } from "../../Utils/IpcService";
 import { ChromePicker } from 'react-color';
 import { Timeout, Team as TeamModel } from "../../Models";
 

@@ -5,7 +5,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import classNames from "classnames";
 import './TeamScorboardEditable.css';
 import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../utils/IpcService";
+import { IpcService } from "../../Utils/IpcService";
 import { ChromePicker } from 'react-color';
 import { Timeout, Team as TeamModel, TeamPossession } from "../../Models";
 

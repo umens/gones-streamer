@@ -4,5 +4,7 @@ import { StoredConfigChannel } from './StoredConfigChannel';
 import { ObsSettingsChannel } from './ObsSettingsChannel';
 import { FileUploadChannel } from './FileUploadChannel';
 import { ScoreboardInfoChannel } from './ScoreboardInfoChannel';
+import { SponsorsDataChannel } from './SponsorsDataChannel';
+import { PlayersDataChannel } from './PlayersDataChannel';
 
-export { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel };
+export { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel };

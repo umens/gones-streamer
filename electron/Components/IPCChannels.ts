@@ -1,6 +1,6 @@
-import { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel } from "./IPC";
+import { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel } from "./IPC";
 import { ipcMain, WebContents } from "electron";
-import * as ElectronLog from 'electron-log';
+import ElectronLog from 'electron-log';
 import { PathsType } from "./App";
 
 export default class IPCChannels {
@@ -19,6 +19,8 @@ export default class IPCChannels {
       new ObsSettingsChannel(this.paths),
       new FileUploadChannel(this.paths),
       new ScoreboardInfoChannel(),
+      new SponsorsDataChannel(this.paths),
+      new PlayersDataChannel(this.paths),
     ])
   }
 

@@ -3,6 +3,7 @@ import { IObsRemote } from "..";
 import { List, Tag } from "antd";
 import { SyncOutlined, VideoCameraFilled } from '@ant-design/icons';
 import { SceneName } from "../../Models";
+import './Scenes.css';
 
 type ScenesProps = {
   ObsRemote: IObsRemote;
@@ -67,11 +68,15 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
               })}</div>;
             }
 
-            return (
-              <List.Item key={item.name} extra={extra} onClick={this.changeScene(item.name as SceneName)}>
-                {content}
-              </List.Item>
-            )
+            let itemNode;
+            if (![SceneName.Replay, SceneName.Sponsors].includes(item.name as SceneName)) {
+              itemNode = <List.Item key={item.name} extra={extra} className="sceneItem" onClick={this.changeScene(item.name as SceneName)}>{content}</List.Item>;
+            } 
+            else {
+              itemNode = <List.Item key={item.name} extra={extra} style={{ color: '#6b6b6b' }}>{content}</List.Item>;
+            }
+
+            return itemNode;
           }}
         />
       </>

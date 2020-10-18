@@ -2,7 +2,7 @@ import React from "react";
 import { Row, Col } from "antd";
 import { GameStatut, LiveSettings, Quarter, TeamPossession } from "../../Models";
 import './Scoreboard.css';
-import { IpcService } from "../../utils/IpcService";
+import { IpcService } from "../../Utils/IpcService";
 import { GameClock } from "..";
 
 const ipc = new IpcService();

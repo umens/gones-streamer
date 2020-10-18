@@ -1,8 +1,8 @@
 import React from "react";
 import { IObsRemote } from "../../Components";
-import { Row, Col, message, Form, Input, Button, Select, Card, List } from "antd";
+import { Row, Col, message, Form, Input, Button, Select, Card, List, Alert } from "antd";
 import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../utils/IpcService";
+import { IpcService } from "../../Utils/IpcService";
 import { LoadingOutlined, PlusOutlined, PoweroffOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
 import { StreamingService, StreamingSport } from "../../Models";
@@ -118,6 +118,14 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
         key: 'cameras',
         tab: 'Cameras',
       },
+      {
+        key: 'playersAdmin',
+        tab: 'Players',
+      },
+      {
+        key: 'sponsorsAdmin',
+        tab: 'Sponsors',
+      },
     ];
 
     const contentList: { [key: string]: JSX.Element } = {
@@ -137,36 +145,44 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
         </section>
       )}
     </ReactDropzone>,
-      cameras: <List
-      grid={{
-        gutter: 16,        
-        xs: 1,
-        sm: 2,
-        md: 2,
-        lg: 2,
-        xl: 2,
-        xxl: 2
-      }}
-      dataSource={data}
-      renderItem={(item, index) => (
-        <List.Item>
-          <Card title={item.title}>
-            { item.active ?
-              <p>à venir</p>
-              :
-              <Button
-                type="primary"
-                icon={<PoweroffOutlined />}
-                loading={this.state.loadingCams[index]}
-                onClick={() => this.activateCam(index)}
-              >
-                Activate Camera {index + 1}
-              </Button>
-            }          
-          </Card>
-        </List.Item>
-      )}
-    />,
+      cameras: <Alert
+        message="Feature in progress"
+        description="Gerez et configurez les caméras disponible pour la retransmission."
+        type="info"
+        showIcon
+      />,
+    //   <List
+    //   grid={{
+    //     gutter: 16,        
+    //     xs: 1,
+    //     sm: 2,
+    //     md: 2,
+    //     lg: 2,
+    //     xl: 2,
+    //     xxl: 2
+    //   }}
+    //   dataSource={data}
+    //   renderItem={(item, index) => (
+    //     <List.Item>
+    //       <Card title={item.title}>
+    //         { item.active ?
+    //           <p>à venir</p>
+    //           :
+    //           <Button
+    //             type="primary"
+    //             icon={<PoweroffOutlined />}
+    //             loading={this.state.loadingCams[index]}
+    //             onClick={() => this.activateCam(index)}
+    //           >
+    //             Activate Camera {index + 1}
+    //           </Button>
+    //         }          
+    //       </Card>
+    //     </List.Item>
+    //   )}
+    // />,
+      playersAdmin: <></>,
+      sponsorsAdmin: <></>,
     };
 
     return (
@@ -201,7 +217,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
                 </Select>
               </Form.Item>
               <Form.Item name="key" label="Clé">
-                <Input placeholder="Clé de stream"/>
+                <Input.Password placeholder="Clé de stream"/>
               </Form.Item>
               <Form.Item name="bitrate" label="Bitrate">
                 <Input type="number" min={0} max={20000} step={500} addonAfter='Kbps' placeholder="Bitrate en Kbps" />

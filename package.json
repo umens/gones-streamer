@@ -4,16 +4,6 @@
   "private": true,
   "homepage": ".",
   "main": "build/main.bundle.js",
-  "dependencies": {
-    "antd": "^4.6.6",
-    "classnames": "^2.2.6",
-    "obs-websocket-js": "^4.0.2",
-    "react": "^16.13.1",
-    "react-color": "^2.18.1",
-    "react-dom": "^16.13.1",
-    "react-dropzone": "^11.2.0",
-    "react-router-dom": "^5.2.0"
-  },
   "scripts": {
     "start": "concurrently \"cross-env BROWSER=none yarn react:start\" \"wait-on http://localhost:3000 && yarn electron:start\"",
     "build": "yarn react:build && yarn electron:build",
@@ -28,7 +18,11 @@
     "getBinary": "node ./scripts/getLatestBins.js"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "excludedFiles": [
+      "*.test.ts",
+      "build/**/*"
+    ]
   },
   "browserslist": {
     "production": [
@@ -45,6 +39,11 @@
   "build": {
     "appId": "some.id.ofyours",
     "extends": null,
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
+      "node_modules/ffmpeg-static/index.js",
+      "node_modules/ffmpeg-static/package.json"
+    ],
     "files": [
       "build/**/*"
     ],
@@ -69,26 +68,45 @@
       "iconUrl": "path-to-icon.png"
     }
   },
+  "dependencies": {
+    "antd": "^4.7.0",
+    "classnames": "^2.2.6",
+    "ffmpeg-static": "^4.2.7",
+    "ffprobe-static": "^3.0.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "obs-websocket-js": "^4.0.2",
+    "react": "^16.14.0",
+    "react-color": "^2.18.1",
+    "react-dom": "^16.14.0",
+    "react-dropzone": "^11.2.0",
+    "react-filter-search": "^1.0.11",
+    "react-router-dom": "^5.2.0",
+    "uuid": "^8.3.1"
+  },
   "devDependencies": {
     "@octokit/rest": "^18.0.6",
     "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.0.4",
-    "@testing-library/user-event": "^12.1.6",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.8",
     "@types/classnames": "^2.2.10",
     "@types/electron-devtools-installer": "^2.2.0",
+    "@types/ffmpeg-static": "^3.0.0",
+    "@types/ffprobe-static": "^2.0.0",
+    "@types/fluent-ffmpeg": "^2.1.16",
     "@types/jest": "^26.0.14",
-    "@types/node": "^14.11.2",
-    "@types/react": "^16.9.49",
+    "@types/node": "^14.11.10",
+    "@types/react": "^16.9.53",
     "@types/react-color": "^3.0.4",
     "@types/react-dom": "^16.9.8",
-    "@types/react-router-dom": "^5.1.5",
+    "@types/react-router-dom": "^5.1.6",
+    "@types/uuid": "^8.3.0",
     "axios": "^0.20.0",
     "clean-webpack-plugin": "^3.0.0",
     "concurrently": "^5.3.0",
-    "copy-webpack-plugin": "^6.1.1",
+    "copy-webpack-plugin": "^6.2.1",
     "cross-env": "^7.0.2",
-    "electron": "^10.1.2",
-    "electron-builder": "^22.8.1",
+    "electron": "^10.1.3",
+    "electron-builder": "^22.9.1",
     "electron-devtools-installer": "^3.1.1",
     "electron-first-run": "^3.0.0",
     "electron-is-dev": "^1.2.0",
@@ -96,18 +114,18 @@
     "electron-log": "^4.2.4",
     "electron-reload": "^1.5.0",
     "electron-root-path": "^1.0.16",
-    "electron-store": "^6.0.0",
+    "electron-store": "^6.0.1",
     "electron-updater": "^4.3.5",
     "extract-zip": "^2.0.1",
     "html-webpack-plugin": "^4.5.0",
     "react-scripts": "3.4.3",
-    "ts-loader": "^8.0.4",
+    "ts-loader": "^8.0.5",
     "typescript": "~4.0.3",
     "unzip": "^0.1.11",
     "wait-on": "^5.2.0",
     "webpack": "4.42.0",
-    "webpack-cli": "^3.3.12",
+    "webpack-cli": "^4.0.0",
     "webpack-electron-reload": "^1.0.1",
-    "webpack-merge": "^5.1.4"
+    "webpack-merge": "^5.2.0"
   }
 }

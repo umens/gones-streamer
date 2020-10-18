@@ -1,9 +1,9 @@
 import React, { createRef } from "react";
 import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
-import { IpcService } from "../../utils/IpcService";
-import { GameEvent, StoreType } from "../../Models";
+import { IpcService } from "../../Utils/IpcService";
+import { GameEvent, SceneName, StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable } from "../../Components";
+import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl } from "../../Components";
 // import ReactDropzone from "react-dropzone";
 import './Cockpit.css';
 import { FormInstance } from "antd/lib/form";
@@ -132,6 +132,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       {
         key: 'PlayerControl',
         tab: 'Players',
+        disabled: this.props.ObsRemote.scenes?.["current-scene"] !== SceneName.Live,
       },
       {
         key: 'SponsorControl',
@@ -140,8 +141,8 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     ];
     const contentList: { [key: string]: JSX.Element } = {
       'GameControl': <GameControl ObsRemote={this.props.ObsRemote} />,
-      'PlayerControl': <p>Coming soon</p>,
-      'SponsorControl': <p>Coming soon</p>,
+      'PlayerControl': <PlayerControl ObsRemote={this.props.ObsRemote} />,
+      'SponsorControl': <SponsorControl ObsRemote={this.props.ObsRemote} />,
     };
 
     const formRef = React.createRef<FormInstance>();

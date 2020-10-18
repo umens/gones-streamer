@@ -2,8 +2,9 @@ import { Component } from "react";
 import OBSWebSocket from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType } from "../Models";
-import { IpcService } from "../utils/IpcService";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig } from "../Models";
+import { IpcService } from "../Utils/IpcService";
+import { Utilities } from "../Utils/Utilities";
 
 const ipc = new IpcService();
 
@@ -25,6 +26,7 @@ type ObsRemoteState = {
   } | null;
   store: StoreType | null;
   timeoutConnection?: NodeJS.Timeout;
+  sponsorDisplayType?: SponsorDisplayType;
 
   reconnectObs: () => Promise<void>;
   goLive: () => Promise<void>;
@@ -44,6 +46,9 @@ type ObsRemoteState = {
   resetClock: () => Promise<void>;
   toggleClock: () => Promise<void>;
   setGameClock: ({ minutes, seconds }: { minutes: number; seconds: number; }) => Promise<void>;
+  togglePlayerHighlight: (show: boolean, uuid: string) => Promise<void>;
+  toggleSponsor: ({show, uuid, previousScene, sponsorDisplayType}: {show: boolean, uuid: string, previousScene: SceneName, sponsorDisplayType?: SponsorDisplayType}) => Promise<void>;
+  // resetSponosorScene: () => Promise<void>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -61,6 +66,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       // homeTeam: null,
       // awayTeam: null,
       store: null,
+
       reconnectObs: this.connectObs.bind(this),
       goLive: this.goLive.bind(this),
       changeActiveScene: this.changeActiveScene.bind(this),
@@ -79,6 +85,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       resetClock: this.resetClock.bind(this),
       toggleClock: this.toggleClock.bind(this),
       setGameClock: this.setGameClock.bind(this),
+      togglePlayerHighlight: this.togglePlayerHighlight.bind(this),
+      toggleSponsor: this.toggleSponsor.bind(this),
+      // resetSponosorScene: this.resetSponosorScene.bind(this),
     };
 
     obsWs.on('ConnectionClosed', async () => {
@@ -332,18 +341,24 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         streamingService: StreamingService.Youtube,
       };
       let bgImg = await (await obsWs.send('GetSourceSettings', { sourceName: 'Background' })).sourceSettings as any; 
+      // TODO: wait for GetSceneItemList to be release to list all cams
       /**
-       * TODO: wait for GetSceneItemList to be release to list all cams
        * Same for DeleteSceneItem (Available) & DuplicateSceneItem (Available) to implemente adding and removing cams
        * configuring them with SetSceneItemProperties (Available) and navigator.mediaDevices.enumerateDevices()
        * use GetSourceSettings to check video input of the cam
        */
       // let cameras = await obsWs.send('GetSceneItemList');
+
+      const Sponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { getter: true }}) || [];
+      const Players = await ipc.send<Player[]>('players-data', { params: { getter: true }}) || [];
+
       let store: StoreType = {
         GameStatut,
         LiveSettings,
         BackgroundImage: bgImg.file,
         CamerasHardware: defaultConfig.CamerasHardware,
+        Sponsors,
+        Players,
       };
       await this.setState({ store, firstDatasLoaded: true });
       await this.sendUpdateToScoreboardWindow();
@@ -757,6 +772,90 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       };
       await this.setState({ store });
       await this.sendUpdateToScoreboardWindow();
+    } catch (error) {
+      
+    }
+  }
+
+  togglePlayerHighlight = async (show: boolean, uuid: string): Promise<void> => {
+    try {      
+      const store = this.state.store!;
+      const player: Player | undefined = store.Players.find(p => p.uuid === uuid);
+      if(player) {
+        await obsWs.send('SetTextGDIPlusProperties', { source: 'player_name', text: `#${player.num} ${player.lastname.toUpperCase()} ${Utilities.capitalize(player.firstname)}` });
+        await obsWs.send('SetTextGDIPlusProperties', { source: 'player_details', text: `${player.position}     ${player.lastname.toUpperCase()}     ${Utilities.capitalize(player.firstname)}` });
+        await obsWs.send('SetSourceSettings', { sourceName: 'player_media', sourceSettings: { file: player.media } });
+        // setTimeout(async () => {
+        //   await obsWs.send('SetSceneItemProperties', { item: { name: 'Player Highlight' }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+        // }, 5000);
+      }
+      await obsWs.send('SetSceneItemProperties', { item: { name: 'Player Highlight' }, visible: show, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+    } catch (error) {
+      
+    }
+  }
+
+  toggleSponsor = async ({show, uuid, previousScene, sponsorDisplayType}: {show: boolean, uuid: string, previousScene: SceneName, sponsorDisplayType?: SponsorDisplayType}): Promise<void> => {
+    try {
+      await this.resetSponosorScene();
+      if(show) {
+        const store = this.state.store!;
+        const sponsor: Sponsor | undefined = store.Sponsors.find(p => p.uuid === uuid);
+        let sourceName = sponsor?.mediaType! === MediaType.Video ? 'sponsor_video' : 'sponsor_image';
+        await obsWs.send('SetSourceSettings', { sourceName, sourceSettings: { file: sponsor?.media } });
+        await obsWs.send('SetSceneItemProperties', { item: { name: sponsorDisplayType + '_sponsor' }, visible: true, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+        let id: number;
+        if(sponsorDisplayType) {
+          switch (previousScene) {
+            case SceneName.Ending:
+              id = sponsorDisplayType === SponsorDisplayType.Small ? SponsorDisplayTypeSceneIdSmall.Ending : SponsorDisplayTypeSceneIdBig.Ending;
+              break;
+            case SceneName.Halftime:
+              id = sponsorDisplayType === SponsorDisplayType.Small ? SponsorDisplayTypeSceneIdSmall.Halftime : SponsorDisplayTypeSceneIdBig.Halftime;
+              break;
+            case SceneName.Starting:
+              id = sponsorDisplayType === SponsorDisplayType.Small ? SponsorDisplayTypeSceneIdSmall.Starting : SponsorDisplayTypeSceneIdBig.Starting;
+              break;
+          
+            case SceneName.Live:
+            default:
+              id = sponsorDisplayType === SponsorDisplayType.Small  ? SponsorDisplayTypeSceneIdSmall.Live : SponsorDisplayTypeSceneIdBig.Live;
+              break;
+          }
+          await obsWs.send('SetSceneItemProperties', { item: { id }, visible: true, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+        }
+        await this.changeActiveScene(SceneName.Sponsors);
+      } else {
+        await this.changeActiveScene(previousScene);
+      }
+    } catch (error) {
+      
+    }
+  }
+
+  resetSponosorScene = async (): Promise<void> => {
+    try {
+      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_video', sourceSettings: { file: null } });
+      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_image', sourceSettings: { file: null } });
+      Object.values(SponsorDisplayType).forEach(async element => {
+        await obsWs.send('SetSceneItemProperties', { item: { name: element + '_sponsor' }, visible: false, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+        if(element === SponsorDisplayType.Small) {
+          Object.values(SponsorDisplayTypeSceneIdSmall).forEach(async id => {
+            if (isNaN(Number(id))) {
+              return;
+            }
+            await obsWs.send('SetSceneItemProperties', { item: { id: id as number }, visible: false, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+          });
+        }
+        if(element === SponsorDisplayType.Big) {
+          Object.values(SponsorDisplayTypeSceneIdBig).forEach(async id => {
+            if (isNaN(Number(id))) {
+              return;
+            }
+            await obsWs.send('SetSceneItemProperties', { item: { id: id as number }, visible: false, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+          });
+        }
+      });
     } catch (error) {
       
     }

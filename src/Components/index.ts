@@ -9,6 +9,9 @@ import { Scoreboard } from "./Scoreboard/Scoreboard";
 import { ScoreboardEditable } from "./ScoreboardEditable/ScoreboardEditable";
 import { GameClockEditable } from "./GameClockEditable/GameClockEditable";
 import { GameClock } from "./GameClock/GameClock";
+import { SponsorControl } from "./SponsorControl/SponsorControl";
+import { PlayerControl } from "./PlayerControl/PlayerControl";
+import { VideoPreview } from "./VideoPreview/VideoPreview";
 
-export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock };
+export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview };
 export type { IObsRemote };

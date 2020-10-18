@@ -7,6 +7,8 @@ export type StoreType = {
   LiveSettings: LiveSettings;
   BackgroundImage: string | null;
   CamerasHardware: CameraHardware[];
+  Sponsors: Sponsor[];
+  Players: Player[];
 };
 
 export type GameStatut = {
@@ -58,6 +60,26 @@ export type GameClock = {
   seconds: number;
   active: boolean;
   isOn: boolean;
+}
+
+export type Sponsor = {
+  uuid: string;
+  label: string;
+  media?: string;
+  mediaType?: MediaType;
+  duration?: number;
+}
+
+export type Player = {
+  uuid: string;
+  firstname: string;
+  lastname: string;
+  num: number;
+  position: string;
+  age?: number;
+  media?: string;
+  weight?: number;
+  height?: number;
 }
 
 /**
@@ -114,11 +136,40 @@ export enum ScoreType {
 
 export enum AnimationType {
   TIMEOUT = 'timeout_animation',
+  TOUCHDOWN = 'touchdown_animation',
+  PAT = 'pat_animation',
+  EXTRAPOINT = 'extrapoint_animation',
+  SAFETY = 'safety_animation',
+  FIELDGOAL = 'fieldgoal_animation',
 }
 
 export enum StreamingService {
   Youtube = 'youtube',
   Facebook = 'facebook',
+}
+
+export enum MediaType {
+  Video = 'video',
+  Image = 'image',
+}
+
+export enum SponsorDisplayType {
+  Fullscreen = 'full',
+  Big = 'big',
+  Small = 'small',
+}
+
+export enum SponsorDisplayTypeSceneIdBig {
+  Ending = 7,
+  Halftime = 8,
+  Live = 9,
+  Starting = 10,
+}
+export enum SponsorDisplayTypeSceneIdSmall {
+  Ending = 11,
+  Halftime = 12,
+  Live = 13,
+  Starting = 14,
 }
 
 /** 
@@ -171,12 +222,16 @@ export function GetDefaultConfig(): StoreType {
       active: true,
     }
   ];
+  const Sponsors: Sponsor[] = [];
+  const Players: Player[] = [];
   const BackgroundImage = '';
   let storedConfigDefault: StoreType = {
     GameStatut,
     LiveSettings,
     BackgroundImage,
     CamerasHardware,
+    Sponsors,
+    Players,
   };
   return storedConfigDefault;
 }

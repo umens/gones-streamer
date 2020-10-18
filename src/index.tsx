@@ -14,8 +14,8 @@ import { Scoreboard } from './Components';
 ReactDOM.render(
   <Router>
     <Switch>
-      <Route exact path="/" component={App} />
       <Route exact path="/scoreboard" component={Scoreboard} />
+      <Route path="/" component={App} />
     </Switch>
   </Router>, 
   document.getElementById('root')

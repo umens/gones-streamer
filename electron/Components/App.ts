@@ -2,11 +2,11 @@
 
 import { BrowserWindowConstructorOptions, screen, BrowserWindow, app, protocol } from "electron";
 import { join } from 'path';
-import * as isDev from 'electron-is-dev';
-import * as Store from 'electron-store';
-import * as ElectronLog from 'electron-log';
-import * as firstRun from 'electron-first-run';
-import * as url from 'url';
+import isDev from 'electron-is-dev';
+import Store from 'electron-store';
+import ElectronLog from 'electron-log';
+import firstRun from 'electron-first-run';
+import url from 'url';
 import installExtension, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import SplashScreen from "./SplashScreen";
 import { StoreType, GetDefaultConfig } from "../../src/Models";
@@ -21,6 +21,8 @@ const isPackaged = require('electron-is-packaged').isPackaged;
 export type PathsType = {
   binFolder: string;
   appFolder: string;
+  sponsorsFolder: string;
+  playersFolder: string;
 }
 
 export default class Main {
@@ -44,6 +46,8 @@ export default class Main {
     this.paths = {
       binFolder: join(extraResources, '/bin'),
       appFolder: join(extraResources, '/appDatas'),
+      sponsorsFolder: join(extraResources, '/sponsors'),
+      playersFolder: join(extraResources, '/players'),
     }
 
     // handle local file bug
@@ -59,7 +63,17 @@ export default class Main {
     this.log.verbose('Checking first run');
     if(firstRun({ options: 'first-run'})) {
       this.log.verbose('First run');
-      await fs.mkdir(this.paths.appFolder, { recursive: true });
+      await fs.mkdir(join(this.paths.sponsorsFolder, '/medias'), { recursive: true });
+      await fs.mkdir(join(this.paths.playersFolder, '/medias'), { recursive: true });
+      await fs.writeFile(
+        join(this.paths.sponsorsFolder, '/sponsors.json'),
+        JSON.stringify([], null, 2),
+      );
+      await fs.mkdir(this.paths.playersFolder, { recursive: true });
+      await fs.writeFile(
+        join(this.paths.playersFolder, '/players.json'),
+        JSON.stringify([], null, 2),
+      );
       // this.log.info('%c[Main] Init store', 'color: blue');
       // this.store = new Store();
       // this.store.set('isRainbow', 'false');

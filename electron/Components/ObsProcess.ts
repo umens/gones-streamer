@@ -1,6 +1,6 @@
-import * as ElectronLog from 'electron-log';
+import ElectronLog from 'electron-log';
 import { execFile, ChildProcess } from 'child_process';
-import * as path from 'path';
+import path from 'path';
 
 export default class ObsProcess {
 
