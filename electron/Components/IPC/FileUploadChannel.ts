@@ -1,9 +1,8 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest } from "../../../src/Models";
+import { IpcRequest, PathsType } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
-import { PathsType } from "../App";
 
 export class FileUploadChannel implements IpcChannelInterface {
 

@@ -1,9 +1,8 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest, Sponsor } from "../../../src/Models";
+import { IpcRequest, PathsType, Sponsor } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
-import { PathsType } from "../App";
 
 export class SponsorsDataChannel implements IpcChannelInterface {
 

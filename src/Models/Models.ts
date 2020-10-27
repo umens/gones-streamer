@@ -1,6 +1,12 @@
 /**
  * Types
  */
+export type PathsType = {
+  binFolder: string;
+  appFolder: string;
+  sponsorsFolder: string;
+  playersFolder: string;
+}
 
 export type StoreType = {
   GameStatut: GameStatut;
@@ -198,7 +204,7 @@ export function GetDefaultConfig(): StoreType {
       quarter: Quarter.Q1,
       possession: TeamPossession.HOME,
       flag: false,
-      showScoreboard: false,
+      showScoreboard: true,
       competition: 'FFFA D2',
       journee: 'Week 1',
       clock: {

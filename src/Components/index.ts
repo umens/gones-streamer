@@ -12,6 +12,7 @@ import { GameClock } from "./GameClock/GameClock";
 import { SponsorControl } from "./SponsorControl/SponsorControl";
 import { PlayerControl } from "./PlayerControl/PlayerControl";
 import { VideoPreview } from "./VideoPreview/VideoPreview";
+import { SponsorForm, SponsorFormValues } from "./SponsorForm/SponsorForm";
 
-export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview };
-export type { IObsRemote };
+export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm };
+export type { IObsRemote, SponsorFormValues };

@@ -2,7 +2,7 @@ import { Component } from "react";
 import OBSWebSocket from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, PathsType } from "../Models";
 import { IpcService } from "../Utils/IpcService";
 import { Utilities } from "../Utils/Utilities";
 
@@ -18,6 +18,7 @@ type ObsRemoteState = {
   connectingObs: boolean;
   connected2Obs: boolean;
   firstDatasLoaded: boolean;
+  // appPaths?: PathsType;
   scenes: {
     messageId: string;
     status: "ok";
@@ -27,6 +28,7 @@ type ObsRemoteState = {
   store: StoreType | null;
   timeoutConnection?: NodeJS.Timeout;
   sponsorDisplayType?: SponsorDisplayType;
+  Utilitites?: Utilities;
 
   reconnectObs: () => Promise<void>;
   goLive: () => Promise<void>;
@@ -299,6 +301,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   initGameStatut = async (): Promise<void> => {
     try {
+      const appPaths = await ipc.send<PathsType>('paths-data');
+      let utilitites = Utilities.getInstance(appPaths);
       const defaultConfig = GetDefaultConfig();
       let logoH = await (await obsWs.send('GetSourceSettings', { sourceName: 'Home Logo' })).sourceSettings as any;
       const HomeTeam: Team = {
@@ -360,7 +364,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         Sponsors,
         Players,
       };
-      await this.setState({ store, firstDatasLoaded: true });
+      await this.setState({ store, firstDatasLoaded: true, Utilitites: utilitites });
       await this.sendUpdateToScoreboardWindow();
     } catch (error) {
 
@@ -455,11 +459,15 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           if(bg) {
             const base64Img: string = await this.getBase64((value as FileUp).file);
             store.BackgroundImage = base64Img;
-            await obsWs.send('SetSourceSettings', { sourceName: 'Background', sourceSettings: { file: (value as FileUp).pathElectron } });
+            let arrayPath = (value as FileUp).pathElectron.split('\\');
+            const obsPath = '../../../../' + arrayPath.slice(Math.max(arrayPath.length - 2, 1)).join('/');
+            await obsWs.send('SetSourceSettings', { sourceName: 'Background', sourceSettings: { file: obsPath } });
           } else {
             const base64Img: string = await this.getBase64((value as FileUp).file);
             homeTeam ? store.GameStatut.HomeTeam.logo = base64Img : store.GameStatut.AwayTeam.logo = base64Img;
-            homeTeam ? await obsWs.send('SetSourceSettings', { sourceName: 'Home Logo', sourceSettings: { file: (value as FileUp).pathElectron } }) : await obsWs.send('SetSourceSettings', { sourceName: 'Away Logo', sourceSettings: { file: (value as FileUp).pathElectron } });
+            let arrayPath = (value as FileUp).pathElectron.split('\\');
+            const obsPath = '../../../../' + arrayPath.slice(Math.max(arrayPath.length - 2, 1)).join('/');
+            homeTeam ? await obsWs.send('SetSourceSettings', { sourceName: 'Home Logo', sourceSettings: { file: obsPath } }) : await obsWs.send('SetSourceSettings', { sourceName: 'Away Logo', sourceSettings: { file: obsPath } });
           }
           break;
         case 'name':
@@ -864,6 +872,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   sendUpdateToScoreboardWindow = async (): Promise<void> => {
     try {      
       const store = this.state.store!;
+      let GameStatut: IGameStatut = {...store.GameStatut};
+      GameStatut.AwayTeam.logo = this.state.Utilitites!.getImageFullPath(GameStatut.AwayTeam.logo);
+      GameStatut.HomeTeam.logo = this.state.Utilitites!.getImageFullPath(GameStatut.HomeTeam.logo);
       await ipc.sendWithoutResponse('scoreboard-info', { 
         responseChannel: 'scoreboard-update', 
         params: {

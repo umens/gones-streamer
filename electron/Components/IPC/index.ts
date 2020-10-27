@@ -6,5 +6,6 @@ import { FileUploadChannel } from './FileUploadChannel';
 import { ScoreboardInfoChannel } from './ScoreboardInfoChannel';
 import { SponsorsDataChannel } from './SponsorsDataChannel';
 import { PlayersDataChannel } from './PlayersDataChannel';
+import { PathsDataChannel } from './PathsDataChannel';
 
-export { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel };
+export { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel };

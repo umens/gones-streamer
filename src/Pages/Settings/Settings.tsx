@@ -1,9 +1,9 @@
 import React from "react";
-import { IObsRemote } from "../../Components";
-import { Row, Col, message, Form, Input, Button, Select, Card, List, Alert } from "antd";
+import { IObsRemote, SponsorControl } from "../../Components";
+import { Row, Col, message, Form, Input, Button, Select, Card, Alert } from "antd";
 import ReactDropzone from "react-dropzone";
 import { IpcService } from "../../Utils/IpcService";
-import { LoadingOutlined, PlusOutlined, PoweroffOutlined } from '@ant-design/icons';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
 import { StreamingService, StreamingSport } from "../../Models";
 
@@ -107,7 +107,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     //   // cam.img = await (await this.props.ObsRemote.getScreenshot()).img;
     //   return cam;
     // });
-    const data = this.props.ObsRemote.store?.CamerasHardware;
+    // const data = this.props.ObsRemote.store?.CamerasHardware;
     
     const tabList = [
       {
@@ -137,7 +137,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
               <input {...getInputProps({ multiple: false })} />
               <span tabIndex={0} className="ant-upload" role="button">
                 <div>
-                  {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.store?.BackgroundImage} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                  {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.Utilitites?.getImageFullPath(this.props.ObsRemote.store?.BackgroundImage)} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
                 </div>
               </span>
             </div>
@@ -182,12 +182,12 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     //   )}
     // />,
       playersAdmin: <></>,
-      sponsorsAdmin: <></>,
+      sponsorsAdmin: <SponsorControl ObsRemote={this.props.ObsRemote} editable={true} />,
     };
 
     return (
       <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
-        <Col span={10}>
+        <Col span={8}>
           <Card title="Paramètres">
             <Form
               layout='vertical'
@@ -233,11 +233,11 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
             </Form>
           </Card>
         </Col>
-        <Col span={14}>
+        <Col span={16}>
           <Card
             tabList={tabList}
             activeTabKey={this.state.key}
-            onTabChange={ newKey => { this.setState({key: newKey}); }}
+            onTabChange={ newKey => { this.setState({ key: newKey }); }}
           >
             { contentList[this.state.key] }
           </Card>

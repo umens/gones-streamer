@@ -9,7 +9,7 @@ import firstRun from 'electron-first-run';
 import url from 'url';
 import installExtension, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import SplashScreen from "./SplashScreen";
-import { StoreType, GetDefaultConfig } from "../../src/Models";
+import { StoreType, GetDefaultConfig, PathsType } from "../../src/Models";
 import IPCChannels from "./IPCChannels";
 import ObsProcess from "./ObsProcess";
 import { promises as fs } from 'fs';
@@ -17,13 +17,6 @@ import ScoreboardWindow from "./ScoreboardWindow";
 
 const isPackaged = require('electron-is-packaged').isPackaged;
 // const rootPath = require('electron-root-path').rootPath;
-
-export type PathsType = {
-  binFolder: string;
-  appFolder: string;
-  sponsorsFolder: string;
-  playersFolder: string;
-}
 
 export default class Main {
   

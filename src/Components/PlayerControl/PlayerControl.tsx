@@ -8,7 +8,7 @@ import { Player } from "../../Models";
 // import { v4 as uuidv4 } from 'uuid';
 import { Utilities } from "../../Utils/Utilities";
 
-type PlayerControlProps = {
+type PlayerControlProps = typeof PlayerControl.defaultProps & {
   ObsRemote: IObsRemote;
 };
 type PlayerControlState = {
@@ -16,6 +16,10 @@ type PlayerControlState = {
   showingPlayer: string | null;
 };
 class PlayerControl extends React.Component<PlayerControlProps, PlayerControlState> {
+
+  static defaultProps = {
+    editable: false,
+  };
 
   constructor(props: Readonly<PlayerControlProps>) {
     super(props);

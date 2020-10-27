@@ -205,7 +205,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
                     <input {...getInputProps({ multiple: false })} />
                     <span tabIndex={0} style={{ padding: 0 }} className="ant-upload" role="button">
                       <div>
-                        {team?.logo ? <img style={{ backgroundColor: 'transparent', border: 0 }} className='img-thumbnail' alt='home team logo' src={ team?.logo } /> : uploadButton}
+                        {team?.logo ? <img style={{ backgroundColor: 'transparent', border: 0 }} className='img-thumbnail' alt='home team logo' src={ this.props.ObsRemote.Utilitites?.getImageFullPath(team.logo) } /> : uploadButton}
                       </div>
                     </span>
                   </div>

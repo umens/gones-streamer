@@ -12,6 +12,7 @@
 /build
 
 /assets/appDatas/**/*.png
+/assets/appDatas/**/*.jpg
 /assets/bin/obs/bin
 /assets/bin/obs/*.bat
 /assets/bin/obs/data

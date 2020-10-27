@@ -15,7 +15,10 @@ import { ObsRemote, IObsRemote } from './Components';
 
 const { Header, Content } = Layout;
 
-function App() {
+type AppProps = {
+}
+
+const App = (props: AppProps) => {
 
   return (
     <Router>

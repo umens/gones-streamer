@@ -24,7 +24,7 @@ export class IpcService {
     });
   }
   
-  public sendWithoutResponse<T>(channel: string, request: IpcRequest = {}): void {
+  public sendWithoutResponse(channel: string, request: IpcRequest = {}): void {
     // If the ipcRenderer is not available try to initialize it
     if (!this.ipcRenderer) {
       this.initializeIpcRenderer();
@@ -38,7 +38,7 @@ export class IpcService {
     ipcRenderer.send(channel, request);
   }
   
-  public receiveUpdate<T>(channel: string, request: IpcRequest = {}): IpcRenderer {
+  public receiveUpdate(channel: string, request: IpcRequest = {}): IpcRenderer {
     // If the ipcRenderer is not available try to initialize it
     if (!this.ipcRenderer) {
       this.initializeIpcRenderer();
