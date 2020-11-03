@@ -5,7 +5,9 @@ import { SearchOutlined, EyeOutlined, EyeInvisibleOutlined, EditOutlined, Delete
 import FilterResults from 'react-filter-search';
 import './SponsorControl.css';
 import { MediaType, SceneName, Sponsor, SponsorDisplayType } from "../../Models";
-import { Utilities } from "../../Utils/Utilities";
+import { IpcService, Utilities } from "../../Utils";
+
+const ipc = new IpcService();
 
 type SponsorControlProps = typeof SponsorControl.defaultProps & {
   ObsRemote: IObsRemote;
@@ -15,6 +17,8 @@ type SponsorControlState = {
   showingSponsor: string | null;
   previousScene?: SceneName;
   visibleModal: boolean;
+  deleteLoading: boolean[];
+  initialValuesForm?: Sponsor;
 };
 class SponsorControl extends React.Component<SponsorControlProps, SponsorControlState> {
   
@@ -29,6 +33,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
       searchValue: '',
       showingSponsor: null,
       visibleModal: false,
+      deleteLoading: [],
     };
   }
 
@@ -39,7 +44,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
     try {      
       const store = this.props.ObsRemote.store!;
       const sponsor: Sponsor | undefined = store.Sponsors.find(p => p.uuid === uuid);
-      let delay = sponsor?.mediaType === MediaType.Video ? sponsor.duration! : 10000;
+      let delay = sponsor?.mediaType === MediaType.Video ? sponsor.duration! * 1000 : 10000;
       await this.setState({ showingSponsor: uuid, previousScene: this.props.ObsRemote.scenes?.["current-scene"] as SceneName });
       await this.props.ObsRemote.toggleSponsor({ show: true, uuid, previousScene: this.state.previousScene!, sponsorDisplayType });
       this.timeout = setTimeout(async () => {
@@ -65,18 +70,58 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
     }
   }
   
-  createSponsor = async (values: any): Promise<void> => {
-    console.log('Received values of form: ', values);
-    await this.setState({ visibleModal: false });
-    // throw new Error("Method not implemented.");
+  createSponsor = async (values: Sponsor): Promise<void> => {
+    try {
+      let newSponsors;
+      values.label = values.label.charAt(0).toUpperCase() + values.label.slice(1).toLowerCase();
+      if(values.uuid) {
+        newSponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'edit', sponsor: values }});
+      } else {
+        newSponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'add', sponsor: values }});
+      }
+      await this.props.ObsRemote.updateSponsorsList(newSponsors);
+      await this.setState({ visibleModal: false, initialValuesForm: undefined });
+      this.forceUpdate()
+    } catch (error) {
+      
+    }
   }
   
   editSponsor = async (uuid: string): Promise<void> => {
-    throw new Error("Method not implemented.");
+    try {
+      let sponsor: Sponsor = {...this.props.ObsRemote.store!.Sponsors.find(p => p.uuid === uuid)!};
+      sponsor.media = undefined;
+      await this.setState({ initialValuesForm: sponsor });
+      await this.setState({ visibleModal: true });
+    } catch (error) {
+      
+    }
   }
   
-  deleteSponsor = async (uuid: string): Promise<void> => {
-    throw new Error("Method not implemented.");
+  deleteSponsor = async (uuid: string, id: number): Promise<void> => {
+    try {
+      await this.setState(({ deleteLoading }) => {
+        const newLoadings = [...deleteLoading];
+        newLoadings[id] = true;
+  
+        return {
+          deleteLoading: newLoadings,
+        };
+      });
+      let newSponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'delete', id: uuid }});
+      await this.props.ObsRemote.updateSponsorsList(newSponsors);
+      await this.setState(({ deleteLoading }) => {
+        const newLoadings = [...deleteLoading];
+        newLoadings[id] = false;
+  
+        return {
+          deleteLoading: newLoadings,
+          visibleModal: false
+        };
+      });
+    } catch (error) {
+      
+    }
   }
   
   render() {
@@ -96,9 +141,9 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
             <FilterResults
               value={this.state.searchValue}
               data={this.props.ObsRemote.store?.Sponsors}
-              renderResults={(results: (Sponsor | { add: boolean })[]) => {
+              renderResults={(results: Sponsor[]) => {
                 if(this.props.editable) {
-                  results.push({ add: true });
+                  results.push({label: "add"});
                 }
                 return (
                   <List
@@ -114,7 +159,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                     style={{ marginTop: 16 }}
                     itemLayout="horizontal"
                     dataSource={results}
-                    renderItem={(item: Sponsor | { add: boolean }, index: number) => {                    
+                    renderItem={(item: Sponsor, index: number) => {                    
                       if(this.props.editable && results.length - 1 === index) {
                         return (
                           <Card bordered={false}>
@@ -124,8 +169,8 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                                   block
                                   icon={<PlusOutlined />} 
                                   // style={{ height: 213 }}
-                                  onClick={() => {
-                                    this.setState({ visibleModal: true });
+                                  onClick={async () => {
+                                    await this.setState({ visibleModal: true });
                                   }}
                                 >
                                   Nouveau sponsor
@@ -133,24 +178,25 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                               </Col>
                             </Row>
                             <SponsorForm
+                              initialValues={this.state.initialValuesForm}
                               visible={this.state.visibleModal}
                               onCreate={this.createSponsor}
-                              onCancel={() => {
-                                this.setState({ visibleModal: false });
+                              onCancel={async () => {
+                                await this.setState({ visibleModal: false, initialValuesForm: undefined });
                               }}
                             />
                           </Card>
                         )
                       } else {
-                        item = item as Sponsor;
                         return (
                           <Card
                             cover={
                               item.media && item.mediaType === MediaType.Video ?
                               <VideoPreview interval={500} images={[...Array(5).keys()].map((value: number) => {
-                                let path = (item as Sponsor).media!.split('/');
-                                let file = path.pop()!;
-                                return `${path.join('/')}/${file.substr(0,file.lastIndexOf('.'))}_thumb-${value}.jpg`;
+                                const path = (item as Sponsor).media!.split('\\');
+                                const file = path.pop()!;
+                                const uuid = file.substr(0,file.lastIndexOf('.'));
+                                return `${path.join('/')}/${uuid}/${uuid}_thumb-${value + 1}.jpg}`;
                               })}/>
                               :
                               <Image
@@ -163,19 +209,20 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                               />
                             }
                             actions={
-                              this.props.editable ?  
+                              this.props.editable ?
                                 [
                                   <Tooltip title="Editer">
                                     <Button 
                                       type="text" 
-                                      onClick={async (e) => { await this.editSponsor((item as Sponsor).uuid)}}
+                                      onClick={async (e) => { await this.editSponsor(item.uuid!)}}
                                       icon={<EditOutlined />} 
                                     />
                                   </Tooltip>,
                                   <Tooltip title="Supprimer">
                                     <Button 
                                       type="text" 
-                                      onClick={async (e) => { await this.deleteSponsor((item as Sponsor).uuid)}}
+                                      loading={this.state.deleteLoading[index]}
+                                      onClick={async (e) => { await this.deleteSponsor(item.uuid!, index)}}
                                       icon={<DeleteOutlined />} 
                                     />
                                   </Tooltip>,
@@ -186,7 +233,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                                       <Tooltip title="Show small sponsor">
                                         <Button 
                                           type="text" 
-                                          onClick={async (e) => { await this.showSponsor((item as Sponsor).uuid, SponsorDisplayType.Small)}} 
+                                          onClick={async (e) => { await this.showSponsor(item.uuid!, SponsorDisplayType.Small)}} 
                                           disabled={true} 
                                           icon={<EyeOutlined />} 
                                         />
@@ -194,7 +241,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                                       <Tooltip title="Show big sponsor">
                                         <Button 
                                           type="text" 
-                                          onClick={async (e) => { await this.showSponsor((item as Sponsor).uuid, SponsorDisplayType.Big)}} 
+                                          onClick={async (e) => { await this.showSponsor(item.uuid!, SponsorDisplayType.Big)}} 
                                           disabled={true} 
                                           icon={<EyeOutlined />} 
                                         />
@@ -202,7 +249,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                                       <Tooltip title="Show fullscreen sponsor">
                                         <Button 
                                           type="text" 
-                                          onClick={async (e) => { await this.showSponsor((item as Sponsor).uuid, SponsorDisplayType.Fullscreen)}} 
+                                          onClick={async (e) => { await this.showSponsor(item.uuid!, SponsorDisplayType.Fullscreen)}} 
                                           disabled={true} 
                                           icon={<EyeOutlined />} 
                                         />
@@ -213,7 +260,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                                       <Tooltip title="Hide sponsor">
                                         <Button 
                                           type="text" 
-                                          onClick={async (e) => { await this.hideSponsor((item as Sponsor).uuid)}}
+                                          onClick={async (e) => { await this.hideSponsor(item.uuid!)}}
                                           icon={<EyeInvisibleOutlined />} 
                                         />
                                       </Tooltip>
@@ -221,13 +268,13 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                                 :
                                 [
                                   <Tooltip title="Show small sponsor">
-                                    <Button type="text" onClick={(e) => this.showSponsor((item as Sponsor).uuid, SponsorDisplayType.Small)} disabled={false} icon={<EyeOutlined />} />
+                                    <Button type="text" onClick={(e) => this.showSponsor(item.uuid!, SponsorDisplayType.Small)} disabled={false} icon={<EyeOutlined />} />
                                   </Tooltip>,
                                   <Tooltip title="Show big sponsor">
-                                    <Button type="text" onClick={(e) => this.showSponsor((item as Sponsor).uuid, SponsorDisplayType.Big)} disabled={false} icon={<EyeOutlined />} />
+                                    <Button type="text" onClick={(e) => this.showSponsor(item.uuid!, SponsorDisplayType.Big)} disabled={false} icon={<EyeOutlined />} />
                                   </Tooltip>,
                                   <Tooltip title="Show fullscreen sponsor">
-                                    <Button type="text" onClick={(e) => this.showSponsor((item as Sponsor).uuid, SponsorDisplayType.Fullscreen)} disabled={false} icon={<EyeOutlined />} />
+                                    <Button type="text" onClick={(e) => this.showSponsor(item.uuid!, SponsorDisplayType.Fullscreen)} disabled={false} icon={<EyeOutlined />} />
                                   </Tooltip>,
                                 ]
                             }

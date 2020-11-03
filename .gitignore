@@ -10,6 +10,7 @@
 
 # production
 /build
+/release
 
 /assets/appDatas/**/*.png
 /assets/appDatas/**/*.jpg
@@ -24,6 +25,9 @@
 /assets/bin/obs/config/obs-studio/updates
 /assets/bin/obs/config/obs-studio/global.ini
 /assets/bin/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json
+
+# /assets/players
+# /assets/sponsors
 
 # misc
 .DS_Store

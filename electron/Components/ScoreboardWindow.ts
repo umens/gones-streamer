@@ -59,11 +59,12 @@ export default class ScoreboardWindow {
     } else {
       // 'build/index.html'
       this.window.removeMenu();
-      this.window.loadURL(url.format({
-        pathname: join(__dirname, './index.html#/scoreboard'),
-        protocol: 'file:',
-        slashes: true
-      }));
+      this.window.loadURL(`file://${__dirname}/index.html#/scoreboard`);
+      // this.window.loadURL(url.format({
+      //   pathname: `${__dirname}/index.html#/scoreboard`,
+      //   protocol: 'file:',
+      //   slashes: true
+      // }));
     }
   }
 }

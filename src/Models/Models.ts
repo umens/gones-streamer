@@ -69,7 +69,7 @@ export type GameClock = {
 }
 
 export type Sponsor = {
-  uuid: string;
+  uuid?: string;
   label: string;
   media?: string;
   mediaType?: MediaType;
@@ -77,7 +77,7 @@ export type Sponsor = {
 }
 
 export type Player = {
-  uuid: string;
+  uuid?: string;
   firstname: string;
   lastname: string;
   num: number;

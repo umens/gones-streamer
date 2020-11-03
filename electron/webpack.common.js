@@ -1,5 +1,6 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -12,6 +13,9 @@ module.exports = {
   },
   plugins: [
     // new HtmlWebpackPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.FLUENTFFMPEG_COV': false
+    }),
     new CopyPlugin({
       patterns: [
         { from: path.resolve(__dirname, 'screens'), to: path.resolve(__dirname, '../build/screens'), },

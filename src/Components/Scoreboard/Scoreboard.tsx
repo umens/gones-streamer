@@ -68,9 +68,9 @@ class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
                   { homeTeam?.score.toLocaleString('fr-FR', { minimumIntegerDigits:2, useGrouping: false }) }
                 </div>
                 <div className="teamtimeoutblock-scoreboard noselect">
-                  { homeTeam?.timeout && homeTeam?.timeout >= 1 && <div className="teamtimeout-scoreboard bg-warning"></div> }
-                  { homeTeam?.timeout && homeTeam?.timeout >= 2 && <div className="teamtimeout-scoreboard bg-warning"></div> }
-                  { homeTeam?.timeout && homeTeam?.timeout >= 3 && <div className="teamtimeout-scoreboard bg-warning"></div> }
+                  { homeTeam?.timeout! >= 1 && <div className="teamtimeout-scoreboard bg-warning"></div> }
+                  { homeTeam?.timeout! >= 2 && <div className="teamtimeout-scoreboard bg-warning"></div> }
+                  { homeTeam?.timeout! >= 3 && <div className="teamtimeout-scoreboard bg-warning"></div> }
                 </div>
                 { this.state.GameStatut?.Options.possession === TeamPossession.HOME && <div className="teampossession-scoreboard bg-warning noselect"></div> }
               </div>
@@ -84,9 +84,9 @@ class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
                   { awayTeam?.score.toLocaleString('fr-FR', { minimumIntegerDigits:2, useGrouping: false }) }
                 </div>
                 <div className="teamtimeoutblock-scoreboard noselect">
-                  { awayTeam?.timeout && awayTeam?.timeout >= 1 && <div className="teamtimeout-scoreboard bg-warning"></div> }
-                  { awayTeam?.timeout && awayTeam?.timeout >= 2 && <div className="teamtimeout-scoreboard bg-warning"></div> }
-                  { awayTeam?.timeout && awayTeam?.timeout >= 3 && <div className="teamtimeout-scoreboard bg-warning"></div> }
+                  { awayTeam?.timeout! >= 1 && <div className="teamtimeout-scoreboard bg-warning"></div> }
+                  { awayTeam?.timeout! >= 2 && <div className="teamtimeout-scoreboard bg-warning"></div> }
+                  { awayTeam?.timeout! >= 3 && <div className="teamtimeout-scoreboard bg-warning"></div> }
                 </div>
                 { this.state.GameStatut?.Options.possession === TeamPossession.AWAY && <div className="teampossession-scoreboard bg-warning noselect"></div> }
               </div>

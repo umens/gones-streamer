@@ -6,7 +6,7 @@ import FilterResults from 'react-filter-search';
 import './PlayerControl.css';
 import { Player } from "../../Models";
 // import { v4 as uuidv4 } from 'uuid';
-import { Utilities } from "../../Utils/Utilities";
+import { Utilities } from "../../Utils";
 
 type PlayerControlProps = typeof PlayerControl.defaultProps & {
   ObsRemote: IObsRemote;
@@ -82,9 +82,9 @@ class PlayerControl extends React.Component<PlayerControlProps, PlayerControlSta
                     <List.Item
                       actions={
                         this.state.showingPlayer !== null ?
-                          [<Tooltip title={this.state.showingPlayer !== item.uuid ? "Show player details" : "Hide player details"}><Button onClick={(e) => {this.state.showingPlayer !== item.uuid ? this.showPlayer(item.uuid) : this.hidePlayer(item.uuid)}} disabled={this.state.showingPlayer !== item.uuid} type="primary" icon={this.state.showingPlayer !== item.uuid ? <EyeOutlined /> : <EyeInvisibleOutlined />} /></Tooltip>]
+                          [<Tooltip title={this.state.showingPlayer !== item.uuid ? "Show player details" : "Hide player details"}><Button onClick={(e) => {this.state.showingPlayer !== item.uuid ? this.showPlayer(item.uuid!) : this.hidePlayer(item.uuid)}} disabled={this.state.showingPlayer !== item.uuid} type="primary" icon={this.state.showingPlayer !== item.uuid ? <EyeOutlined /> : <EyeInvisibleOutlined />} /></Tooltip>]
                         :
-                        [<Tooltip title="Show player details"><Button onClick={(e) => this.showPlayer(item.uuid)} disabled={false} type="primary" icon={<EyeOutlined />} /></Tooltip>]
+                        [<Tooltip title="Show player details"><Button onClick={(e) => this.showPlayer(item.uuid!)} disabled={false} type="primary" icon={<EyeOutlined />} /></Tooltip>]
                         }
                     >
                       <List.Item.Meta

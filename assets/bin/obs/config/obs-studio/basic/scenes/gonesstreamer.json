@@ -1,6 +1,6 @@
 {
-    "current_program_scene": "* bg",
-    "current_scene": "* bg",
+    "current_program_scene": "Starting",
+    "current_scene": "Starting",
     "current_transition": "Coupure",
     "groups": [
         {
@@ -98,8 +98,8 @@
             "push-to-talk-delay": 0,
             "settings": {
                 "custom_size": true,
-                "cx": 1812,
-                "cy": 808,
+                "cx": 1920,
+                "cy": 1080,
                 "id_counter": 0,
                 "items": [
                     {
@@ -187,7 +187,7 @@
                             "y": 0.33611109852790833
                         },
                         "scale_filter": "disable",
-                        "visible": false
+                        "visible": true
                     },
                     {
                         "align": 5,
@@ -315,8 +315,8 @@
             "push-to-talk-delay": 0,
             "settings": {
                 "custom_size": true,
-                "cx": 1920,
-                "cy": 1080,
+                "cx": 1812,
+                "cy": 808,
                 "id_counter": 0,
                 "items": [
                     {
@@ -833,7 +833,9 @@
             "push-to-talk": false,
             "push-to-talk-delay": 0,
             "settings": {
-                "file": "F:/Devs/gones-streamer/assets/appDatas/home.png"
+                "file": "",
+                "render": false,
+                "unload": true
             },
             "sync": 0,
             "versioned_id": "image_source",
@@ -866,7 +868,13 @@
             "push-to-mute-delay": 0,
             "push-to-talk": false,
             "push-to-talk-delay": 0,
-            "settings": {},
+            "settings": {
+                "close_when_inactive": true,
+                "file": "",
+                "is_local_file": true,
+                "local_file": "F:\\Devs\\gones-streamer\\assets\\sponsors\\medias\\cb40a5d9-f818-4757-a4f2-a792c5e1ab27.mp4",
+                "render": true
+            },
             "sync": 0,
             "versioned_id": "ffmpeg_source",
             "volume": 1.0
@@ -955,7 +963,7 @@
                             "y": 1.0
                         },
                         "scale_filter": "disable",
-                        "visible": true
+                        "visible": false
                     }
                 ]
             },
@@ -3063,7 +3071,7 @@
                             "y": 0.33611109852790833
                         },
                         "scale_filter": "disable",
-                        "visible": false
+                        "visible": true
                     },
                     {
                         "align": 5,
@@ -3181,7 +3189,7 @@
                             "y": 1.0
                         },
                         "scale_filter": "disable",
-                        "visible": false
+                        "visible": true
                     },
                     {
                         "align": 5,

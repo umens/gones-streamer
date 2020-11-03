@@ -3,8 +3,7 @@ import OBSWebSocket from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
 import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, PathsType } from "../Models";
-import { IpcService } from "../Utils/IpcService";
-import { Utilities } from "../Utils/Utilities";
+import { IpcService, Utilities } from "../Utils";
 
 const ipc = new IpcService();
 
@@ -51,6 +50,8 @@ type ObsRemoteState = {
   togglePlayerHighlight: (show: boolean, uuid: string) => Promise<void>;
   toggleSponsor: ({show, uuid, previousScene, sponsorDisplayType}: {show: boolean, uuid: string, previousScene: SceneName, sponsorDisplayType?: SponsorDisplayType}) => Promise<void>;
   // resetSponosorScene: () => Promise<void>;
+  updateSponsorsList: (sponsors: Sponsor[]) => Promise<void>;
+  updatePlayersList: (players: Player[]) => Promise<void>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -89,6 +90,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       setGameClock: this.setGameClock.bind(this),
       togglePlayerHighlight: this.togglePlayerHighlight.bind(this),
       toggleSponsor: this.toggleSponsor.bind(this),
+      updateSponsorsList: this.updateSponsorsList.bind(this),
+      updatePlayersList: this.updatePlayersList.bind(this),
       // resetSponosorScene: this.resetSponosorScene.bind(this),
     };
 
@@ -353,8 +356,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
        */
       // let cameras = await obsWs.send('GetSceneItemList');
 
-      const Sponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { getter: true }}) || [];
-      const Players = await ipc.send<Player[]>('players-data', { params: { getter: true }}) || [];
+      const Sponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'get' }}) || [];
+      const Players = await ipc.send<Player[]>('players-data', { params: { action: 'get' }}) || [];
 
       let store: StoreType = {
         GameStatut,
@@ -809,8 +812,19 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       if(show) {
         const store = this.state.store!;
         const sponsor: Sponsor | undefined = store.Sponsors.find(p => p.uuid === uuid);
-        let sourceName = sponsor?.mediaType! === MediaType.Video ? 'sponsor_video' : 'sponsor_image';
-        await obsWs.send('SetSourceSettings', { sourceName, sourceSettings: { file: sponsor?.media } });
+        let sourceName;
+        switch (sponsor?.mediaType!) {
+          case MediaType.Video:
+            sourceName = 'sponsor_video';
+            await obsWs.send('SetSourceSettings', { sourceName, sourceSettings: { local_file: sponsor?.media } });
+            break;
+          case MediaType.Image:
+          default:
+            sourceName = 'sponsor_image';
+            await obsWs.send('SetSourceSettings', { sourceName, sourceSettings: { file: sponsor?.media } });
+            break;
+        }
+        await obsWs.send('SetSceneItemProperties', { item: { name: sourceName }, visible: true, 'scene-name': "* Sponsor media", bounds: {}, crop: {}, position: {}, scale: {} });
         await obsWs.send('SetSceneItemProperties', { item: { name: sponsorDisplayType + '_sponsor' }, visible: true, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
         let id: number;
         if(sponsorDisplayType) {
@@ -843,8 +857,10 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   resetSponosorScene = async (): Promise<void> => {
     try {
-      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_video', sourceSettings: { file: null } });
-      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_image', sourceSettings: { file: null } });
+      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_video', sourceSettings: { local_file: "" } });
+      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_image', sourceSettings: { file: "" } });
+      await obsWs.send('SetSceneItemProperties', { item: { name: 'sponsor_video' }, visible: false, 'scene-name': "* Sponsor media", bounds: {}, crop: {}, position: {}, scale: {} });
+      await obsWs.send('SetSceneItemProperties', { item: { name: 'sponsor_image' }, visible: false, 'scene-name': "* Sponsor media", bounds: {}, crop: {}, position: {}, scale: {} });
       Object.values(SponsorDisplayType).forEach(async element => {
         await obsWs.send('SetSceneItemProperties', { item: { name: element + '_sponsor' }, visible: false, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
         if(element === SponsorDisplayType.Small) {
@@ -888,6 +904,27 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       
     }
   }
+
+  updateSponsorsList = async (sponsors: Sponsor[]): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      store.Sponsors = sponsors;
+      await this.setState({ store });
+    } catch (error) {
+      
+    }
+  }
+
+  updatePlayersList = async (players: Player[]): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      store.Players = players;
+      await this.setState({ store });
+    } catch (error) {
+      
+    }
+  }
+  
 
   disconnectObs = (): void => {
     obsWs.disconnect();

@@ -8,7 +8,7 @@ declare global {
   namespace NodeJS {
       interface  Global {
         ipcRenderer: IpcRenderer;
-        log: LogFunctions;
+        // log: LogFunctions;
         // store: Store;
       }
   }
@@ -16,7 +16,7 @@ declare global {
 
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
-  global.log = functions
+  // global.log = functions
   // global.store = new Store()
 });
 

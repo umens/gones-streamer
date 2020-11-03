@@ -12,11 +12,11 @@ import SplashScreen from "./SplashScreen";
 import { StoreType, GetDefaultConfig, PathsType } from "../../src/Models";
 import IPCChannels from "./IPCChannels";
 import ObsProcess from "./ObsProcess";
-import { promises as fs } from 'fs';
+import { promises as fs, existsSync } from 'fs';
 import ScoreboardWindow from "./ScoreboardWindow";
+import { autoUpdater } from "electron-updater";
 
 const isPackaged = require('electron-is-packaged').isPackaged;
-// const rootPath = require('electron-root-path').rootPath;
 
 export default class Main {
   
@@ -34,14 +34,19 @@ export default class Main {
   });
 
   constructor() {
-    this.log = ElectronLog.scope('Main');
-    const extraResources = (isPackaged) ? join(app.getAppPath(), '/resources') : join(app.getAppPath(), '../assets');
+    this.log = ElectronLog.scope('Main');    
+    autoUpdater.logger = ElectronLog.scope('Auto Updater');
+    const extraResources = (isPackaged) ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
     this.paths = {
       binFolder: join(extraResources, '/bin'),
       appFolder: join(extraResources, '/appDatas'),
       sponsorsFolder: join(extraResources, '/sponsors'),
       playersFolder: join(extraResources, '/players'),
     }
+    this.log.info(`${isPackaged}`);
+    this.log.info(`${app.getAppPath()}`);
+    this.log.info(`${extraResources}`);
+    this.log.info(`${JSON.stringify(this.paths, null, 2)}`);
 
     // handle local file bug
     app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
@@ -58,15 +63,18 @@ export default class Main {
       this.log.verbose('First run');
       await fs.mkdir(join(this.paths.sponsorsFolder, '/medias'), { recursive: true });
       await fs.mkdir(join(this.paths.playersFolder, '/medias'), { recursive: true });
-      await fs.writeFile(
-        join(this.paths.sponsorsFolder, '/sponsors.json'),
-        JSON.stringify([], null, 2),
-      );
-      await fs.mkdir(this.paths.playersFolder, { recursive: true });
-      await fs.writeFile(
-        join(this.paths.playersFolder, '/players.json'),
-        JSON.stringify([], null, 2),
-      );
+      if (!existsSync(join(this.paths.sponsorsFolder, '/sponsors.json'))) {        
+        await fs.writeFile(
+          join(this.paths.sponsorsFolder, '/sponsors.json'),
+          JSON.stringify([], null, 2),
+        );
+      }
+      if (!existsSync(join(this.paths.playersFolder, '/players.json'))) {        
+        await fs.writeFile(
+          join(this.paths.playersFolder, '/players.json'),
+          JSON.stringify([], null, 2),
+        );
+      }
       // this.log.info('%c[Main] Init store', 'color: blue');
       // this.store = new Store();
       // this.store.set('isRainbow', 'false');
@@ -79,7 +87,10 @@ export default class Main {
     this.obsProcess = new ObsProcess({ binFolder: this.paths.binFolder });
     await this.obsProcess.startObs();
 
-    app.on('ready', this.createWindow);
+    app.on('ready', () => {
+      autoUpdater.checkForUpdatesAndNotify();
+      this.createWindow();
+    });
     app.on('window-all-closed', this.onWindowAllClosed);
     app.on('activate', this.onActivate);
     } catch (error) {
@@ -164,7 +175,7 @@ export default class Main {
     this.mainWindow.webContents.on('did-finish-load', () => {
 
       this.log.info('%cRegister IPc Channels', 'color: blue');
-      this.IpcChannels = new IPCChannels(this.paths, this.scoreboardWindow?.window?.webContents!);
+      this.IpcChannels = new IPCChannels(this.paths, this.mainWindow?.webContents!, this.scoreboardWindow?.window?.webContents!);
 
       this.log.info('%cclose Splash Window', 'color: blue');
       this.splashScreen && this.splashScreen.window && this.splashScreen.window.destroy();
