@@ -18,7 +18,7 @@
     "release": "electron-builder --c.publish.releaseType=release",
     "beta": "electron-builder --c.publish.releaseType=prerelease",
     "getBinary": "node ./scripts/getLatestBins.js",
-    "commit": "cz",
+    "cz": "cz",
     "semantic-release": "semantic-release"
   },
   "eslintConfig": {
