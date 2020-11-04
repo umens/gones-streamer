@@ -1,5 +1,5 @@
 import React from "react";
-import { IObsRemote, SponsorControl } from "../../Components";
+import { IObsRemote, PlayerControl, SponsorControl } from "../../Components";
 import { Row, Col, message, Form, Input, Button, Select, Card, Alert } from "antd";
 import ReactDropzone from "react-dropzone";
 import { IpcService } from "../../Utils/IpcService";
@@ -181,7 +181,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     //     </List.Item>
     //   )}
     // />,
-      playersAdmin: <></>,
+      playersAdmin: <PlayerControl ObsRemote={this.props.ObsRemote} editable={true} />,
       sponsorsAdmin: <SponsorControl ObsRemote={this.props.ObsRemote} editable={true} />,
     };
 

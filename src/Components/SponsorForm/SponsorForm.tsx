@@ -9,6 +9,7 @@ type SponsorFormValues = Sponsor & {
 }
 
 type SponsorFormProps = {
+  loadingForm: boolean;
   initialValues?: Sponsor;
   visible: boolean;
   onCreate: (values: Sponsor) => void;
@@ -21,6 +22,7 @@ const getExtension = (filename: string): string => {
 }
 
 const SponsorForm: React.FC<SponsorFormProps> = ({
+  loadingForm,
   initialValues,
   visible,
   onCreate,
@@ -81,6 +83,7 @@ const SponsorForm: React.FC<SponsorFormProps> = ({
       okText="Ajouter"
       cancelText="Annuler"
       destroyOnClose={true}
+      confirmLoading={loadingForm}
       // afterClose={() => { setFile([]); form.resetFields(); }}
       onCancel={() => { setFile([]); form.resetFields(); onCancel(); }}
       // okButtonProps={{

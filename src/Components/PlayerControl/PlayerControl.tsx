@@ -1,12 +1,12 @@
 import React from "react";
 import { IObsRemote } from "../";
-import { Row, Col, List, Avatar, Input, Button, Tooltip } from "antd";
-import { UserOutlined, SearchOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import FilterResults from 'react-filter-search';
+import { Row, Col, Alert } from "antd";
+// import { UserOutlined, SearchOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+// import FilterResults from 'react-filter-search';
 import './PlayerControl.css';
-import { Player } from "../../Models";
+// import { Player } from "../../Models";
 // import { v4 as uuidv4 } from 'uuid';
-import { Utilities } from "../../Utils";
+// import { Utilities } from "../../Utils";
 
 type PlayerControlProps = typeof PlayerControl.defaultProps & {
   ObsRemote: IObsRemote;
@@ -55,13 +55,13 @@ class PlayerControl extends React.Component<PlayerControlProps, PlayerControlSta
       <>        
         <Row gutter={[16, 0]}>
           <Col span={24}>
-            {/* <Alert
-              message="Coming soon !"
+            <Alert
+              message="Feature in progress"
               description="Vous pourrez mettre un spotlight sur un joueur à partir de cet endroit."
               type="info"
               showIcon
-            /> */}
-            <Input 
+            />
+            {/* <Input 
               placeholder="Rechercher un joueur"
               onChange={e => this.setState({searchValue: e.target.value})}
               suffix={<SearchOutlined />}
@@ -96,7 +96,7 @@ class PlayerControl extends React.Component<PlayerControlProps, PlayerControlSta
                   )}
                 />
               )}
-            />            
+            /> */}
           </Col>
         </Row>
       </>

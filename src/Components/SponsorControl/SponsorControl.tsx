@@ -19,6 +19,7 @@ type SponsorControlState = {
   visibleModal: boolean;
   deleteLoading: boolean[];
   initialValuesForm?: Sponsor;
+  loadingForm: boolean;
 };
 class SponsorControl extends React.Component<SponsorControlProps, SponsorControlState> {
   
@@ -34,6 +35,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
       showingSponsor: null,
       visibleModal: false,
       deleteLoading: [],
+      loadingForm: false,
     };
   }
 
@@ -41,7 +43,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
   }
   
   showSponsor = async (uuid: string, sponsorDisplayType: SponsorDisplayType): Promise<void> => {
-    try {      
+    try {
       const store = this.props.ObsRemote.store!;
       const sponsor: Sponsor | undefined = store.Sponsors.find(p => p.uuid === uuid);
       let delay = sponsor?.mediaType === MediaType.Video ? sponsor.duration! * 1000 : 10000;
@@ -72,6 +74,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
   
   createSponsor = async (values: Sponsor): Promise<void> => {
     try {
+      await this.setState({ loadingForm: true });
       let newSponsors;
       values.label = values.label.charAt(0).toUpperCase() + values.label.slice(1).toLowerCase();
       if(values.uuid) {
@@ -80,7 +83,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
         newSponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'add', sponsor: values }});
       }
       await this.props.ObsRemote.updateSponsorsList(newSponsors);
-      await this.setState({ visibleModal: false, initialValuesForm: undefined });
+      await this.setState({ visibleModal: false, initialValuesForm: undefined, loadingForm: false });
       this.forceUpdate()
     } catch (error) {
       
@@ -178,6 +181,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                               </Col>
                             </Row>
                             <SponsorForm
+                              loadingForm={this.state.loadingForm}
                               initialValues={this.state.initialValuesForm}
                               visible={this.state.visibleModal}
                               onCreate={this.createSponsor}
@@ -196,7 +200,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
                                 const path = (item as Sponsor).media!.split('\\');
                                 const file = path.pop()!;
                                 const uuid = file.substr(0,file.lastIndexOf('.'));
-                                return `${path.join('/')}/${uuid}/${uuid}_thumb-${value + 1}.jpg}`;
+                                return `${path.join('/')}/${uuid}/${uuid}_thumb-${value + 1}.jpg`;
                               })}/>
                               :
                               <Image

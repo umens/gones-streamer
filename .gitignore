@@ -26,8 +26,8 @@
 /assets/bin/obs/config/obs-studio/global.ini
 /assets/bin/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json
 
-# /assets/players
-# /assets/sponsors
+/assets/players
+/assets/sponsors
 
 # misc
 .DS_Store
