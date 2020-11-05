@@ -1,3 +1,4 @@
+name: Build and Release
 # Run the workflow when a Pull Request is opened or when changes are pushed to master
 on:
  pull_request:
@@ -7,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Tests and Build
     if: "!contains(toJSON(github.event.commits.*.message), 'skip ci')"
     runs-on: windows-latest
     steps:
@@ -53,7 +54,7 @@ jobs:
       run: yarn build
 
     # Run Archive
-    - name: Archive production artifact
+    - name: Archive production build artifact
       uses: actions/upload-artifact@v2
       with:
         name: build
@@ -114,3 +115,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: yarn release
+        
+      # Run Archive
+      - name: Archive production release artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: release
+          path: |
+            release
+          retention-days: 5
