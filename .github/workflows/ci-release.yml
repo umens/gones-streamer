@@ -23,8 +23,22 @@ jobs:
       with:
         node-version: '15.x'
 
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+    
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
     # Install package dependencies
     - name: Install
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
 
     # # Run tests
@@ -34,6 +48,16 @@ jobs:
     # Run build
     - name: Build
       run: yarn build
+
+    # Run Archive
+    - name: Archive production artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: |
+          build
+          node_modules
+        retention-days: 5
 
   release:
     name: Release
@@ -53,18 +77,35 @@ jobs:
         with:
           node-version: '15.x'
 
-      - name: Install dependencies
+      # Install package dependencies
+      - name: Install
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile
+
+      - name: Download production artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build
 
       - name: Download OBS Binaries
         run: yarn getBinary
+
+      - name: Set Default Images
+        run: yarn setDefaultImages        
 
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: npx semantic-release
 
-      - name: Package Release
+      - name: Package Beta Release       
+        if: "github.ref == 'refs/heads/develop'"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: yarn beta
+
+      - name: Package Stable Release      
+        if: "github.ref == 'refs/heads/master'"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: yarn release

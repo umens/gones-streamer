@@ -14,6 +14,8 @@
 
 /assets/appDatas/**/*.png
 /assets/appDatas/**/*.jpg
+!/assets/appDatas/placeholder_team.png
+!/assets/appDatas/placeholder_bg.jpg
 /assets/bin/obs/bin
 /assets/bin/obs/*.bat
 /assets/bin/obs/data

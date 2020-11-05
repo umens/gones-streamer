@@ -1060,7 +1060,7 @@
                 },
                 "read_from_file": false,
                 "source": "Away City Text",
-                "text": "Nice",
+                "text": "City",
                 "valign": "center"
             },
             "sync": 0,
@@ -1098,7 +1098,7 @@
                 },
                 "read_from_file": false,
                 "source": "Away Name Text",
-                "text": "Dauphins",
+                "text": "Away",
                 "valign": "center"
             },
             "sync": 0,
@@ -1136,7 +1136,7 @@
                 },
                 "read_from_file": false,
                 "source": "Home City Text",
-                "text": "Lyon",
+                "text": "City",
                 "valign": "center"
             },
             "sync": 0,
@@ -1174,7 +1174,7 @@
                 },
                 "read_from_file": false,
                 "source": "Home Name Text",
-                "text": "Gones",
+                "text": "Home",
                 "valign": "center"
             },
             "sync": 0,

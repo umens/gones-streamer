@@ -18,6 +18,7 @@
     "release": "electron-builder --c.publish.releaseType=release",
     "beta": "electron-builder --c.publish.releaseType=prerelease",
     "getBinary": "node ./scripts/getLatestBins.js",
+    "setDefaultImages": "node ./scripts/placeholderImage.js",
     "commit": "cross-env HUSKY=0 git-cz",
     "semantic-release": "semantic-release"
   },
