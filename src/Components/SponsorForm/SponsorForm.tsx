@@ -29,8 +29,8 @@ const SponsorForm: React.FC<SponsorFormProps> = ({
   onCancel,
 }) => {
   
-  const [form] = Form.useForm<SponsorFormValues>();
-  const [file, setFile] = useState<RcFile[]>([]);  
+  let [form] = Form.useForm<SponsorFormValues>();
+  let [file, setFile] = useState<RcFile[]>([]);  
 
   const uploadProps: UploadProps = {
     name: 'file',

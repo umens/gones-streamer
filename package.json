@@ -85,12 +85,14 @@
     }
   },
   "dependencies": {
+    "@ant-design/charts": "^1.0.4",
     "antd": "^4.8.0",
     "classnames": "^2.2.6",
     "ffmpeg-static": "^4.2.7",
     "ffprobe-static": "^3.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "obs-websocket-js": "^4.0.2",
+    "pretty-bytes": "^5.4.1",
     "react": "^17.0.1",
     "react-color": "^2.19.3",
     "react-dom": "^17.0.1",

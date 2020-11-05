@@ -2,8 +2,9 @@ import { Component } from "react";
 import OBSWebSocket from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, PathsType } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, PathsType, StreamingStats } from "../Models";
 import { IpcService, Utilities } from "../Utils";
+import moment from "moment";
 
 const ipc = new IpcService();
 
@@ -28,6 +29,7 @@ type ObsRemoteState = {
   timeoutConnection?: NodeJS.Timeout;
   sponsorDisplayType?: SponsorDisplayType;
   Utilitites?: Utilities;
+  streamingStats?: StreamingStats;
 
   reconnectObs: () => Promise<void>;
   goLive: () => Promise<void>;
@@ -57,6 +59,7 @@ type ObsRemoteState = {
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   intervalClockId?: NodeJS.Timeout;
+  intervalStatsId?: NodeJS.Timeout;
 
   constructor(props: Readonly<ObsRemoteProps>) {
     super(props);
@@ -102,7 +105,6 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         
       }
     });
-    
 
     obsWs.on('SwitchScenes', async (data) => {
       try {
@@ -113,6 +115,57 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         
       }
     });
+
+    obsWs.on('StreamStopped', async () => {
+      try {
+        obsWs.removeAllListeners('StreamStatus');
+        await this.setState({ streamingStats: undefined, live: false });
+      } catch (error) {
+        
+      }
+    });
+
+    obsWs.on('StreamStarted', async () => {
+      try {
+        await this.setState({ live: true });
+        obsWs.on('StreamStatus', async (data) => {
+          let oldDroppedFrame = 0;
+          let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+          let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+          if(this.state.streamingStats !== undefined) {
+            oldDroppedFrame = this.state.streamingStats.droppedFrame;
+            cpuUsage = this.state.streamingStats.cpuUsage;
+            memoryUsage = this.state.streamingStats.memoryUsage;
+          }
+          cpuUsage = this.addToStatArray(data["cpu-usage"], cpuUsage);
+          memoryUsage = this.addToStatArray(data["memory-usage"], memoryUsage);
+          await this.setState({
+            streamingStats: {
+              oldDroppedFrame,
+              droppedFrame: data["strain"],
+              // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
+              totalStreamTime: moment().startOf('day').seconds(data["total-stream-time"]).format('HH:mm:ss'),
+              cpuUsage,
+              bytesPerSec: data["bytes-per-sec"] * 10,
+              memoryUsage,
+            }
+          });
+        });
+      } catch (error) {
+        
+      }
+    });
+
+    // obsWs.on('Heartbeat', async (data) => {
+    //   try {
+    //     console.log(data);
+    //     // if(Object.values(SceneName).includes(data["scene-name"] as SceneName)) {
+    //     //   await this.changeActiveScene(data["scene-name"] as SceneName);
+    //     // }
+    //   } catch (error) {
+        
+    //   }
+    // });
   }
 
   componentDidMount = async (): Promise<void> => {
@@ -128,6 +181,33 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       await this.connectObs();
       await this.getScenes();
       await this.initGameStatut();
+      const streamStatus = await obsWs.send('GetStreamingStatus');
+      if(streamStatus.streaming) {
+        await this.setState({ live: true });
+        obsWs.on('StreamStatus', async (data) => {
+          let oldDroppedFrame = 0;
+          let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+          let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+          if(this.state.streamingStats !== undefined) {
+            oldDroppedFrame = this.state.streamingStats.droppedFrame;
+            cpuUsage = this.state.streamingStats.cpuUsage;
+            memoryUsage = this.state.streamingStats.memoryUsage;
+          }
+          cpuUsage = this.addToStatArray(data["cpu-usage"], cpuUsage);
+          memoryUsage = this.addToStatArray(data["memory-usage"], memoryUsage);
+          await this.setState({
+            streamingStats: {
+              oldDroppedFrame,
+              droppedFrame: data["strain"],
+              // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
+              totalStreamTime: moment().startOf('day').seconds(data["total-stream-time"]).format('HH:mm:ss'),
+              cpuUsage,
+              bytesPerSec: data["bytes-per-sec"] * 10,
+              memoryUsage,
+            }
+          });
+        });
+      }
       if(this.state.timeoutConnection) {
         await this.setState({ timeoutConnection: undefined });
       }
@@ -147,127 +227,127 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
 
-  workOnEvent(event: any): void {
-    // tslint:disable-next-line: no-console
-    console.debug(event);
-    switch (event['update-type']) {
-      case 'SwitchScenes':
-        // if (event['scene-name'] === AvailableScenes.LIVE && this.replayPlaying) {
-        //   this.replayPlaying = false;
-        // }
-        // if (event['scene-name'] === AvailableScenes.REPLAY && !this.replayPlaying) {
-        //   this.replayPlaying = true;
-        // }
-        // if (this.scenes.find(scene => scene.name === event['scene-name']) !== undefined) {
-        //   this.scenes.find(scene => scene.active).active = false;
-        //   this.scenes.find(scene => scene.name === event['scene-name']).active = true;
-        // }
-        // // tslint:disable-next-line: no-string-literal
-        // // this.scenes.find(scene => scene.name === event['scene-name']).sources = event['sources'];
-        // // this.activeScene = event['scene-name'];
-        break;
-      case 'ScenesChanged':
-      case 'SceneCollectionChanged':
-      case 'SceneCollectionListChanged':
-      case 'SwitchTransition':
-      case 'TransitionListChanged':
-      case 'TransitionDurationChanged':
-      case 'ProfileChanged':
-      case 'ProfileListChanged':
-        break;
-      case 'SceneItemVisibilityChanged':
-        // tslint:disable-next-line: max-line-length
-        // this.scenes.find(scene => scene.active).sources.find(source => source.name === event['item-name']).render = event['item-visible'];
-        break;
-      case 'StreamStatus':
-        // const streamStatus = new StreamStatus(event);
-        // // console.log(streamStatus);
-        // // const newData = [];
-        // this.streamTime = event['stream-timecode'];
-        // this.liveUpdateChartData.push({
-        //   value: [
-        //     new Date().toISOString(),
-        //     Math.round(streamStatus.cpuUsage),
-        //   ],
-        // });
+  // workOnEvent(event: any): void {
+  //   // tslint:disable-next-line: no-console
+  //   console.debug(event);
+  //   switch (event['update-type']) {
+  //     case 'SwitchScenes':
+  //       // if (event['scene-name'] === AvailableScenes.LIVE && this.replayPlaying) {
+  //       //   this.replayPlaying = false;
+  //       // }
+  //       // if (event['scene-name'] === AvailableScenes.REPLAY && !this.replayPlaying) {
+  //       //   this.replayPlaying = true;
+  //       // }
+  //       // if (this.scenes.find(scene => scene.name === event['scene-name']) !== undefined) {
+  //       //   this.scenes.find(scene => scene.active).active = false;
+  //       //   this.scenes.find(scene => scene.name === event['scene-name']).active = true;
+  //       // }
+  //       // // tslint:disable-next-line: no-string-literal
+  //       // // this.scenes.find(scene => scene.name === event['scene-name']).sources = event['sources'];
+  //       // // this.activeScene = event['scene-name'];
+  //       break;
+  //     case 'ScenesChanged':
+  //     case 'SceneCollectionChanged':
+  //     case 'SceneCollectionListChanged':
+  //     case 'SwitchTransition':
+  //     case 'TransitionListChanged':
+  //     case 'TransitionDurationChanged':
+  //     case 'ProfileChanged':
+  //     case 'ProfileListChanged':
+  //       break;
+  //     case 'SceneItemVisibilityChanged':
+  //       // tslint:disable-next-line: max-line-length
+  //       // this.scenes.find(scene => scene.active).sources.find(source => source.name === event['item-name']).render = event['item-visible'];
+  //       break;
+  //     case 'StreamStatus':
+  //       // const streamStatus = new StreamStatus(event);
+  //       // // console.log(streamStatus);
+  //       // // const newData = [];
+  //       // this.streamTime = event['stream-timecode'];
+  //       // this.liveUpdateChartData.push({
+  //       //   value: [
+  //       //     new Date().toISOString(),
+  //       //     Math.round(streamStatus.cpuUsage),
+  //       //   ],
+  //       // });
 
-        // this.framesChartData[0].value = streamStatus.numDroppedFrames;
-        // this.framesChartData[1].value = streamStatus.numTotalFrames - streamStatus.numDroppedFrames;
-        // if (this.liveUpdateChartData.length > 50) {
-        //   this.liveUpdateChartData.shift();
-        // }
-        // // newData.push({ value: [new Date(), event['cpu-usage']] });
-        // this.liveUpdateChartData = [...this.liveUpdateChartData];
-        // this.framesChartData = [...this.framesChartData];
-        // this.isStreaming = streamStatus.streaming;
-        // // tslint:disable-next-line: no-string-literal
-        // // this.isStreaming = event['streaming'];
-        // // // tslint:disable-next-line: no-string-literal
-        // // this.isRecording = event['recording'];
-        // // this.streamLength = event['total-stream-time'];
+  //       // this.framesChartData[0].value = streamStatus.numDroppedFrames;
+  //       // this.framesChartData[1].value = streamStatus.numTotalFrames - streamStatus.numDroppedFrames;
+  //       // if (this.liveUpdateChartData.length > 50) {
+  //       //   this.liveUpdateChartData.shift();
+  //       // }
+  //       // // newData.push({ value: [new Date(), event['cpu-usage']] });
+  //       // this.liveUpdateChartData = [...this.liveUpdateChartData];
+  //       // this.framesChartData = [...this.framesChartData];
+  //       // this.isStreaming = streamStatus.streaming;
+  //       // // tslint:disable-next-line: no-string-literal
+  //       // // this.isStreaming = event['streaming'];
+  //       // // // tslint:disable-next-line: no-string-literal
+  //       // // this.isRecording = event['recording'];
+  //       // // this.streamLength = event['total-stream-time'];
 
-        // // // tslint:disable-next-line: no-string-literal
-        // // this.fps = event['fps'];
-        // // this.droppedFrames = event['num-dropped-frames'];
-        // // this.totalFrames = event['num-total-frames'];
-        // // // tslint:disable-next-line: no-string-literal
-        // // this.droppedFramesPercent = event['strain'];
-        // // this.transmittionSpeed = event['kbits-per-sec'];
-        // // this.transmittionSpeedB = event['bytes-per-sec'];
-        // // {
-        // //   bytes - per - sec: 63972
-        // //   fps: 30.000000300000007
-        // //   kbits - per - sec: 499
-        // //   num - dropped - frames: 1165
-        // //   num - total - frames: 1473
-        // //   preview - only: false
-        // //   recording: false
-        // //   strain: 1
-        // //   stream - timecode: "00:00:50.014"
-        // //   streaming: true
-        // //   total - stream - time: 50
-        // //   update - type: "StreamStatus"
-        // // }
-        break;
+  //       // // // tslint:disable-next-line: no-string-literal
+  //       // // this.fps = event['fps'];
+  //       // // this.droppedFrames = event['num-dropped-frames'];
+  //       // // this.totalFrames = event['num-total-frames'];
+  //       // // // tslint:disable-next-line: no-string-literal
+  //       // // this.droppedFramesPercent = event['strain'];
+  //       // // this.transmittionSpeed = event['kbits-per-sec'];
+  //       // // this.transmittionSpeedB = event['bytes-per-sec'];
+  //       // // {
+  //       // //   bytes - per - sec: 63972
+  //       // //   fps: 30.000000300000007
+  //       // //   kbits - per - sec: 499
+  //       // //   num - dropped - frames: 1165
+  //       // //   num - total - frames: 1473
+  //       // //   preview - only: false
+  //       // //   recording: false
+  //       // //   strain: 1
+  //       // //   stream - timecode: "00:00:50.014"
+  //       // //   streaming: true
+  //       // //   total - stream - time: 50
+  //       // //   update - type: "StreamStatus"
+  //       // // }
+  //       break;
 
-      case 'TransitionBegin':
-        break;
-      case 'StudioModeSwitched':
-      case 'StreamStarting':
-      case 'StreamStopping':
-      case 'ReplayStarting':
-      case 'ReplayStarted':
-      case 'ReplayStopping':
-      case 'ReplayStopped':
-        // tslint:disable-next-line:no-console
-        // console.debug(event);
-        break;
+  //     case 'TransitionBegin':
+  //       break;
+  //     case 'StudioModeSwitched':
+  //     case 'StreamStarting':
+  //     case 'StreamStopping':
+  //     case 'ReplayStarting':
+  //     case 'ReplayStarted':
+  //     case 'ReplayStopping':
+  //     case 'ReplayStopped':
+  //       // tslint:disable-next-line:no-console
+  //       // console.debug(event);
+  //       break;
 
-      case 'StreamStarted':
-        // this.isStreaming = true;
+  //     case 'StreamStarted':
+  //       // this.isStreaming = true;
 
-        // // start replay buffer
-        // // this.obsWebsocket.StartReplayBuffer().catch((err: Error) => { console.error(err); });
-        break;
+  //       // // start replay buffer
+  //       // // this.obsWebsocket.StartReplayBuffer().catch((err: Error) => { console.error(err); });
+  //       break;
 
-      case 'StreamStopped':
-        // this.isStreaming = false;
-        // // reset charts datas
-        // this.liveUpdateChartData = [];
-        // this.framesChartData[0].value = 0;
-        // this.framesChartData[1].value = 0;
-        // this.framesChartData = [...this.framesChartData];
-        // // stop replay buffer
-        // // this.obsWebsocket.StopReplayBuffer().catch((err: Error) => { console.error(err); });
-        // this.obsWebsocket.setCurrentScene(AvailableScenes.STARTING).catch((err: Error) => { console.error(err); });
-        break;
+  //     case 'StreamStopped':
+  //       // this.isStreaming = false;
+  //       // // reset charts datas
+  //       // this.liveUpdateChartData = [];
+  //       // this.framesChartData[0].value = 0;
+  //       // this.framesChartData[1].value = 0;
+  //       // this.framesChartData = [...this.framesChartData];
+  //       // // stop replay buffer
+  //       // // this.obsWebsocket.StopReplayBuffer().catch((err: Error) => { console.error(err); });
+  //       // this.obsWebsocket.setCurrentScene(AvailableScenes.STARTING).catch((err: Error) => { console.error(err); });
+  //       break;
 
-      default:
-        // tslint:disable-next-line:no-console
-        // console.debug(event);
-        break;
-    }
-  }
+  //     default:
+  //       // tslint:disable-next-line:no-console
+  //       // console.debug(event);
+  //       break;
+  //   }
+  // }
 
   connectObs = async (): Promise<void> => {
     try {
@@ -419,16 +499,27 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
 
+  addToStatArray = (item: number, originalDatas: number[]): number[] => {
+    let clonnedStats = [...originalDatas];
+    if (clonnedStats.length >= 25) {
+      clonnedStats.shift();
+      clonnedStats.push(item);
+    } else {
+      clonnedStats.push(item);
+    }
+    return clonnedStats;
+  }
+
   updateLiveStatus = async (): Promise<void> => {
     try {
-      if (this.state.live) {
-        await obsWs.send('StopStreaming');
+      if(this.state.live) {
+        await obsWs.send('StopStreaming');  
       } else {
         await obsWs.send('StartStreaming', {});
       }
       await this.setState({ live: !this.state.live });
     } catch (error) {
-
+      console.log(error)
     }
   }
 

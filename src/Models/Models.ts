@@ -88,6 +88,15 @@ export type Player = {
   height?: number;
 }
 
+export type StreamingStats = {
+  totalStreamTime: string;
+  oldDroppedFrame: number;
+  droppedFrame: number;
+  cpuUsage: number[];
+  memoryUsage: number[];
+  bytesPerSec: number;
+}
+
 /**
  * Enums
  */

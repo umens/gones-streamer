@@ -3,10 +3,11 @@ import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Drop
 import { IpcService } from "../../Utils/IpcService";
 import { GameEvent, SceneName, StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl } from "../../Components";
+import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, StatsTinyChart } from "../../Components";
 // import ReactDropzone from "react-dropzone";
 import './Cockpit.css';
 import { FormInstance } from "antd/lib/form";
+import prettyBytes from 'pretty-bytes';
 
 const ipc: IpcService = new IpcService();
 
@@ -170,7 +171,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   cancelText="Non"
                   placement="right"
                 >
-                  <Tag icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } color="processing">Running</Tag>
+                  <Tag style={{ cursor: "pointer" }} icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } color="processing">Running</Tag>
                 </Popconfirm>
                 : <Popconfirm
                   title="Voulez vous vraiment démarrer le live"
@@ -179,7 +180,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   cancelText="Non"
                   placement="right"
                 >
-                  <Tag icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } color="default">Not running</Tag>
+                  <Tag style={{ cursor: "pointer" }} icon={(this.state.loadingLiveStatus) ? <SyncOutlined spin /> : null } color="default">Not running</Tag>
                 </Popconfirm>
               }
               title="Stream is"
@@ -192,18 +193,35 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
               ]}
             >
               <Row>
-                <Col span={8} style={{ display: "flex" }}>
-                <Statistic title="Length" value="00:00m" />
+                <Col span={6} style={{ display: "flex" }}>
+                  <Statistic title="Length" value={this.props.ObsRemote.streamingStats ? this.props.ObsRemote.streamingStats?.totalStreamTime : '00:00:00'} />
                   <Statistic
                     title="Dropped Frame"
-                    prefix={ true ? <ArrowUpOutlined /> : <ArrowDownOutlined /> }
+                    prefix={this.props.ObsRemote.streamingStats ? (this.props.ObsRemote.streamingStats?.droppedFrame > this.props.ObsRemote.streamingStats?.oldDroppedFrame) ? <ArrowUpOutlined /> : <ArrowDownOutlined /> : ''}
                     suffix="%"
-                    value="0.32"
-                    valueStyle={ true ? { color: '#cf1322' } : { color: '#3f8600' } }
+                    value={this.props.ObsRemote.streamingStats ? this.props.ObsRemote.streamingStats?.droppedFrame : '0.00'}
+                    valueStyle={this.props.ObsRemote.streamingStats ? (this.props.ObsRemote.streamingStats?.droppedFrame > this.props.ObsRemote.streamingStats?.oldDroppedFrame) ? { color: '#cf1322' } : { color: '#3f8600' } : { color: 'rgba(255, 255, 255, 0.85)' }}
                     style={{
                       margin: '0 32px',
                     }}
                   />
+                  <Statistic title="Transfert Speed" value={this.props.ObsRemote.streamingStats ? `${prettyBytes(this.props.ObsRemote.streamingStats?.bytesPerSec)}ps` : `${prettyBytes(0)}ps`} />
+                </Col>
+                <Col span={3} style={{ display: "flex" }}>
+                  <div className={'ant-statistic'} style={{ margin: '0 32px' }}>
+                    <div className={'ant-statistic-title'}>Memory Usage</div>
+                    <div className={'ant-statistic-content'} style={{ width: 130 }}>
+                      <StatsTinyChart chartType="bar" data={this.props.ObsRemote.streamingStats?.memoryUsage} customContent={(title, items) => { return `${items[0] && prettyBytes(+items[0].value * 1000000)}`; }}/>
+                    </div>
+                  </div>
+                </Col>
+                <Col span={3} style={{ display: "flex" }}>
+                  <div className={'ant-statistic'}>
+                    <div className={'ant-statistic-title'}>CPU Usage</div>
+                    <div className={'ant-statistic-content'} style={{ width: 130 }}>
+                      <StatsTinyChart maxY={100} chartType="area" data={this.props.ObsRemote.streamingStats?.cpuUsage} formatter={(datum: any) => { return { name: datum.x, value: `${+(datum.y).toFixed(2)}` }; }} customContent={(title, items) => { return `${items[0] && items[0].value}%`; }}/>
+                    </div>
+                  </div>
                 </Col>
                 <Col span={8}>
                   <Descriptions size="small" column={1}>

@@ -13,6 +13,7 @@ import { SponsorControl } from "./SponsorControl/SponsorControl";
 import { PlayerControl } from "./PlayerControl/PlayerControl";
 import { VideoPreview } from "./VideoPreview/VideoPreview";
 import { SponsorForm, SponsorFormValues } from "./SponsorForm/SponsorForm";
+import { StatsTinyChart } from "./StatsTinyChart/StatsTinyChart";
 
-export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm };
+export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, StatsTinyChart };
 export type { IObsRemote, SponsorFormValues };
