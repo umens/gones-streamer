@@ -38,7 +38,7 @@ jobs:
   release:
     name: Release
     # Only release on push to master
-    if: github.event_name' == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci')'
+    if: "github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci')"
     runs-on: windows-latest
     # Waits for test jobs for each Node.js version to complete
     needs: [test]
