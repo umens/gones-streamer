@@ -62,7 +62,7 @@ module.exports = {
               ##
             {{~else~}}
               #
-            {{~/if}} :rocket: Release{{#if @root.linkCompare~}}
+            {{~/if}} :rocket: Release {{#if @root.linkCompare~}}
               [v{{version}}](
               {{~#if @root.repository~}}
                 {{~#if @root.host}}
@@ -147,30 +147,30 @@ module.exports = {
         "npmPublish": false,
       }
     ],
-    // [
-    //   "@semantic-release/github",
-    //   {
-    //     "assets": [
-    //       {
-    //         "path": "CHANGELOG.md",
-    //         "label": "Changelog",
-    //       }
-    //     ]
-    //   }
-    // ],
-    // [
-    //   "@semantic-release/git",
-    //   {
-    //     assets: [
-    //       "package.json",
-    //       "yarn.lock",
-    //       "CHANGELOG.md"
-    //     ],
-    //     message: "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-    //   }
-    // ]
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "CHANGELOG.md",
+            "label": "Changelog",
+          }
+        ]
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        assets: [
+          "package.json",
+          "yarn.lock",
+          "CHANGELOG.md"
+        ],
+        message: "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+      }
+    ]
   ],
   preset: "angular",
-  dryRun: true,
-  debug: true
+  // dryRun: true,
+  // debug: true
 }

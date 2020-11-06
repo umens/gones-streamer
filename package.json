@@ -3,7 +3,7 @@
   "version": "1.3.0-development",
   "private": true,
   "homepage": ".",
-  "main": "main.bundle.js",
+  "main": "build/main.bundle.js",
   "scripts": {
     "start": "concurrently \"cross-env BROWSER=none yarn react:start\" \"wait-on http://localhost:3000 && yarn electron:start\"",
     "build": "yarn react:build && yarn electron:build",
@@ -15,8 +15,8 @@
     "electron:start": "webpack --config ./electron/webpack.dev.js",
     "electron:build": "webpack --config ./electron/webpack.prod.js",
     "package": "yarn build && electron-builder",
-    "release": "electron-builder --c.publish.releaseType=release",
-    "beta": "electron-builder --c.publish.releaseType=prerelease",
+    "release": "electron-builder --c.extraMetadata.main=main.bundle.js --c.publish.releaseType=release",
+    "beta": "electron-builder --c.extraMetadata.main=main.bundle.js --c.publish.releaseType=prerelease",
     "getBinary": "node ./scripts/getLatestBins.js",
     "setDefaultImages": "node ./scripts/placeholderImage.js",
     "commit": "cross-env HUSKY=0 git-cz",
@@ -68,14 +68,6 @@
       {
         "from": "assets/appDatas",
         "to": "appDatas"
-      },
-      {
-        "from": "assets/players",
-        "to": "players"
-      },
-      {
-        "from": "assets/sponsors",
-        "to": "sponsors"
       }
     ],
     "directories": {
@@ -104,6 +96,7 @@
     "web-vitals": "^0.2.4"
   },
   "devDependencies": {
+    "@octokit/auth-action": "^1.3.0",
     "@octokit/rest": "^18.0.9",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/git": "^9.0.0",

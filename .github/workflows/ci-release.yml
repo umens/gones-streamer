@@ -13,6 +13,7 @@ jobs:
     name: Tests and Build
     if: "!contains(toJSON(github.event.commits.*.message), 'skip ci')"
     runs-on: windows-latest
+    # runs-on: ubuntu-latest
     steps:
     # Fetch the latest commit
     - name: Checkout
@@ -44,7 +45,6 @@ jobs:
 
     # Install package dependencies
     - name: Install
-      # if: steps.yarn-cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
 
     # # Run tests
@@ -69,6 +69,7 @@ jobs:
     # Only release on push to master
     if: "github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci')"
     runs-on: windows-latest
+    # runs-on: ubuntu-latest
     # Waits for test jobs for each Node.js version to complete
     needs: [test]
     steps:
@@ -87,19 +88,40 @@ jobs:
 
       # Install package dependencies
       - name: Install
-        # if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile
+
+      # # Run build
+      # - name: Build
+      #   run: yarn build
 
       - name: Download production artifact
         uses: actions/download-artifact@v2
         with:
           name: build
 
+      - name: Display all files
+        run: ls -al
+        shell: bash
+
+      - name: Display build folder
+        run: ls -al ./build
+        shell: bash
+
       - name: Download OBS Binaries
         run: yarn getBinary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Display obs folder
+        run: ls -al ./assets/bin/obs/obs-plugins/64bit
+        shell: bash
 
       - name: Set Default Images
-        run: yarn setDefaultImages        
+        run: yarn setDefaultImages
+
+      - name: Display image folder
+        run: ls -al ./assets/appDatas
+        shell: bash    
 
       - name: Release
         env:
