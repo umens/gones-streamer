@@ -5,13 +5,11 @@ const path = require('path');
   try {
     console.log('* Setting placeholder images...');
     console.log('** Copying team image...');
-    console.log(__dirname);
-    console.log(process.cwd());
     await fs.copyFile(path.join(__dirname, '../assets/appDatas/placeholder_team.png'), path.join(__dirname, '../assets/appDatas/home.png'));
     await fs.rename(path.join(__dirname, '../assets/appDatas/placeholder_team.png'), path.join(__dirname, '../assets/appDatas/away.png'));
     console.log('** Copying team image OK!');
     console.log('** copying background image...');
-    await fs.rename(path.join(__dirname, '../assets/appDatas/placeholder_bg.png'), path.join(__dirname, '../assets/appDatas/bg.jpg'));
+    await fs.rename(path.join(__dirname, '../assets/appDatas/placeholder_bg.jpg'), path.join(__dirname, '../assets/appDatas/bg.jpg'));
     console.log('** Copying background image OK!');
     console.log('* Setting placeholder images OK!');
   } catch (error) {

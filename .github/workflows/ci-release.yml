@@ -90,24 +90,16 @@ jobs:
       - name: Install
         run: yarn install --frozen-lockfile
 
-      # # Run build
-      # - name: Build
-      #   run: yarn build
+      - name: Download production artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: build
 
-      # - name: Download production artifact
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: build
-      #     path: build
-
-      # - name: Download OBS Binaries
-      #   run: yarn getBinary
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Display build folder
-        run: ls -al ./assets/appDatas
-        shell: bash
+      - name: Download OBS Binaries
+        run: yarn getBinary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set Default Images
         run: yarn setDefaultImages
@@ -116,28 +108,28 @@ jobs:
         run: ls -al ./assets/appDatas
         shell: bash    
 
-      # - name: Release
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      #   run: npx semantic-release
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npx semantic-release
 
-      # - name: Package Beta Release       
-      #   if: "github.ref == 'refs/heads/develop'"
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      #   run: yarn beta
+      - name: Package Beta Release       
+        if: "github.ref == 'refs/heads/develop'"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: yarn beta
 
-      # - name: Package Stable Release      
-      #   if: "github.ref == 'refs/heads/master'"
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      #   run: yarn release
+      - name: Package Stable Release      
+        if: "github.ref == 'refs/heads/master'"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: yarn release
         
-      # # Run Archive
-      # - name: Archive production release artifact
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: release
-      #     path: |
-      #       release
-      #     retention-days: 5
+      # Run Archive
+      - name: Archive production release artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: release
+          path: |
+            release
+          retention-days: 5
