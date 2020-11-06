@@ -1,0 +1,47 @@
+.scoreDisplay .ant-avatar:hover{
+  cursor: pointer;
+}
+
+.timeout-container {
+  display: flex;
+  position: absolute;
+  bottom: 7px;
+  width: 100%;
+  justify-content: center;
+}
+
+.timeout {
+  width: 20px;
+  height: 8px;
+  transform: skew(-35deg);
+  margin-right: 5px;
+}
+
+.timeout:last-child {
+  margin-right: 0;
+}
+.timeout:hover {
+  cursor: pointer;
+}
+
+.bg-warning {
+  background-color: #ffaa00 !important;
+}
+
+.border {
+  border: 1px solid;
+}
+
+.border-warning {
+  border-color: #ffaa00;
+}
+
+.ant-upload.ant-upload-select-picture-card {
+  margin: 0;
+}
+
+.avatar-uploader {
+  display: flex;
+  width: auto;
+  justify-content: center;
+}

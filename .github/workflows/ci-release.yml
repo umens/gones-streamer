@@ -1,0 +1,128 @@
+name: Build and Release
+env:
+  HUSKY: 0
+# Run the workflow when a Pull Request is opened or when changes are pushed to master
+on:
+#  pull_request:
+#   branches: [ master, develop ]
+ push:
+  branches: [ master, develop, 'feature/**', 'fix/**' ]
+
+jobs:
+  test:
+    name: Tests and Build
+    if: "!contains(toJSON(github.event.commits.*.message), 'skip ci')"
+    runs-on: windows-latest
+    steps:
+    # Fetch the latest commit
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Setup Node.js using the appropriate version
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '15.x'
+
+    - name: Cache dependencies
+      uses: c-hive/gha-yarn-cache@v1
+
+    # - name: Get yarn cache directory path
+    #   id: yarn-cache-dir-path
+    #   run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+    
+    # - name: Cache dependencies
+    #   uses: actions/cache@v2
+    #   id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+    #   with:
+    #     path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+    #     key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-yarn-
+
+    # Install package dependencies
+    - name: Install
+      # if: steps.yarn-cache.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile
+
+    # # Run tests
+    # - name: Test
+    #   run: npm test
+
+    # Run build
+    - name: Build
+      run: yarn build
+
+    # Run Archive
+    - name: Archive production build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: |
+          build
+        retention-days: 5
+
+  release:
+    name: Release
+    # Only release on push to master
+    if: "github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci')"
+    runs-on: windows-latest
+    # Waits for test jobs for each Node.js version to complete
+    needs: [test]
+    steps:
+      # - name: Checkout
+      #   uses: actions/checkout@v2
+      #   with:
+      #     fetch-depth: 0
+
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v1
+      #   with:
+      #     node-version: '15.x'
+
+      # - name: Cache dependencies
+      #   uses: c-hive/gha-yarn-cache@v1
+
+      # # # Install package dependencies
+      # # - name: Install
+      # #   # if: steps.yarn-cache.outputs.cache-hit != 'true'
+      # #   run: yarn install --frozen-lockfile
+
+      # - name: Download production artifact
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: build
+
+      - name: Download OBS Binaries
+        run: yarn getBinary
+
+      - name: Set Default Images
+        run: yarn setDefaultImages        
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npx semantic-release
+
+      - name: Package Beta Release       
+        if: "github.ref == 'refs/heads/develop'"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: yarn beta
+
+      - name: Package Stable Release      
+        if: "github.ref == 'refs/heads/master'"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: yarn release
+        
+      # Run Archive
+      - name: Archive production release artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: release
+          path: |
+            release
+          retention-days: 5

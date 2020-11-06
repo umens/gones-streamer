@@ -1,0 +1,71 @@
+.teamblock-scoreboard {
+  height: 50px;
+  transform: skewX(-25deg);
+}
+.teamblock-scoreboard .img-thumbnail {
+  padding: .25rem;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: .25rem;
+  max-width: 100%;
+  height: auto;
+}
+.teamblock-scoreboard .teamlogo-scoreboard {
+  height: 50px;
+  transform: skewX(25deg);
+  position: absolute;
+  left: 10px;
+  background: none;
+  border: none;
+}
+.teamblock-scoreboard .teamname-scoreboard {
+  transform: skewX(25deg);
+  position: absolute;
+  left: 70px;
+  font-size: 30px;
+  line-height: 50px;
+  max-width: 225px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.teamblock-scoreboard .teamscore-scoreboard {
+  transform: skewX(25deg);
+  position: absolute;
+  right: 15px;
+  font-size: 30px;
+  line-height: 50px;
+}
+.teamblock-scoreboard .teampossession-scoreboard {
+  height: 3px;
+  position: absolute;
+  bottom: -3px;
+  width: 100%;
+}
+.teamblock-scoreboard .teamtimeoutblock-scoreboard {
+  display: flex;
+  position: absolute;
+  bottom: -13px;
+}
+.teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard {
+  width: 25px;
+  height: 7px;
+  margin-right: 3px;
+}
+.teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard:last-child {
+  margin-right: 0;
+}
+.teamblock-scoreboard .quarter-scoreboard {
+  /* transform: skewX(25deg); */
+  font-size: 30px;
+  line-height: 50px;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}

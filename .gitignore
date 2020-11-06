@@ -1,47 +1,48 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
-# compiled output
-/dist
-/tmp
-/out-tsc
-/documentation
-# Only exists if Bazel was run
-/bazel-out
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
+/.pnp
+.pnp.js
 
-# profiling files
-chrome-profiler-events*.json
-speed-measure-plugin*.json
+# testing
+/coverage
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# production
+/build
+/release
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+/assets/appDatas/**/*.png
+/assets/appDatas/**/*.jpg
+!/assets/appDatas/placeholder_team.png
+!/assets/appDatas/placeholder_bg.jpg
+/assets/bin/obs/bin
+/assets/bin/obs/*.bat
+/assets/bin/obs/data
+/assets/bin/obs/obs-plugins
+/assets/bin/obs/config/obs-studio/crashes
+/assets/bin/obs/config/obs-studio/logs
+/assets/bin/obs/config/obs-studio/plugin_config
+/assets/bin/obs/config/obs-studio/profiler_data
+/assets/bin/obs/config/obs-studio/updates
+/assets/bin/obs/config/obs-studio/global.ini
+/assets/bin/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json
+
+/assets/players
+/assets/sponsors
 
 # misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
-# System Files
 .DS_Store
-Thumbs.db
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+
+/scripts/*.zip
+
+/assets/appDatas/Replay instantReplay.mkv

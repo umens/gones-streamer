@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "strict": true,
+    "outDir": "../build",
+    "rootDir": "../",
+    "noEmitOnError": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+  },
+  "include": [
+    "./**/*",
+    "../common.d.ts",
+      "../shared/*"
+    ],
+  "exclude": ["../node_modules"]
+}
