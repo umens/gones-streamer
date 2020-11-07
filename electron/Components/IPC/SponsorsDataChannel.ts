@@ -5,13 +5,15 @@ import { join } from 'path';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { Utilities } from "../../Utilities";
-import { stringify } from "querystring";
+import ElectronLog from "electron-log";
 
 export class SponsorsDataChannel implements IpcChannelInterface {
 
+  log: ElectronLog.LogFunctions;
   paths: PathsType;
 
   constructor(paths: PathsType) {
+    this.log = ElectronLog.scope('SponsorsDataChannel');
     this.paths = paths;
   }
 
@@ -102,17 +104,16 @@ export class SponsorsDataChannel implements IpcChannelInterface {
             }  
             break;
           case 'get':
+          default:
             const rawSponsors = await fs.readFile(join(this.paths.sponsorsFolder, '/sponsors.json'), 'utf8');
             const sponsors: Sponsor[] = JSON.parse(rawSponsors);
             event.sender.send(request.responseChannel, sponsors);
             break;
-        
-          default:
-            break;
         }
       }
     } catch (error) {
-      event.sender.send(request.responseChannel, false);
+      this.log.error(error);
+      event.sender.send(request.responseChannel, []);
     }
   }
 }

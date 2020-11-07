@@ -2,10 +2,16 @@ import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
 import { IpcRequest, StoreType, GetDefaultConfig } from "../../../src/Models";
 import Store from 'electron-store';
+import ElectronLog from "electron-log";
 
 export class StoredConfigChannel implements IpcChannelInterface {
 
   private store: Store<StoreType> = new Store<StoreType>();
+  log: ElectronLog.LogFunctions;
+
+  constructor() {
+    this.log = ElectronLog.scope('StoredConfigChannel');
+  }
 
   getName(): string {
     return 'stored-config';
@@ -33,7 +39,7 @@ export class StoredConfigChannel implements IpcChannelInterface {
       };
       event.sender.send(request.responseChannel, { storedConfig });
     } catch (error) {
-
+      this.log.error(error);
     }
   }
 }

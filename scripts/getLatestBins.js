@@ -6,9 +6,15 @@ const extract = require('extract-zip');
 const path = require('path');
 
 (async () => {
-  try {    
-    const auth = createActionAuth();
-    const authentication = await auth();
+  try {
+    let authentication;
+    if(process.env.GITHUB_ACTION) { 
+      const auth = createActionAuth();
+      authentication = await auth();
+    }
+    else { 
+      authentication = { token: process.env.GH_TOKEN };
+    }
     const octokit = new Octokit({
       auth: authentication.token,
     });

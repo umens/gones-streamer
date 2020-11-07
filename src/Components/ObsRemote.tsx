@@ -427,7 +427,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         sport: StreamingSport.Football,
         streamingService: StreamingService.Youtube,
       };
-      let bgImg = await (await obsWs.send('GetSourceSettings', { sourceName: 'Background' })).sourceSettings as any; 
+      let bgImg = await (await obsWs.send('GetSourceSettings', { sourceName: 'Background' })).sourceSettings as any;
       // TODO: wait for GetSceneItemList to be release to list all cams
       /**
        * Same for DeleteSceneItem (Available) & DuplicateSceneItem (Available) to implemente adding and removing cams

@@ -196,7 +196,7 @@ export function GetDefaultConfig(): StoreType {
     AwayTeam: {
       city: 'Ville Equipe 2',
       color: '#612323',
-      logo: 'https://placekitten.com/450/450',
+      logo: '../../../../appDatas/away.png',
       name: 'Equipe 2',
       score: 0,
       timeout: 3
@@ -204,7 +204,7 @@ export function GetDefaultConfig(): StoreType {
     HomeTeam: {
       city: 'Ville Equipe 1',
       color: '#133155',
-      logo: 'https://placekitten.com/450/450',
+      logo: '../../../../appDatas/home.png',
       name: 'Equipe 1',
       score: 0,
       timeout: 3
@@ -239,7 +239,7 @@ export function GetDefaultConfig(): StoreType {
   ];
   const Sponsors: Sponsor[] = [];
   const Players: Player[] = [];
-  const BackgroundImage = '';
+  const BackgroundImage = '../../../../appDatas/bg.jpg';
   let storedConfigDefault: StoreType = {
     GameStatut,
     LiveSettings,

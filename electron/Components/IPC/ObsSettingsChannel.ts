@@ -3,12 +3,15 @@ import { IpcMainEvent } from 'electron';
 import { IpcRequest, PathsType } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
+import ElectronLog from "electron-log";
 
 export class ObsSettingsChannel implements IpcChannelInterface {
 
+  log: ElectronLog.LogFunctions;
   paths: PathsType;
 
   constructor(paths: PathsType) {
+    this.log = ElectronLog.scope('ObsSettingsChannel');
     this.paths = paths;
   }
 
@@ -37,7 +40,7 @@ export class ObsSettingsChannel implements IpcChannelInterface {
         event.sender.send(request.responseChannel, streamSettingsOBS.bitrate as string);
       }
     } catch (error) {
-
+      this.log.error(error);
     }
   }
 }

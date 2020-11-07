@@ -143,7 +143,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
           <Col span={24}>            
             <FilterResults
               value={this.state.searchValue}
-              data={this.props.ObsRemote.store?.Sponsors}
+              data={this.props.ObsRemote.store?.Sponsors ? this.props.ObsRemote.store?.Sponsors : []}
               renderResults={(results: Sponsor[]) => {
                 if(this.props.editable) {
                   results.push({label: "add"});

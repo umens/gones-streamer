@@ -3,12 +3,15 @@ import { IpcMainEvent } from 'electron';
 import { IpcRequest, PathsType } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
+import ElectronLog from "electron-log";
 
 export class FileUploadChannel implements IpcChannelInterface {
 
+  log: ElectronLog.LogFunctions;
   paths: PathsType;
 
   constructor(paths: PathsType) {
+    this.log = ElectronLog.scope('FileUploadChannel');
     this.paths = paths;
   }
 
@@ -41,7 +44,7 @@ export class FileUploadChannel implements IpcChannelInterface {
       //   event.sender.send(request.responseChannel, { settings: streamSettingsOBS });
       // }
     } catch (error) {
-
+      this.log.error(error);
     }
   }
 }

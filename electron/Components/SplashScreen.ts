@@ -25,6 +25,7 @@ export default class SplashScreen {
   private createSplashScreen() {
     this.log.verbose('Creating splash Window config');
     this.config = {
+      title: 'Starting Gones Streamer...',
       width: 500,
       height: 450,
       transparent: true,

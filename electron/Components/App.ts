@@ -43,11 +43,6 @@ export default class Main {
       sponsorsFolder: join(extraResources, '/sponsors'),
       playersFolder: join(extraResources, '/players'),
     }
-    this.log.info(`${isPackaged}`);
-    this.log.info(`${app.getAppPath()}`);
-    this.log.info(`${extraResources}`);
-    this.log.info(`${JSON.stringify(this.paths, null, 2)}`);
-
     // handle local file bug
     app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
     // console.log(this.paths);
@@ -56,45 +51,84 @@ export default class Main {
   init = async () => {
     try {
       // const test = fs.readdirSync(this.paths.binFolder);
-    // console.log(test);
-    this.log.info('%cInit', 'color: blue');
-    this.log.verbose('Checking first run');
-    if(firstRun({ options: 'first-run'})) {
-      this.log.verbose('First run');
-      await fs.mkdir(join(this.paths.sponsorsFolder, '/medias'), { recursive: true });
-      await fs.mkdir(join(this.paths.playersFolder, '/medias'), { recursive: true });
-      if (!existsSync(join(this.paths.sponsorsFolder, '/sponsors.json'))) {        
-        await fs.writeFile(
-          join(this.paths.sponsorsFolder, '/sponsors.json'),
-          JSON.stringify([], null, 2),
-        );
+      // console.log(test);
+      this.log.info('%cInit', 'color: blue');
+      this.log.verbose('Checking first run');
+      if(firstRun({ options: 'first-run'})) {
+        this.log.verbose('First run');
+        if (!existsSync(this.paths.sponsorsFolder)) {
+          await fs.mkdir(join(this.paths.sponsorsFolder), { recursive: true });
+        }
+        if(!existsSync(join(this.paths.sponsorsFolder, '/medias'))){
+          await fs.mkdir(join(this.paths.sponsorsFolder, '/medias'), { recursive: true });
+        }
+        if (!existsSync(join(this.paths.sponsorsFolder, '/sponsors.json'))) {        
+          await fs.writeFile(
+            join(this.paths.sponsorsFolder, '/sponsors.json'),
+            JSON.stringify([], null, 2),
+          );
+        }
+        if (!existsSync(this.paths.playersFolder)) {
+          await fs.mkdir(join(this.paths.playersFolder), { recursive: true });
+        }
+        if(!existsSync(join(this.paths.playersFolder, '/medias'))){
+          await fs.mkdir(join(this.paths.playersFolder, '/medias'), { recursive: true });
+        }
+        if (!existsSync(join(this.paths.playersFolder, '/players.json'))) {        
+          await fs.writeFile(
+            join(this.paths.playersFolder, '/players.json'),
+            JSON.stringify([], null, 2),
+          );
+        }
+        // this.log.info('%c[Main] Init store', 'color: blue');
+        // this.store = new Store();
+        // this.store.set('isRainbow', 'false');
+      } else {
+        // this.log.info('%c[Main] Init store with existing value', 'color: blue');
+        // this.store = new Store();
+        // this.store.set('unicorn', 'tes');
+        if (!existsSync(this.paths.sponsorsFolder)) {
+          await fs.mkdir(join(this.paths.sponsorsFolder), { recursive: true });
+        }
+        if(!existsSync(join(this.paths.sponsorsFolder, '/medias'))){
+          await fs.mkdir(join(this.paths.sponsorsFolder, '/medias'), { recursive: true });
+        }
+        if (!existsSync(join(this.paths.sponsorsFolder, '/sponsors.json'))) {        
+          await fs.writeFile(
+            join(this.paths.sponsorsFolder, '/sponsors.json'),
+            JSON.stringify([], null, 2),
+          );
+        }
+        if (!existsSync(this.paths.playersFolder)) {
+          await fs.mkdir(join(this.paths.playersFolder), { recursive: true });
+        }
+        if(!existsSync(join(this.paths.playersFolder, '/medias'))){
+          await fs.mkdir(join(this.paths.playersFolder, '/medias'), { recursive: true });
+        }
+        if (!existsSync(join(this.paths.playersFolder, '/players.json'))) {        
+          await fs.writeFile(
+            join(this.paths.playersFolder, '/players.json'),
+            JSON.stringify([], null, 2),
+          );
+        }
+        this.log.info('created')
       }
-      if (!existsSync(join(this.paths.playersFolder, '/players.json'))) {        
-        await fs.writeFile(
-          join(this.paths.playersFolder, '/players.json'),
-          JSON.stringify([], null, 2),
-        );
-      }
-      // this.log.info('%c[Main] Init store', 'color: blue');
-      // this.store = new Store();
-      // this.store.set('isRainbow', 'false');
-    } else {
-      // this.log.info('%c[Main] Init store with existing value', 'color: blue');
-      // this.store = new Store();
-      // this.store.set('unicorn', 'tes');
-    }
 
-    this.obsProcess = new ObsProcess({ binFolder: this.paths.binFolder });
-    await this.obsProcess.startObs();
+      this.obsProcess = new ObsProcess({ binFolder: this.paths.binFolder });
+      await this.obsProcess.startObs();
 
-    app.on('ready', () => {
-      autoUpdater.checkForUpdatesAndNotify();
-      this.createWindow();
-    });
-    app.on('window-all-closed', this.onWindowAllClosed);
-    app.on('activate', this.onActivate);
+      app.on('ready', async () => {
+        try {
+          await autoUpdater.checkForUpdatesAndNotify();
+          await this.createWindow();
+        } catch (error) {
+          this.log.error(error)
+        }
+      });
+      app.on('window-all-closed', this.onWindowAllClosed);
+      app.on('activate', this.onActivate);
     } catch (error) {
-      console.log(error)
+      this.log.error(error)
     }
   }
 
@@ -107,7 +141,9 @@ export default class Main {
 
     this.log.verbose('Creating splashScreen');
     this.splashScreen = new SplashScreen();
+    // TODO: check this to hide this windows https://www.electronjs.org/docs/tutorial/offscreen-rendering
     this.log.verbose('Creating scoreboard Window');
+
     this.scoreboardWindow = new ScoreboardWindow();
     this.log.verbose('Creating main Window config');
     const size = screen.getPrimaryDisplay().workAreaSize;
@@ -193,7 +229,7 @@ export default class Main {
         this.log.info('%cApp Closed.', 'color: blue');
       }
     } catch (error) {
-      
+      this.log.error(error)
     }
   }
 

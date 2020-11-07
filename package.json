@@ -15,8 +15,9 @@
     "electron:start": "webpack --config ./electron/webpack.dev.js",
     "electron:build": "webpack --config ./electron/webpack.prod.js",
     "package": "yarn build && electron-builder",
-    "release": "electron-builder --c.extraMetadata.main=main.bundle.js --c.publish.releaseType=release",
-    "beta": "electron-builder --c.extraMetadata.main=main.bundle.js --c.publish.releaseType=prerelease",
+    "release": "electron-builder -c.extraMetadata.main=main.bundle.js -c.publish.releaseType=release",
+    "beta": "electron-builder -c.extraMetadata.main=main.bundle.js -c.publish.releaseType=prerelease",
+    "packdev": "yarn build && electron-builder -w -c.extraMetadata.main=main.bundle.js",
     "getBinary": "node ./scripts/getLatestBins.js",
     "setDefaultImages": "node ./scripts/placeholderImage.js",
     "commit": "cross-env HUSKY=0 git-cz",
@@ -74,7 +75,12 @@
       "output": "release/"
     },
     "win": {
-      "icon": "logos/logo.png"
+      "icon": "logos/logo.png",
+      "target": [
+        "nsis",
+        "nsis-web",
+        "portable"
+      ]
     }
   },
   "dependencies": {
