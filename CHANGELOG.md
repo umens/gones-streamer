@@ -1,5 +1,12 @@
 Changelog
 
+# :rocket: Release [v2.0.0-beta.2](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.1...v2.0.0-beta.2) (2020-11-07)
+          
+
+### :robot: Continuous Integration
+
+* **release:** add app targets ([66d08af](https://github.com/umens/gones-streamer/commit/66d08af03c54c76c82c101174835f6ac3e6cee8d))
+
 # :rocket: Release [v2.0.0-beta.1](https://github.com/umens/gones-streamer/compare/v1.3.0...v2.0.0-beta.1) (2020-11-06)
           
 
@@ -86,4 +93,3 @@ Changelog
 
 
 *No changelog for this release.*
-
