@@ -4,11 +4,12 @@ const { createActionAuth } = require("@octokit/auth-action");
 const Axios = require('axios');
 const extract = require('extract-zip');
 const path = require('path');
+const isCI = require('is-ci');
 
 (async () => {
   try {
     let authentication;
-    if(process.env.GITHUB_ACTION) { 
+    if(isCI) { 
       const auth = createActionAuth();
       authentication = await auth();
     }
