@@ -1,5 +1,7 @@
 Changelog
 
+# :rocket: Release [v2.0.0-beta.3](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.2...v2.0.0-beta.3) (2020-11-08)
+
 # :rocket: Release [v2.0.0-beta.2](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.1...v2.0.0-beta.2) (2020-11-07)
           
 
