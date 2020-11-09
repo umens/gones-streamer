@@ -1,5 +1,12 @@
 Changelog
 
+# :rocket: Release [v2.0.0-beta.4](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.3...v2.0.0-beta.4) (2020-11-09)
+          
+
+### :fast_forward: Performance Improvements
+
+* **electron:** fix process still running after closing ([66f7011](https://github.com/umens/gones-streamer/commit/66f70117c808ea031bd91884a1bc0a27d9a99601))
+
 # :rocket: Release [v2.0.0-beta.3](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.2...v2.0.0-beta.3) (2020-11-08)
 
 # :rocket: Release [v2.0.0-beta.2](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.1...v2.0.0-beta.2) (2020-11-07)
