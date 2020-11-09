@@ -126,6 +126,7 @@ export default class Main {
         }
       });
       app.on('window-all-closed', this.onWindowAllClosed);
+      app.on('before-quit', this.beforeQuit);
       app.on('activate', this.onActivate);
     } catch (error) {
       this.log.error(error)
@@ -220,14 +221,24 @@ export default class Main {
     });
   }
 
-  private onWindowAllClosed = async () => {
+  private beforeQuit = async () => {
     try {
       this.log.info('%cApp Closing...', 'color: blue');
-      if (process.platform !== 'darwin') {
-        await this.obsProcess?.stopObs();
-        app.quit();
-        this.log.info('%cApp Closed.', 'color: blue');
+      if(this.obsProcess) {
+        await this.obsProcess.stopObs();
       }
+    } catch (error) {
+      this.log.error(error)
+    }
+  }
+
+  private onWindowAllClosed = async () => {
+    try {
+      if (process.platform !== 'darwin') {
+        app.quit();
+      }
+      this.log.info('%cApp Closed.', 'color: blue');
+      process.exit(0);
     } catch (error) {
       this.log.error(error)
     }

@@ -24,7 +24,7 @@ export default class ObsProcess {
   startObs = async (): Promise<void> => {
     try {
       const executablePath = path.join(this.binFolder, '/obs/bin/64bit/obs64.exe');
-      let parameters = [     
+      const parameters = [     
         '--portable', 
         '--profile gonesstreamer',  
         '--collection gonesstreamer',
@@ -56,9 +56,10 @@ export default class ObsProcess {
   stopObs = async () => {
     try {
       this.log.info('Closing...');
-      this.log.info(this.obsProcess);
       const closed = this.obsProcess!.kill();
       if(closed) {
+        this.obsProcess?.removeAllListeners();
+        this.obsProcess = undefined;
         this.log.info('Closed.');
       } else {
         throw new Error('Erreur lors de la fermeture de OBS');
