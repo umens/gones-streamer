@@ -56,6 +56,9 @@ export default class Main {
       this.log.verbose('Checking first run');
       if(firstRun({ options: 'first-run'})) {
         this.log.verbose('First run');
+        if(!existsSync(join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json'))){
+          await fs.rename(join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json.sample'), join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json'));
+        }
         if (!existsSync(this.paths.sponsorsFolder)) {
           await fs.mkdir(join(this.paths.sponsorsFolder), { recursive: true });
         }
@@ -87,6 +90,9 @@ export default class Main {
         // this.log.info('%c[Main] Init store with existing value', 'color: blue');
         // this.store = new Store();
         // this.store.set('unicorn', 'tes');
+        if(!existsSync(join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json'))){
+          await fs.rename(join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json.sample'), join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/service.json'));
+        }
         if (!existsSync(this.paths.sponsorsFolder)) {
           await fs.mkdir(join(this.paths.sponsorsFolder), { recursive: true });
         }
