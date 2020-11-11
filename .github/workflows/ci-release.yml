@@ -54,6 +54,14 @@ jobs:
     # Run build
     - name: Build
       run: yarn build
+      
+    - name: Prints the current branch name
+      run: |
+        echo "${GITHUB_BRANCH##*/}"
+        echo "${GITHUB_CONDITION}"
+      env:
+        GITHUB_BRANCH: ${{ github.ref }}
+        GITHUB_CONDITION: ${{ github.ref == ('refs/heads/develop' || 'refs/heads/master') }}
 
     # Run Archive
     - name: Archive production build artifact
