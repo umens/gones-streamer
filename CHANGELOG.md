@@ -1,5 +1,12 @@
 Changelog
 
+# :rocket: Release [v2.0.0-beta.5](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.4...v2.0.0-beta.5) (2020-11-11)
+          
+
+### :bug: Bug Fixes
+
+* **obs config:** fix missing file on fresh install ([e43a2d5](https://github.com/umens/gones-streamer/commit/e43a2d5676f2bccef7209cd3f6bc0e9c1832b618))
+
 # :rocket: Release [v2.0.0-beta.4](https://github.com/umens/gones-streamer/compare/v2.0.0-beta.3...v2.0.0-beta.4) (2020-11-09)
           
 
