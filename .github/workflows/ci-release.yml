@@ -3,8 +3,8 @@ env:
   HUSKY: 0
 # Run the workflow when a Pull Request is opened or when changes are pushed to master
 on:
-#  pull_request:
-#   branches: [ master, develop ]
+ pull_request:
+  branches: [ master ]
  push:
   branches: [ master, develop, 'feature/**', 'fix/**' ]
 
