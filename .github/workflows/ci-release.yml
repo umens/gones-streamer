@@ -59,6 +59,7 @@ jobs:
       run: |
         echo "${GITHUB_BRANCH##*/}"
         echo "${GITHUB_CONDITION}"
+      shell: bash
       env:
         GITHUB_BRANCH: ${{ github.ref }}
         GITHUB_CONDITION: ${{ github.ref == ('refs/heads/develop' || 'refs/heads/master') }}
