@@ -4,7 +4,7 @@ env:
 # Run the workflow when a Pull Request is opened or when changes are pushed to master
 on:
  pull_request:
-  branches: [ master ]
+  branches: [ master, develop ]
  push:
   branches: [ master, develop, 'feature/**', 'fix/**' ]
 
@@ -21,22 +21,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Prints the current branch name
-      run: |
-        echo "GITHUB_BRANCH : ${GITHUB_BRANCH}"
-        echo "GITHUB_BRANCH##*/ : ${GITHUB_BRANCH##*/}"
-        echo "GITHUB_EVENT : ${GITHUB_EVENT}"
-        echo "GITHUB_CONDITION : ${GITHUB_CONDITION}"
-        echo "GITHUB_SMALCONDITION : ${GITHUB_SMALCONDITION}"
-        echo "GITHUB_BIGCONDITION : ${GITHUB_BIGCONDITION}"
-      shell: bash
-      env:
-        GITHUB_BRANCH: ${{ github.ref }}
-        GITHUB_CONDITION: ${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master' }}
-        GITHUB_SMALCONDITION: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master') }}
-        GITHUB_EVENT: ${{ github.event_name }}
-        GITHUB_BIGCONDITION: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci') }}
-
     # Setup Node.js using the appropriate version
     - name: Use Node.js
       uses: actions/setup-node@v1
@@ -45,19 +29,6 @@ jobs:
 
     - name: Cache dependencies
       uses: c-hive/gha-yarn-cache@v1
-
-    # - name: Get yarn cache directory path
-    #   id: yarn-cache-dir-path
-    #   run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-    
-    # - name: Cache dependencies
-    #   uses: actions/cache@v2
-    #   id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-    #   with:
-    #     path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-    #     key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-yarn-
 
     # Install package dependencies
     - name: Install
@@ -82,7 +53,7 @@ jobs:
   release:
     name: Release
     # Only release on push to master
-    if: "github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci')"
+    if: "github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci')"
     runs-on: windows-latest
     # runs-on: ubuntu-latest
     # Waits for test jobs for each Node.js version to complete
