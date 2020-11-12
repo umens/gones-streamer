@@ -21,6 +21,22 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Prints the current branch name
+      run: |
+        echo "GITHUB_BRANCH : ${GITHUB_BRANCH}"
+        echo "GITHUB_BRANCH##*/ : ${GITHUB_BRANCH##*/}"
+        echo "GITHUB_EVENT : ${GITHUB_EVENT}"
+        echo "GITHUB_CONDITION : ${GITHUB_CONDITION}"
+        echo "GITHUB_SMALCONDITION : ${GITHUB_SMALCONDITION}"
+        echo "GITHUB_BIGCONDITION : ${GITHUB_BIGCONDITION}"
+      shell: bash
+      env:
+        GITHUB_BRANCH: ${{ github.ref }}
+        GITHUB_CONDITION: ${{ github.ref == ('refs/heads/develop' || 'refs/heads/master') }}
+        GITHUB_SMALCONDITION: ${{ github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') }}
+        GITHUB_EVENT: ${{ github.event_name }}
+        GITHUB_BIGCONDITION: ${{ github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci') }}
+
     # Setup Node.js using the appropriate version
     - name: Use Node.js
       uses: actions/setup-node@v1
@@ -54,15 +70,6 @@ jobs:
     # Run build
     - name: Build
       run: yarn build
-      
-    - name: Prints the current branch name
-      run: |
-        echo "${GITHUB_BRANCH##*/}"
-        echo "${GITHUB_CONDITION}"
-      shell: bash
-      env:
-        GITHUB_BRANCH: ${{ github.ref }}
-        GITHUB_CONDITION: ${{ github.ref == ('refs/heads/develop' || 'refs/heads/master') }}
 
     # Run Archive
     - name: Archive production build artifact
