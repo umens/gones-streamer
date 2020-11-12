@@ -32,10 +32,10 @@ jobs:
       shell: bash
       env:
         GITHUB_BRANCH: ${{ github.ref }}
-        GITHUB_CONDITION: ${{ github.ref == ('refs/heads/develop' || 'refs/heads/master') }}
-        GITHUB_SMALCONDITION: ${{ github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') }}
+        GITHUB_CONDITION: ${{ contains(["refs/heads/develop", "refs/heads/master"], github.ref) }}
+        GITHUB_SMALCONDITION: ${{ github.event_name == 'push' && contains(["refs/heads/develop", "refs/heads/master"], github.ref) }}
         GITHUB_EVENT: ${{ github.event_name }}
-        GITHUB_BIGCONDITION: ${{ github.event_name == 'push' && github.ref == ('refs/heads/develop' || 'refs/heads/master') && !contains(toJSON(github.event.commits.*.message), 'skip ci') }}
+        GITHUB_BIGCONDITION: ${{ github.event_name == 'push' && contains(["refs/heads/develop", "refs/heads/master"], github.ref) && !contains(toJSON(github.event.commits.*.message), 'skip ci') }}
 
     # Setup Node.js using the appropriate version
     - name: Use Node.js
