@@ -3,15 +3,19 @@
 import { BrowserWindowConstructorOptions, BrowserWindow, protocol } from "electron";
 import ElectronLog from 'electron-log';
 import { join } from "path";
-import url from 'url';
+// import url from 'url';
 import isDev from 'electron-is-dev';
+// import { promises as fs } from "fs";
+import { Utilities } from "../Utilities";
 
 export default class ScoreboardWindow {
 
   log: ElectronLog.LogFunctions;
+  private utilities: Utilities = new Utilities();
 
   private config: BrowserWindowConstructorOptions | null = null;
   window: BrowserWindow | null = null;
+  ready: boolean = false;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor() {
@@ -36,21 +40,31 @@ export default class ScoreboardWindow {
       width: 1000,
       height: 100,
       title: 'Gones Streamer - Scoreboard',
-      // backgroundColor: '#008000',
       // show: false,
-      // autoHideMenuBar: true,
+      show: true,
       frame: false,
-      webPreferences: {        
-        nodeIntegration: true,
+      webPreferences: {    
+        // offscreen: true,
+        // transparent: true,
+        backgroundThrottling: false,
         webSecurity: false, // handle local file bug
+        allowRunningInsecureContent: false,
         additionalArguments: ['--allow-file-access-from-files'], // handle local file bug
         preload: join(__dirname, "preload.bundle.js") // use a preload script
       }
     };
     this.log.info('%cCreating Scoreboard Window', 'color: blue');
     this.window = new BrowserWindow(this.config);
+    // this.window.webContents.setFrameRate(60);
 
     this.window.on('closed', () => this.window = null);
+    // this.window.on('ready-to-show', () => (this.ready = true));
+    // this.window.webContents.on('paint', async (event, dirty, image) => {
+    //   if (!this.ready) return
+    //   // handle frame
+    //   // console.log(`The screenshot has been successfully saved to ${join(process.cwd(), 'scoreboard.png')}`)
+    //   await fs.writeFile(join(this.utilities.paths.appFolder, 'scoreboard.png'), image.toPNG());
+    // })
 
     this.window.center();
     

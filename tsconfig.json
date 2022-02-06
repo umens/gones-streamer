@@ -20,11 +20,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "downlevelIteration": true,
-    "jsx": "react",
+    "jsx": "react-jsx"
   },
   "include": [
     "src",
     "common.d.ts",
-    // "shared"
+    "exposedInMainWorld.d.ts"
   ]
 }

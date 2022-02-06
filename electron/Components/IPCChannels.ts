@@ -1,24 +1,24 @@
-import { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel } from "./IPC";
-import { ipcMain, WebContents } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import ElectronLog from 'electron-log';
+
+import { IpcChannelInterface, StoredConfigChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel, OBSChannel } from "./IPC";
 import { PathsType } from "../../src/Models";
 
 export default class IPCChannels {
   
   log: ElectronLog.LogFunctions;
   paths: PathsType;  
-  mainWindow: WebContents;
-  scoreboardWindow: WebContents;
+  mainWindow: BrowserWindow;
+  scoreboardWindow: BrowserWindow;
 
-  constructor(paths: PathsType, mainWindow: WebContents, scoreboardWindow: WebContents) {
+  constructor(paths: PathsType, mainWindow: BrowserWindow, scoreboardWindow: BrowserWindow) {
     this.log = ElectronLog.scope('IPC Channel');
     this.paths = paths;
     this.mainWindow = mainWindow;
     this.scoreboardWindow = scoreboardWindow;
     this.registerIpcChannels([
-      new SystemInfoChannel(),
       new StoredConfigChannel(),
-      new ObsSettingsChannel(this.paths),
+      new OBSChannel(this.mainWindow),
       new FileUploadChannel(this.paths),
       new ScoreboardInfoChannel(),
       new SponsorsDataChannel(this.paths),

@@ -26,7 +26,8 @@ const StatsTinyChart: React.FC<StatsTinyChartProps> = ({
     case 'area':
       chart = <TinyArea 
         // loading={data ? false : true}
-        autoFit={true}
+        autoFit={false}
+        height={37.7}
         theme={'dark'}
         data={data ? data : []}
         smooth={true}
@@ -49,7 +50,8 @@ const StatsTinyChart: React.FC<StatsTinyChartProps> = ({
     case 'bar':
       chart = <TinyColumn
         // loading={data ? false : true}
-        autoFit={true}
+        autoFit={false}
+        height={37.7}
         data={data ? data : []}
         columnWidthRatio={1}
         theme={'dark'}
@@ -69,7 +71,8 @@ const StatsTinyChart: React.FC<StatsTinyChartProps> = ({
     default:
       chart = <TinyLine
         // loading={data ? false : true}
-        autoFit={true}
+        autoFit={false}
+        height={37.7}
         data={data ? data : []}
         smooth={true}
         theme={'dark'}

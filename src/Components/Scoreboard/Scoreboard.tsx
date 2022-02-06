@@ -1,18 +1,15 @@
 import React from "react";
 import { Row, Col } from "antd";
+
 import { GameStatut, LiveSettings, Quarter, TeamPossession } from "../../Models";
 import './Scoreboard.css';
-import { IpcService } from "../../Utils/IpcService";
 import { GameClock } from "..";
-
-const ipc = new IpcService();
 
 type ScoreboardProps = {
 };
 type ScoreboardState = {
   GameStatut?: GameStatut;
   LiveSettings?: LiveSettings;
-  ipcrenderer?: Electron.IpcRenderer;
 };
 class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
 
@@ -24,28 +21,23 @@ class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
 
   componentDidMount = async () => {
     try {
-      let ipcrenderer = await ipc.receiveUpdate('scoreboard-update', { responseChannel: 'scoreboard-update' });
-      await this.setState({ ipcrenderer })
-      this.state.ipcrenderer?.on('scoreboard-update', this.onData);
+      window.addEventListener('scoreboardUpdateReact', this.onData);
     } catch (error) {
     }
   }
 
   componentWillUnmount = async () => {
     try {
-      if (this.state.ipcrenderer) {
-        this.state.ipcrenderer.removeListener('scoreboard-update', this.onData);
-        await this.setState({ ipcrenderer: undefined });
-      }
+      window.removeEventListener('scoreboardUpdateReact', this.onData);
     } catch (error) {
       console.log(error);
     }
   }
 
-  onData = async (event: any, response: any) => {
+  onData = async (data: any) => {
     await this.setState({
-      GameStatut: response.GameStatut,
-      LiveSettings: response.LiveSettings,
+      GameStatut: data.detail.GameStatut,
+      LiveSettings: data.detail.LiveSettings,
     })
   };
   

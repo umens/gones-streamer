@@ -35,7 +35,7 @@ class PlayerControl extends React.Component<PlayerControlProps, PlayerControlSta
   showPlayer = async (uuid: string): Promise<void> => {
     try {
       await this.setState({ showingPlayer: uuid });
-      await this.props.ObsRemote.togglePlayerHighlight(true, uuid);
+      // await this.props.ObsRemote.togglePlayerHighlight(true, uuid);
     } catch (error) {
       
     }
@@ -43,7 +43,7 @@ class PlayerControl extends React.Component<PlayerControlProps, PlayerControlSta
   
   hidePlayer = async (uuid: string): Promise<void> => {
     try {
-      await this.props.ObsRemote.togglePlayerHighlight(false, uuid);
+      // await this.props.ObsRemote.togglePlayerHighlight(false, uuid);
       await this.setState({ showingPlayer: null });
     } catch (error) {
       

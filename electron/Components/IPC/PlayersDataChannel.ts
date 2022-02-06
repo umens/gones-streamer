@@ -1,10 +1,10 @@
-import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest, PathsType, Player } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
 import ElectronLog from "electron-log";
 
+import { IpcChannelInterface } from "./IpcChannelInterface";
+import { IpcRequest, PathsType, Player } from "../../../src/Models";
 export class PlayersDataChannel implements IpcChannelInterface {
 
   log: ElectronLog.LogFunctions;

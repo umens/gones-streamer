@@ -2,10 +2,11 @@
  * Types
  */
 export type PathsType = {
-  binFolder: string;
-  appFolder: string;
-  sponsorsFolder: string;
-  playersFolder: string;
+  osnFolder: string,
+  screensFolder: string,
+  appFolder: string,
+  sponsorsFolder: string,
+  playersFolder: string,
 }
 
 export type StoreType = {
@@ -123,15 +124,19 @@ export enum Quarter {
 };
 
 export enum SceneName {
+  Background = '_bg',
+  ScoreBackground = '_Score-bg',
+  Soundboard = '_Soundboard',
+  SponsorsMedia = '_Sponsor-media',
   Replay = 'Replay',
   Live = 'Live',
   Starting = 'Starting',
   Halftime = 'Halftime',
   Ending = 'Ending',
+  SponsorsFull = 'SponsorsFull',
+  SponsorsSmall = 'SponsorsSmall',
+  SponsorsBig = 'SponsorsBig',
   Sponsors = 'Sponsors',
-  Background = '* bg',
-  ScoreBackground = '* Score bg',
-  Soundboard = '* Soundboard',
 }
 
 export enum StreamingSport {
@@ -191,12 +196,12 @@ export enum SponsorDisplayTypeSceneIdSmall {
  * Functions
 */
 
-export function GetDefaultConfig(): StoreType {  
+export function GetDefaultConfig(paths: PathsType): StoreType {  
   const GameStatut: GameStatut = {
     AwayTeam: {
       city: 'Ville Equipe 2',
       color: '#612323',
-      logo: '../../../../appDatas/away.png',
+      logo: `${paths.appFolder}/away.png`,
       name: 'Equipe 2',
       score: 0,
       timeout: 3
@@ -204,7 +209,7 @@ export function GetDefaultConfig(): StoreType {
     HomeTeam: {
       city: 'Ville Equipe 1',
       color: '#133155',
-      logo: '../../../../appDatas/home.png',
+      logo: `${paths.appFolder}/home.png`,
       name: 'Equipe 1',
       score: 0,
       timeout: 3
@@ -231,15 +236,10 @@ export function GetDefaultConfig(): StoreType {
     sport: StreamingSport.Football,
     streamingService: StreamingService.Youtube,
   };
-  const CamerasHardware: CameraHardware[] = [
-    {
-      title: 'Camera 1',
-      active: true,
-    }
-  ];
+  const CamerasHardware: CameraHardware[] = [];
   const Sponsors: Sponsor[] = [];
   const Players: Player[] = [];
-  const BackgroundImage = '../../../../appDatas/bg.jpg';
+  const BackgroundImage = `${paths.appFolder}/bg.jpg`;
   let storedConfigDefault: StoreType = {
     GameStatut,
     LiveSettings,

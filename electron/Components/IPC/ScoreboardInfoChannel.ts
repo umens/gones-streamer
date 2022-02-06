@@ -1,5 +1,7 @@
+
+import { BrowserWindow, IpcMainEvent, WebContents } from 'electron';
+
 import { IpcChannelInterface } from "./IpcChannelInterface";
-import { IpcMainEvent, WebContents } from 'electron';
 import { IpcRequest,  } from "../../../src/Models";
 
 export class ScoreboardInfoChannel implements IpcChannelInterface {
@@ -7,12 +9,12 @@ export class ScoreboardInfoChannel implements IpcChannelInterface {
     return 'scoreboard-info';
   }
 
-  async handle(event: IpcMainEvent, request: IpcRequest, to: WebContents): Promise<void> {
+  async handle(event: IpcMainEvent, request: IpcRequest, to: BrowserWindow): Promise<void> {
     try {
       if (!request.responseChannel) {
         request.responseChannel = `${this.getName()}_response`;
       }
-      to.send(request.responseChannel, request.params?.body || {});
+      to.webContents.send(request.responseChannel, request.params?.body || {});
     } catch (error) {
     }
   }

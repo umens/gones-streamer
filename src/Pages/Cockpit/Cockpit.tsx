@@ -1,15 +1,13 @@
 import React, { createRef } from "react";
-import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
-import { IpcService } from "../../Utils";
-import { GameEvent, SceneName, StoreType } from "../../Models";
-import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, StatsTinyChart } from "../../Components";
-// import ReactDropzone from "react-dropzone";
-import './Cockpit.css';
+import { Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
+import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
 import prettyBytes from 'pretty-bytes';
 
-const ipc: IpcService = new IpcService();
+import { GameEvent, SceneName, StoreType } from "../../Models";
+import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, StatsTinyChart } from "../../Components";
+// import ReactDropzone from "react-dropzone";
+import './Cockpit.css';
 
 type CockpitProps = {
   ObsRemote: IObsRemote;
@@ -19,7 +17,6 @@ type CockpitState = {
   StoredConfig: StoreType | null;
   loadingSettings: boolean;
   loadingLiveStatus: boolean;
-  displayPreview: boolean;
   TabKey: string;
   newGameModalVisible: boolean;
 };
@@ -32,7 +29,6 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       loadingSettings: false,
       StoredConfig: null,
       loadingLiveStatus: false,
-      displayPreview: false,
       TabKey: 'GameControl',
       newGameModalVisible: false,
     };
@@ -40,10 +36,17 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
 
   componentDidMount = async () => {
     try {
-      await this.getStoredConfig();
-      // setTimeout(async () => {
-      //   await this.setState({ displayPreview: true });
-      // }, 500);
+    } catch (error) {
+
+    }
+  }
+
+  componentWillUnmount = async (): Promise<void> => {
+    try {
+      console.log('unmont cocpit')
+      await window.obs.removePreview();
+      // window.removeEventListener('performanceStatisticsReact', this.props.ObsRemote.onPerformanceStatistics);
+      // window.obs.stopStats();
     } catch (error) {
 
     }
@@ -51,13 +54,6 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
 
   getStoredConfig = async () => {
     try {
-      await this.setState({ loadingSettings: true });
-      message.loading({ content: 'Loading settings...', key: 'loadingSettings' });
-      let data = await ipc.send<{ StoredConfig: StoreType }>('stored-config');
-      // setTimeout(async () => {
-        await this.setState({ StoredConfig: data.StoredConfig, loadingSettings: false });
-        message.success({ content: 'Settings loaded !', duration: 2, key: 'loadingSettings' });
-      // }, 1500);
     } catch (error) {
 
     }
@@ -67,7 +63,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     try {
       if(!this.state.loadingLiveStatus) {
         this.setState({ loadingLiveStatus: true });
-        await this.props.ObsRemote.updateLiveStatus();
+        // await this.props.ObsRemote.updateLiveStatus();
         this.setState({ loadingLiveStatus: false });
       }
     } catch (error) {
@@ -98,14 +94,6 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     }
   }
 
-  togglePreview = async (e: any) => {
-    try {
-      await this.setState({ displayPreview: !this.state.displayPreview });
-    } catch (error) {
-
-    }
-  }
-
   changeText = async (prop: keyof GameEvent, value: string) => {
     try {
       await this.props.ObsRemote.updateGameEventProps({ props: prop, value });
@@ -115,7 +103,6 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
 
   onCreate = async (values: any) => {
     try {
-      console.log('Received values of form: ', values);
       this.props.ObsRemote.newGame(values);
       await this.setState({ newGameModalVisible: false });
     } catch (error) {
@@ -255,8 +242,8 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
           <Col span={8}>
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={24}>
-                <Card title="Preview" loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} extra={this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }>
-                  <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
+                <Card title="Preview" loading={!this.props.ObsRemote.firstDatasLoaded} >
+                  <Preview ObsRemote={this.props.ObsRemote} />
                 </Card>
               </Col>
             </Row>
@@ -271,7 +258,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
               <Col span={24}>
                 <Card
                   bordered={false}
-                  loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded}
+                  loading={!this.props.ObsRemote.firstDatasLoaded}
                 >
                   <ScoreboardEditable ObsRemote={this.props.ObsRemote} />
                 </Card>
@@ -280,7 +267,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
             <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={24}>
                 <Card
-                  loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded}
+                  loading={!this.props.ObsRemote.firstDatasLoaded}
                   tabList={tabList}
                   activeTabKey={this.state.TabKey}
                   onTabChange={key => {

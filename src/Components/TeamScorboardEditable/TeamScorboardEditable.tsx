@@ -124,7 +124,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
     try {
       if(this.beforeUpload(acceptedFiles[0])) {
         await this.setState({ loadingFile: true });
-        const data = await ipc.send<string>('file-upload', { params: { file: acceptedFiles[0]?.path, isHomeTeam: this.props.isHomeTeam }});
+        const data = await window.app.uploadFile({ file: acceptedFiles[0]?.path, isHomeTeam: this.props.isHomeTeam });
         await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0], pathElectron: data.split('#').shift()! }, homeTeam: this.props.isHomeTeam});
         await this.setState({ loadingFile: false });
       }
@@ -205,7 +205,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
                     <input {...getInputProps({ multiple: false })} />
                     <span tabIndex={0} style={{ padding: 0 }} className="ant-upload" role="button">
                       <div>
-                        {team?.logo ? <img style={{ backgroundColor: 'transparent', border: 0 }} className='img-thumbnail' alt='home team logo' src={ this.props.ObsRemote.Utilitites?.getImageFullPath(team.logo) } /> : uploadButton}
+                        {team?.logo ? <img style={{ backgroundColor: 'transparent', border: 0 }} className='img-thumbnail' alt='home team logo' src={ `${team.logo}#${new Date().getTime()}` } /> : uploadButton}
                       </div>
                     </span>
                   </div>

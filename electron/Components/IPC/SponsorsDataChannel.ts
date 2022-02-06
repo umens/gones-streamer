@@ -1,11 +1,12 @@
-import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest, MediaType, PathsType, Sponsor } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import { Utilities } from "../../Utilities";
 import ElectronLog from "electron-log";
+
+import { IpcChannelInterface } from "./IpcChannelInterface";
+import { IpcRequest, MediaType, PathsType, Sponsor } from "../../../src/Models";
+import { Utilities } from "../../Utilities";
 
 export class SponsorsDataChannel implements IpcChannelInterface {
 

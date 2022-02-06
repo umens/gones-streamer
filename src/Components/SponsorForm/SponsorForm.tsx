@@ -5,7 +5,7 @@ import { MediaType, Sponsor } from '../../Models/Models';
 import { RcFile, UploadProps } from 'antd/lib/upload';
 
 type SponsorFormValues = Sponsor & {
-  media: RcFile;
+  media: string | RcFile;
 }
 
 type SponsorFormProps = {
@@ -95,7 +95,9 @@ const SponsorForm: React.FC<SponsorFormProps> = ({
           .then(values => {
             // console.log(values)
             form.resetFields();
-            values['media'] = values['media'].originFileObj.path;
+            // console.log(values['media'])
+            // console.log(typeof values['media'])
+            values.media = ((values.media as any).originFileObj as File).path;
             onCreate(values as Sponsor);
           })
           .catch(info => {

@@ -1,10 +1,11 @@
 import React from "react";
-import { IObsRemote, PlayerControl, SponsorControl } from "../../Components";
 import { Row, Col, message, Form, Input, Button, Select, Card, Alert } from "antd";
-import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../Utils/IpcService";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
+import ReactDropzone from "react-dropzone";
+
+import { IObsRemote, PlayerControl, SponsorControl } from "../../Components";
+import { IpcService } from "../../Utils/IpcService";
 import { StreamingService, StreamingSport } from "../../Models";
 
 const ipc = new IpcService();
@@ -33,8 +34,8 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
   }
 
   componentDidMount = async () => {    
-    // let devices = await navigator.mediaDevices.enumerateDevices();
-    // console.log(devices.filter(({ kind }) => kind === "videoinput"));
+    let devices = await navigator.mediaDevices.enumerateDevices();
+    console.log(devices.filter(({ kind }) => kind === "videoinput"));
   }
 
   beforeUpload = (file: File) => {
@@ -53,7 +54,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     try {
       if(this.beforeUpload(acceptedFiles[0])) {
         await this.setState({ loadingFile: true });
-        const data = await ipc.send<string>('file-upload', { params: { file: acceptedFiles[0]?.path, isBg: true }});
+        const data = await window.app.uploadFile({ file: acceptedFiles[0]?.path, isBg: true });
         await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0], pathElectron: data.split('#').shift()! }, bg: true});
         await this.setState({ loadingFile: false });
       }
@@ -65,7 +66,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
   onFinish = async (values: any) => {
     try {
       await this.setState({ sendingForm: true });
-      await this.props.ObsRemote.updateSettings(values);
+      // await this.props.ObsRemote.updateSettings(values);
       await this.setState({ sendingForm: false });      
       message.success({ content: 'Settings updated !', key: 'settingsupdated' });
     } catch (error) {
@@ -137,7 +138,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
               <input {...getInputProps({ multiple: false })} />
               <span tabIndex={0} className="ant-upload" role="button">
                 <div>
-                  {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.Utilitites?.getImageFullPath(this.props.ObsRemote.store?.BackgroundImage)} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                  {this.props.ObsRemote.store?.BackgroundImage ? <img src={ this.props.ObsRemote.store?.BackgroundImage } alt="avatar" style={{ width: '100%' }} /> : uploadButton}
                 </div>
               </span>
             </div>

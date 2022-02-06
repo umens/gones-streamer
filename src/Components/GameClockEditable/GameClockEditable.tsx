@@ -20,7 +20,7 @@ class GameClockEditable extends Component<GameClockEditableProps, GameClockEdita
 
   onCreate = async (values: any) => {
     try {
-      this.props.ObsRemote.setGameClock(values);
+      // this.props.ObsRemote.setGameClock(values);
       await this.setState({ visibleModal: false });
     } catch (error) {
       

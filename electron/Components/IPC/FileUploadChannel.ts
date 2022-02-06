@@ -1,10 +1,11 @@
-import { IpcChannelInterface } from "./IpcChannelInterface";
 import { IpcMainEvent } from 'electron';
-import { IpcRequest, PathsType } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
 import ElectronLog from "electron-log";
 
+import { IpcChannelInterface } from "./IpcChannelInterface";
+import { IpcRequest, PathsType } from "../../../src/Models";
+import OBSRecorder from '../OBSRecorder';
 export class FileUploadChannel implements IpcChannelInterface {
 
   log: ElectronLog.LogFunctions;
@@ -36,7 +37,8 @@ export class FileUploadChannel implements IpcChannelInterface {
         } else {
           finalCopy = isHomeTeam ? join(this.paths.appFolder, '/home.' + ext) : join(this.paths.appFolder, '/away.' + ext);
         }
-        await fs.copyFile(file, finalCopy);        
+        await fs.copyFile(file, finalCopy);
+        isBg ? OBSRecorder.updateBackgroundImage(finalCopy) : OBSRecorder.updateTeamLogo(isHomeTeam, finalCopy);
         event.sender.send(request.responseChannel, finalCopy + '#' + new Date().getTime());
       // } else {
       //   const rawStreamSettingsOBS: string = await fs.readFile(join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/streamEncoder.json'), 'utf8');
