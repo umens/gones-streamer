@@ -1,6 +1,5 @@
 import React, { createRef } from "react";
 import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
-import { IpcService } from "../../Utils";
 import { GameEvent, SceneName, StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, StatsTinyChart } from "../../Components";
@@ -8,8 +7,6 @@ import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable,
 import './Cockpit.css';
 import { FormInstance } from "antd/lib/form";
 import prettyBytes from 'pretty-bytes';
-
-const ipc: IpcService = new IpcService();
 
 type CockpitProps = {
   ObsRemote: IObsRemote;
@@ -53,9 +50,9 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     try {
       await this.setState({ loadingSettings: true });
       message.loading({ content: 'Loading settings...', key: 'loadingSettings' });
-      let data = await ipc.send<{ StoredConfig: StoreType }>('stored-config');
+      const data = await window.app.GetStoredConfig();
       // setTimeout(async () => {
-        await this.setState({ StoredConfig: data.StoredConfig, loadingSettings: false });
+        await this.setState({ StoredConfig: data, loadingSettings: false });
         message.success({ content: 'Settings loaded !', duration: 2, key: 'loadingSettings' });
       // }, 1500);
     } catch (error) {
@@ -133,7 +130,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       {
         key: 'PlayerControl',
         tab: 'Players',
-        disabled: this.props.ObsRemote.scenes?.["current-scene"] !== SceneName.Live,
+        disabled: this.props.ObsRemote.scenes?.currentScene !== SceneName.Live,
       },
       {
         key: 'SponsorControl',

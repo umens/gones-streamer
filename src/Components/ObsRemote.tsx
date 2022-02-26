@@ -2,11 +2,9 @@ import { Component } from "react";
 import OBSWebSocket from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, PathsType, StreamingStats } from "../Models";
-import { IpcService, Utilities } from "../Utils";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSVideoInput } from "../Models";
+import { Utilities } from "../Utils";
 import moment from "moment";
-
-const ipc = new IpcService();
 
 const obsWs = new OBSWebSocket();
 
@@ -20,11 +18,15 @@ type ObsRemoteState = {
   firstDatasLoaded: boolean;
   // appPaths?: PathsType;
   scenes: {
-    messageId: string;
-    status: "ok";
-    "current-scene": string | null;
-    scenes: OBSWebSocket.Scene[];
+    currentScene: string | null;
+    scenes: any[];
   } | null;
+  // {
+  //   messageId: string;
+  //   status: "ok";
+  //   "current-scene": string | null;
+  //   scenes: any[];
+  // } | null;
   store: StoreType | null;
   timeoutConnection?: NodeJS.Timeout;
   sponsorDisplayType?: SponsorDisplayType;
@@ -54,6 +56,10 @@ type ObsRemoteState = {
   // resetSponosorScene: () => Promise<void>;
   updateSponsorsList: (sponsors: Sponsor[]) => Promise<void>;
   updatePlayersList: (players: Player[]) => Promise<void>;
+  addCamera: (camera: CameraHardware) => Promise<void>;
+  editCamera: (camera: CameraHardware) => Promise<void>;
+  removeCamera: (camera: CameraHardware) => Promise<void>;
+  getAvailableCameras: () => Promise<OBSVideoInput[]>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -72,7 +78,6 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       // homeTeam: null,
       // awayTeam: null,
       store: null,
-
       reconnectObs: this.connectObs.bind(this),
       goLive: this.goLive.bind(this),
       changeActiveScene: this.changeActiveScene.bind(this),
@@ -95,66 +100,43 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       toggleSponsor: this.toggleSponsor.bind(this),
       updateSponsorsList: this.updateSponsorsList.bind(this),
       updatePlayersList: this.updatePlayersList.bind(this),
+      addCamera: this.addCamera.bind(this),
+      editCamera: this.editCamera.bind(this),
+      removeCamera: this.removeCamera.bind(this),
+      getAvailableCameras: this.getAvailableCameras.bind(this),
       // resetSponosorScene: this.resetSponosorScene.bind(this),
     };
 
-    obsWs.on('ConnectionClosed', async () => {
-      try {
-        await this.setState({ connected2Obs: false });
-      } catch (error) {
+    // obsWs.on('StreamStarted', async () => {
+    //   try {
+    //     await this.setState({ live: true });
+    //     obsWs.on('StreamStatus', async (data) => {
+    //       let oldDroppedFrame = 0;
+    //       let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    //       let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    //       if(this.state.streamingStats !== undefined) {
+    //         oldDroppedFrame = this.state.streamingStats.droppedFrame;
+    //         cpuUsage = this.state.streamingStats.cpuUsage;
+    //         memoryUsage = this.state.streamingStats.memoryUsage;
+    //       }
+    //       cpuUsage = this.addToStatArray(data["cpu-usage"], cpuUsage);
+    //       memoryUsage = this.addToStatArray(data["memory-usage"], memoryUsage);
+    //       await this.setState({
+    //         streamingStats: {
+    //           oldDroppedFrame,
+    //           droppedFrame: data["strain"],
+    //           // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
+    //           totalStreamTime: moment().startOf('day').seconds(data["total-stream-time"]).format('HH:mm:ss'),
+    //           cpuUsage,
+    //           bytesPerSec: data["bytes-per-sec"] * 10,
+    //           memoryUsage,
+    //         }
+    //       });
+    //     });
+    //   } catch (error) {
         
-      }
-    });
-
-    obsWs.on('SwitchScenes', async (data) => {
-      try {
-        if(Object.values(SceneName).includes(data["scene-name"] as SceneName)) {
-          await this.changeActiveScene(data["scene-name"] as SceneName);
-        }
-      } catch (error) {
-        
-      }
-    });
-
-    obsWs.on('StreamStopped', async () => {
-      try {
-        obsWs.removeAllListeners('StreamStatus');
-        await this.setState({ streamingStats: undefined, live: false });
-      } catch (error) {
-        
-      }
-    });
-
-    obsWs.on('StreamStarted', async () => {
-      try {
-        await this.setState({ live: true });
-        obsWs.on('StreamStatus', async (data) => {
-          let oldDroppedFrame = 0;
-          let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-          let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-          if(this.state.streamingStats !== undefined) {
-            oldDroppedFrame = this.state.streamingStats.droppedFrame;
-            cpuUsage = this.state.streamingStats.cpuUsage;
-            memoryUsage = this.state.streamingStats.memoryUsage;
-          }
-          cpuUsage = this.addToStatArray(data["cpu-usage"], cpuUsage);
-          memoryUsage = this.addToStatArray(data["memory-usage"], memoryUsage);
-          await this.setState({
-            streamingStats: {
-              oldDroppedFrame,
-              droppedFrame: data["strain"],
-              // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
-              totalStreamTime: moment().startOf('day').seconds(data["total-stream-time"]).format('HH:mm:ss'),
-              cpuUsage,
-              bytesPerSec: data["bytes-per-sec"] * 10,
-              memoryUsage,
-            }
-          });
-        });
-      } catch (error) {
-        
-      }
-    });
+    //   }
+    // });
 
     // obsWs.on('Heartbeat', async (data) => {
     //   try {
@@ -168,49 +150,147 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     // });
   }
 
-  componentDidMount = async (): Promise<void> => {
+  handleStatsDatas = async () => {
     try {
-      await this.startApp();
+      const stats = await obsWs.call('GetStats');
+      const statsStream = await obsWs.call('GetStreamStatus');
+      let oldDroppedFrame = 0;
+      let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+      let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+      if(this.state.streamingStats !== undefined) {
+        oldDroppedFrame = this.state.streamingStats.droppedFrame;
+        cpuUsage = this.state.streamingStats.cpuUsage;
+        memoryUsage = this.state.streamingStats.memoryUsage;
+      }
+      cpuUsage = this.addToStatArray(stats.cpuUsage, cpuUsage);
+      memoryUsage = this.addToStatArray(stats.memoryUsage, memoryUsage);
+      await this.setState({
+        streamingStats: {
+          oldDroppedFrame,
+          droppedFrame: statsStream.outputSkippedFrames,
+          // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
+          totalStreamTime: moment().startOf('day').milliseconds(statsStream.outputDuration).format('HH:mm:ss'),
+          cpuUsage,
+          bytesPerSec: statsStream.outputBytes * 10,
+          memoryUsage,
+        }
+      });
+    } catch (error) {
+      
+    }
+  }
+  
+  startStats = async (): Promise<void> => {
+    this.intervalStatsId = setTimeout(this.handleStatsDatas, 1000);
+  }
+  
+  stopStats = (): void => {
+    if (this.intervalStatsId) {
+      clearTimeout(this.intervalStatsId);
+      // await this.setState({ timeout: undefined, preview: undefined });
+    }
+  }
+
+  onConnectionClosed = async (): Promise<void> => {
+    try {
+      await this.setState({ connected2Obs: false });
+    } catch (error) {
+      
+    }
+  };
+
+  onCurrentProgramSceneChanged = async (data: any): Promise<void> => {
+    try {
+      if(Object.values(SceneName).includes(data.sceneName as SceneName)) {
+        await this.changeActiveScene(data.sceneName as SceneName);
+      }
+    } catch (error) {
+      
+    }
+  };
+
+  onStreamStateChanged = async (data: any): Promise<void> => {
+    try {
+      if(data.outputActive) {
+        await this.startStats();
+      } else {
+        this.stopStats();
+      }
+      // obsWs.removeAllListeners('StreamStatus');
+      await this.setState({ streamingStats: undefined, live: data.outputActive });
+    } catch (error) {
+      
+    }
+  };
+
+  componentDidMount = (): void => {
+    try {
+      setTimeout(async () => {
+        const appPaths = await window.app.getPaths();
+        await this.setState({ Utilitites: Utilities.getInstance(appPaths) });
+        await this.startApp();
+      }, 3000);
     } catch (error) {
       console.log(error)
     }
   }
+
+  findIdFromSceneItemName = async (sceneName: string, sourceName: string): Promise<number> => {
+    try {
+      const { sceneItemId } = await obsWs.call('GetSceneItemId', { sceneName, sourceName });
+      return sceneItemId;
+    } catch (error) {
+      throw error;      
+    }
+  } 
 
   startApp = async() => {
     try {
       await this.connectObs();
       await this.getScenes();
       await this.initGameStatut();
-      const streamStatus = await obsWs.send('GetStreamingStatus');
-      if(streamStatus.streaming) {
+      const streamStatus = await obsWs.call('GetStreamStatus');
+      if(streamStatus.outputActive) {
         await this.setState({ live: true });
-        obsWs.on('StreamStatus', async (data) => {
-          let oldDroppedFrame = 0;
-          let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-          let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-          if(this.state.streamingStats !== undefined) {
-            oldDroppedFrame = this.state.streamingStats.droppedFrame;
-            cpuUsage = this.state.streamingStats.cpuUsage;
-            memoryUsage = this.state.streamingStats.memoryUsage;
-          }
-          cpuUsage = this.addToStatArray(data["cpu-usage"], cpuUsage);
-          memoryUsage = this.addToStatArray(data["memory-usage"], memoryUsage);
-          await this.setState({
-            streamingStats: {
-              oldDroppedFrame,
-              droppedFrame: data["strain"],
-              // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
-              totalStreamTime: moment().startOf('day').seconds(data["total-stream-time"]).format('HH:mm:ss'),
-              cpuUsage,
-              bytesPerSec: data["bytes-per-sec"] * 10,
-              memoryUsage,
-            }
-          });
-        });
+        // obsWs.on('StreamStatus', async (data) => {
+        //   let oldDroppedFrame = 0;
+        //   let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        //   let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        //   if(this.state.streamingStats !== undefined) {
+        //     oldDroppedFrame = this.state.streamingStats.droppedFrame;
+        //     cpuUsage = this.state.streamingStats.cpuUsage;
+        //     memoryUsage = this.state.streamingStats.memoryUsage;
+        //   }
+        //   cpuUsage = this.addToStatArray(data["cpu-usage"], cpuUsage);
+        //   memoryUsage = this.addToStatArray(data["memory-usage"], memoryUsage);
+        //   await this.setState({
+        //     streamingStats: {
+        //       oldDroppedFrame,
+        //       droppedFrame: data["strain"],
+        //       // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
+        //       totalStreamTime: moment().startOf('day').seconds(data["total-stream-time"]).format('HH:mm:ss'),
+        //       cpuUsage,
+        //       bytesPerSec: data["bytes-per-sec"] * 10,
+        //       memoryUsage,
+        //     }
+        //   });
+        // });
       }
       if(this.state.timeoutConnection) {
         await this.setState({ timeoutConnection: undefined });
       }
+      obsWs.on('ConnectionClosed', this.onConnectionClosed);
+      obsWs.on('CurrentProgramSceneChanged', this.onCurrentProgramSceneChanged);
+      obsWs.on('StreamStateChanged', this.onStreamStateChanged);
+
+      obsWs.once('ExitStarted', () => {
+        console.log('OBS started shutdown');
+      
+        // Just for example, not necessary should you want to reuse this instance by re-connect()
+        obsWs.off('ConnectionClosed', this.onConnectionClosed);
+        obsWs.off('CurrentProgramSceneChanged', this.onCurrentProgramSceneChanged);
+        obsWs.off('StreamStateChanged', this.onStreamStateChanged);
+      });
     } catch (error) {
       let timeout = setTimeout(async() => {
         await this.startApp();
@@ -352,14 +432,15 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   connectObs = async (): Promise<void> => {
     try {
       await this.setState({ connectingObs: true });
-      await obsWs.connect({ address: 'localhost:4444' });
+      // await obsWs.connect({ address: 'localhost:4444' });
+      await obsWs.connect('ws://127.0.0.1:4444', 'IxqGV59RRNzMyQNo');
       notification['success']({
         message: 'Connecté à OBS',
         // description: '',
         placement: 'bottomRight',
       });
       await this.setState({ connectingObs: false, connected2Obs: true });
-    } catch (error) {
+    } catch (error: any) {
       notification['error']({
         message: 'Connection à OBS impossible, Retrying...',
         description: `${error.description}`,
@@ -372,11 +453,14 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   getScenes = async (): Promise<void> => {
     try {
-      let scenesData = await obsWs.send('GetSceneList');
-      scenesData.scenes = scenesData.scenes.filter(item => {
-        return !item.name.startsWith('*');
-      })
-      await this.setState({ scenes: scenesData });
+      let scenesData = await obsWs.call('GetSceneList');
+      const scenesDataState = scenesData.scenes.filter(item => {
+        const itemGrbg: {sceneIndex: number, sceneName: string} = item as {sceneIndex: number, sceneName: string};
+        return !itemGrbg.sceneName.startsWith('*');
+        // return !item!.name.startsWith('*');
+      });      
+      await this.changeActiveScene(scenesData.currentProgramSceneName as SceneName);
+      await this.setState({ scenes: { currentScene: scenesData.currentProgramSceneName as SceneName, scenes: scenesDataState } });
     } catch (error) {
 
     }
@@ -384,28 +468,26 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   initGameStatut = async (): Promise<void> => {
     try {
-      const appPaths = await ipc.send<PathsType>('paths-data');
-      let utilitites = Utilities.getInstance(appPaths);
       const defaultConfig = GetDefaultConfig();
-      let logoH = await (await obsWs.send('GetSourceSettings', { sourceName: 'Home Logo' })).sourceSettings as any;
+      let logoH = await (await obsWs.call('GetInputSettings', { inputName: 'Home Logo' })).inputSettings;
       const HomeTeam: Team = {
-        name: await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Home Name Text' })).text,
-        city: await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Home City Text' })).text,
-        score: +await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Home Score Text' })).text,
-        logo: logoH.file,
+        name: await (await obsWs.call('GetInputSettings', { inputName: 'Home Name Text' })).inputSettings.text + '',
+        city: await (await obsWs.call('GetInputSettings', { inputName: 'Home City Text' })).inputSettings.text + '',
+        score: +await (await obsWs.call('GetInputSettings', { inputName: 'Home Score Text' })).inputSettings.text!,
+        logo: await this.state.Utilitites!.getBase64FromFilePath(logoH.file as string),
         color: "#133155",
         timeout: Timeout.THREE
       };
-      let logoA = await (await obsWs.send('GetSourceSettings', { sourceName: 'Away Logo' })).sourceSettings as any;
+      let logoA = await (await obsWs.call('GetInputSettings', { inputName: 'Away Logo' })).inputSettings;
       const AwayTeam: Team = {
-        name: await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Away Name Text' })).text,
-        city: await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Away City Text' })).text,
-        score: +await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Away Score Text' })).text,
-        logo: logoA.file,
+        name: await (await obsWs.call('GetInputSettings', { inputName: 'Away Name Text' })).inputSettings.text + '',
+        city: await (await obsWs.call('GetInputSettings', { inputName: 'Away City Text' })).inputSettings.text + '',
+        score: +await (await obsWs.call('GetInputSettings', { inputName: 'Away Score Text' })).inputSettings.text!,
+        logo: await this.state.Utilitites!.getBase64FromFilePath(logoA.file as string),
         color: "#612323",
         timeout: Timeout.THREE
       };
-      const competWeek = await (await obsWs.send('GetTextGDIPlusProperties', { source: 'Week Text' })).text.split(' - ');
+      const competWeek = (await (await obsWs.call('GetInputSettings', { inputName: 'Week Text' })).inputSettings.text! + '').split(' - ');
       let Options: GameEvent = { 
         ...defaultConfig.GameStatut.Options, 
         ...{ 
@@ -418,16 +500,18 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         AwayTeam,
         Options,
       };
-      const buffer = await (await obsWs.send('GetSourceSettings', { sourceName: 'Replay Video' })).sourceSettings as any;
-      const bitrate = +await ipc.send<string>('obs-settings', { params: { getter: true }});
+      const buffer = await (await obsWs.call('GetInputSettings', { inputName: 'Replay Video' })).inputSettings;
+      const bitrate = await window.app.manageObsSettings({ setter: false });
+      // const bitrate = +await (await obsWs.call('GetProfileParameter', { parameterCategory: 'Output', parameterName: 'VBitrate' })).parameterValue;
       let LiveSettings: ILiveSettings = {
         bitrate,
-        buffer: buffer.duration,
-        streamKey: await (await obsWs.send('GetStreamSettings')).settings.key,
+        buffer: buffer.duration as number,
+        streamKey: await (await obsWs.call('GetStreamServiceSettings')).streamServiceSettings.key + '',
         sport: StreamingSport.Football,
         streamingService: StreamingService.Youtube,
       };
-      let bgImg = await (await obsWs.send('GetSourceSettings', { sourceName: 'Background' })).sourceSettings as any;
+      const bgImg = await (await obsWs.call('GetInputSettings', { inputName: 'Background' })).inputSettings;
+      const bgImg64 = await this.state.Utilitites!.getBase64FromFilePath(bgImg.file as string);
       // TODO: wait for GetSceneItemList to be release to list all cams
       /**
        * Same for DeleteSceneItem (Available) & DuplicateSceneItem (Available) to implemente adding and removing cams
@@ -436,18 +520,19 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
        */
       // let cameras = await obsWs.send('GetSceneItemList');
 
-      const Sponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'get' }}) || [];
-      const Players = await ipc.send<Player[]>('players-data', { params: { action: 'get' }}) || [];
+      
+      const Sponsors = await window.app.manageSponsors({ action: 'get' });
+      const Players = await window.app.managePlayers({ action: 'get' });
 
       let store: StoreType = {
         GameStatut,
         LiveSettings,
-        BackgroundImage: bgImg.file,
+        BackgroundImage: bgImg64,
         CamerasHardware: defaultConfig.CamerasHardware,
         Sponsors,
         Players,
       };
-      await this.setState({ store, firstDatasLoaded: true, Utilitites: utilitites });
+      await this.setState({ store, firstDatasLoaded: true });
       await this.sendUpdateToScoreboardWindow();
     } catch (error) {
 
@@ -456,9 +541,10 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   updateSettings = async (value: any): Promise<void> => {
     try {
-      await obsWs.send('SetSourceSettings', { sourceName: 'Replay Video', sourceSettings: { duration: +value.buffer * 1000 } });
-      await obsWs.send('SetStreamSettings', { type: 'rtmp_common', settings: { key: value.key }, save: true});
-      await ipc.send<void>('obs-settings', { params: { setter: true, bitrate: +value.bitrate }});
+      await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: +value.buffer * 1000 } });
+      await obsWs.call('SetStreamServiceSettings', { streamServiceType: 'rtmp_common', streamServiceSettings: { key: value.key } });
+      // await obsWs.call('SetProfileParameter', { parameterCategory: 'Output', parameterName: 'VBitrate', parameterValue: value.bitrate });
+      await window.app.manageObsSettings({ setter: true, bitrate: +value.bitrate });
     } catch (error) {
 
     }
@@ -466,9 +552,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   changeActiveScene = async (name: SceneName): Promise<void> => {
     try {
-      await obsWs.send('SetCurrentScene', { "scene-name": name });
+      await obsWs.call('SetCurrentProgramScene', { sceneName: name });
       let data = this.state.scenes;
-      data!["current-scene"] = name.startsWith('*') ? null : name as string;
+      data!.currentScene = name.startsWith('*') ? null : name as string;
       await this.setState({ scenes: data });
     } catch (error) {
 
@@ -478,22 +564,25 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   changeActiveCam = async (name: string): Promise<void> => {
     try {
       // TODO: when changing cam, also change the replay source cam
-      let oldCam: string = '';
-      const indexLive = this.state.scenes?.scenes.findIndex(scene => scene.name === SceneName.Live)!;
-      this.state.scenes?.scenes[indexLive].sources.forEach(item => {
-        if (item.name.startsWith('cam')) {
-          if (item.render) {
-            item.render = false;
-            oldCam = item.name;
-          }
-          if (item.name === name) {
-            item.render = true;
-          }
-        }
-      });
-      await obsWs.send('SetSceneItemProperties', { item: { name }, visible: true, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
-      await obsWs.send('SetSceneItemProperties', { item: { name: oldCam }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
-      await this.setState({ scenes: this.state.scenes });
+      let store = this.state.store!;
+      let { CamerasHardware } = store;
+      let oldCam = CamerasHardware.find(item => item.active)!;
+      const indexOldCam = CamerasHardware.findIndex(item => item.active)!;
+      const sceneItemIdOldCam = await this.findIdFromSceneItemName(SceneName.Live, `Camera - ${oldCam.title}`);
+      oldCam.active = false;
+      CamerasHardware[indexOldCam] = oldCam;
+
+      let newCam = CamerasHardware.find(item => item.title === name)!;
+      const indexNewCam = CamerasHardware.findIndex(item => item.title === name)!;
+      const sceneItemIdNewCam = await this.findIdFromSceneItemName(SceneName.Live, `Camera - ${newCam.title}`);
+      newCam.active = true;
+      CamerasHardware[indexNewCam] = newCam;
+      
+      store.CamerasHardware = CamerasHardware;
+
+      await obsWs.call('SetSceneItemEnabled', { sceneItemId: sceneItemIdNewCam, sceneItemEnabled: true, sceneName: SceneName.Live });
+      await obsWs.call('SetSceneItemEnabled', { sceneItemId: sceneItemIdOldCam, sceneItemEnabled: false, sceneName: SceneName.Live });
+      await this.setState({ store });
     } catch (error) {
 
     }
@@ -512,29 +601,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   updateLiveStatus = async (): Promise<void> => {
     try {
-      if(this.state.live) {
-        await obsWs.send('StopStreaming');  
-      } else {
-        await obsWs.send('StartStreaming', {});
-      }
-      await this.setState({ live: !this.state.live });
+      const streamingStatus = await (await obsWs.call('ToggleStream')).outputActive;
+      await this.setState({ live: streamingStatus });
     } catch (error) {
       console.log(error)
     }
-  }
-
-  getBase64 = (img: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-  
-      reader.onload = () => {
-        resolve(reader.result! as string);
-      };
-  
-      reader.onerror = reject;
-  
-      reader.readAsDataURL(img);
-    });
   }
 
   updateTextProps = async ({ props, value, homeTeam = false, bg = false, withAnimation = false }: { props: keyof Team; value: string | number | FileUp | Timeout; homeTeam?: boolean; bg?: boolean; withAnimation?: boolean;  }): Promise<void> => {
@@ -543,7 +614,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       switch (props) {
         case 'city':
           homeTeam ? store.GameStatut.HomeTeam.city = value as string : store.GameStatut.AwayTeam.city = value as string;
-          homeTeam ? await obsWs.send('SetTextGDIPlusProperties', { source: 'Home City Text', text: value as string }) : await obsWs.send('SetTextGDIPlusProperties', { source: 'Away City Text', text: value as string });
+          const sourceCityText = homeTeam ? 'Home City Text' : 'Away City Text'
+          await obsWs.call('SetInputSettings', { inputName: sourceCityText, inputSettings: { text: value as string } });
           break;
         case 'color':
           homeTeam ? store.GameStatut.HomeTeam.color = value as string : store.GameStatut.AwayTeam.color = value as string;
@@ -551,35 +623,39 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           break;
         case 'logo':
           if(bg) {
-            const base64Img: string = await this.getBase64((value as FileUp).file);
+            const base64Img: string = await this.state.Utilitites!.getBase64((value as FileUp));
             store.BackgroundImage = base64Img;
             let arrayPath = (value as FileUp).pathElectron.split('\\');
             const obsPath = '../../../../' + arrayPath.slice(Math.max(arrayPath.length - 2, 1)).join('/');
-            await obsWs.send('SetSourceSettings', { sourceName: 'Background', sourceSettings: { file: obsPath } });
+            await obsWs.call('SetInputSettings', { inputName: 'Background', inputSettings: { file: obsPath } });
           } else {
-            const base64Img: string = await this.getBase64((value as FileUp).file);
+            const base64Img: string = await this.state.Utilitites!.getBase64((value as FileUp));
             homeTeam ? store.GameStatut.HomeTeam.logo = base64Img : store.GameStatut.AwayTeam.logo = base64Img;
             let arrayPath = (value as FileUp).pathElectron.split('\\');
             const obsPath = '../../../../' + arrayPath.slice(Math.max(arrayPath.length - 2, 1)).join('/');
-            homeTeam ? await obsWs.send('SetSourceSettings', { sourceName: 'Home Logo', sourceSettings: { file: obsPath } }) : await obsWs.send('SetSourceSettings', { sourceName: 'Away Logo', sourceSettings: { file: obsPath } });
+            const sourceCityText = homeTeam ? 'Home Logo' : 'Away Logo'
+            await obsWs.call('SetInputSettings', { inputName: sourceCityText, inputSettings: { file: obsPath } });
           }
           break;
         case 'name':
           homeTeam ? store.GameStatut.HomeTeam.name = value as string : store.GameStatut.AwayTeam.name = value as string;
-          homeTeam ? await obsWs.send('SetTextGDIPlusProperties', { source: 'Home Name Text', text: value as string }) : await obsWs.send('SetTextGDIPlusProperties', { source: 'Away Name Text', text: value as string });
+          const sourceNameText = homeTeam ? 'Home Name Text' : 'Away Name Text'
+          await obsWs.call('SetInputSettings', { inputName: sourceNameText, inputSettings: { text: value as string } });
           break;
         case 'score':
           homeTeam ? store.GameStatut.HomeTeam.score = Math.trunc(value as number) : store.GameStatut.AwayTeam.score = Math.trunc(value as number);
           const score: string = homeTeam ? '' + store.GameStatut.HomeTeam.score : '' +store.GameStatut.AwayTeam.score;
-          homeTeam ? await obsWs.send('SetTextGDIPlusProperties', { source: 'Home Score Text', text: score.padStart(2, '0') }) : await obsWs.send('SetTextGDIPlusProperties', { source: 'Away Score Text', text: score.padStart(2, '0') });
+          const sourceScoreText = homeTeam ? 'Home Score Text' : 'Away Score Text'
+          await obsWs.call('SetInputSettings', { inputName: sourceScoreText, inputSettings: { text: score.padStart(2, '0') } });
           break;
         case 'timeout':
           let animate = withAnimation && (homeTeam ? store.GameStatut.HomeTeam.timeout > value : store.GameStatut.AwayTeam.timeout > value);
           homeTeam ? store.GameStatut.HomeTeam.timeout = value as Timeout : store.GameStatut.AwayTeam.timeout = value as Timeout ;          
           if(animate) {
-            await obsWs.send('SetSceneItemProperties', { item: { name: AnimationType.TIMEOUT }, visible: true, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+            const timeoutItemId = await this.findIdFromSceneItemName(SceneName.Live, AnimationType.TIMEOUT);
+            await obsWs.call('SetSceneItemEnabled', { sceneItemId: timeoutItemId, sceneItemEnabled: true, sceneName: SceneName.Live });
             setTimeout(async () => {
-              await obsWs.send('SetSceneItemProperties', { item: { name: AnimationType.TIMEOUT }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+              await obsWs.call('SetSceneItemEnabled', { sceneItemId: timeoutItemId, sceneItemEnabled: false, sceneName: SceneName.Live });
             }, 4000);
           }
           break;
@@ -603,7 +679,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           break;
         case 'showScoreboard':
           store.GameStatut.Options.showScoreboard = value as boolean;
-          await obsWs.send('SetSceneItemProperties', { item: { name: 'scoreboard' }, visible: value as boolean, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+          await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName(SceneName.Live, 'scoreboard'), sceneItemEnabled: value as boolean, sceneName: SceneName.Live });
           break;
         case 'flag':
           store.GameStatut.Options.flag = value as boolean;
@@ -613,11 +689,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           break;
         case 'competition':
           store.GameStatut.Options.competition = value as string;
-          await obsWs.send('SetTextGDIPlusProperties', { source: 'Week Text', text: value as string + ' - ' + store.GameStatut.Options.journee });
+          await obsWs.call('SetInputSettings', { inputName: 'Week Text', inputSettings: { text: value as string + ' - ' + store.GameStatut.Options.journee } });
           break;
         case 'journee':
           store.GameStatut.Options.journee = value as string;
-          await obsWs.send('SetTextGDIPlusProperties', { source: 'Week Text', text: store.GameStatut.Options.competition + ' - ' + value as string });
+          await obsWs.call('SetInputSettings', { inputName: 'Week Text', inputSettings: { text: store.GameStatut.Options.competition + ' - ' + value as string } });
           break;
 
         default:
@@ -655,9 +731,10 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       const scoreToDisplay = isHomeTeam ? store.GameStatut.HomeTeam.score + scoreAdded : store.GameStatut.AwayTeam.score + scoreAdded;
       await this.updateTextProps({ props: 'score', value: scoreToDisplay, homeTeam: isHomeTeam });
       if(withAnimation) {
-        await obsWs.send('SetSceneItemProperties', { item: { name: scoreType }, visible: true, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+        const scoreItemId = await this.findIdFromSceneItemName(SceneName.ScoreBackground, scoreType as string);
+        await obsWs.call('SetSceneItemEnabled', { sceneItemId: scoreItemId, sceneItemEnabled: true, sceneName: SceneName.Live });
         setTimeout(async () => {
-          await obsWs.send('SetSceneItemProperties', { item: { name: scoreType }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+          await obsWs.call('SetSceneItemEnabled', { sceneItemId: scoreItemId, sceneItemEnabled: false, sceneName: SceneName.Live });
         }, 5000);
       }
     } catch (error) {
@@ -687,8 +764,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
    */
   startReplay = async () => {
     try {
-      if(this.state.scenes?.["current-scene"] !== SceneName.Replay) {
-        await obsWs.send('SaveReplayBuffer');
+      if(this.state.scenes?.currentScene !== SceneName.Replay) {
+        await obsWs.call('SaveReplayBuffer');
         await this.changeActiveScene(SceneName.Replay);
         setTimeout(async () => {
           await this.changeActiveScene(SceneName.Live);
@@ -702,8 +779,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   
   getScreenshot = async (): Promise<{ img?: string }> => {
     try {
-      let data = await obsWs.send('TakeSourceScreenshot', { sourceName: this.state.scenes?.["current-scene"]!, embedPictureFormat: 'jpeg', width: 450, height: 254 });
-      return data;
+      let data = await obsWs.call('GetSourceScreenshot', { sourceName: this.state.scenes?.currentScene!, imageFormat: 'jpeg', imageWidth: 450, imageHeight: 254 });
+      return { img: data.imageData };
     } catch (error) {
       return {};
     }
@@ -733,7 +810,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       await this.updateTextProps({ props: "logo", value: defaultConfig.BackgroundImage!, bg: true });
       
       // set beginning scene
-      await obsWs.send('SetCurrentScene', { "scene-name": SceneName.Starting });
+      await obsWs.call('SetCurrentProgramScene', { sceneName: SceneName.Starting });
 
       await this.setState({ store: defaultConfig });
       await this.sendUpdateToScoreboardWindow();
@@ -765,7 +842,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       }
       
       // set beginning scene
-      await obsWs.send('SetCurrentScene', { "scene-name": SceneName.Starting });
+      await obsWs.call('SetCurrentProgramScene', { sceneName: SceneName.Starting });
     } catch (error) {
       
     }
@@ -884,14 +961,14 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       const store = this.state.store!;
       const player: Player | undefined = store.Players.find(p => p.uuid === uuid);
       if(player) {
-        await obsWs.send('SetTextGDIPlusProperties', { source: 'player_name', text: `#${player.num} ${player.lastname.toUpperCase()} ${Utilities.capitalize(player.firstname)}` });
-        await obsWs.send('SetTextGDIPlusProperties', { source: 'player_details', text: `${player.position}     ${player.lastname.toUpperCase()}     ${Utilities.capitalize(player.firstname)}` });
-        await obsWs.send('SetSourceSettings', { sourceName: 'player_media', sourceSettings: { file: player.media } });
+        await obsWs.call('SetInputSettings', { inputName: 'player_name', inputSettings: { text: `#${player.num} ${player.lastname.toUpperCase()} ${Utilities.capitalize(player.firstname)}` } });
+        await obsWs.call('SetInputSettings', { inputName: 'player_details', inputSettings: { text: `${player.position}     ${player.lastname.toUpperCase()}     ${Utilities.capitalize(player.firstname)}` } });
+        await obsWs.call('SetInputSettings', { inputName: 'player_media', inputSettings: { file: player.media } });
         // setTimeout(async () => {
         //   await obsWs.send('SetSceneItemProperties', { item: { name: 'Player Highlight' }, visible: false, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
         // }, 5000);
       }
-      await obsWs.send('SetSceneItemProperties', { item: { name: 'Player Highlight' }, visible: show, 'scene-name': SceneName.Live, bounds: {}, crop: {}, position: {}, scale: {} });
+      await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName(SceneName.Live, 'Player Highlight'), sceneItemEnabled: show, sceneName: SceneName.Live });
     } catch (error) {
       
     }
@@ -907,16 +984,16 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         switch (sponsor?.mediaType!) {
           case MediaType.Video:
             sourceName = 'sponsor_video';
-            await obsWs.send('SetSourceSettings', { sourceName, sourceSettings: { local_file: sponsor?.media } });
+            await obsWs.call('SetInputSettings', { inputName: sourceName, inputSettings: { local_file: sponsor?.media } });
             break;
           case MediaType.Image:
           default:
             sourceName = 'sponsor_image';
-            await obsWs.send('SetSourceSettings', { sourceName, sourceSettings: { file: sponsor?.media } });
+            await obsWs.call('SetInputSettings', { inputName: sourceName, inputSettings: { file: sponsor?.media } });
             break;
         }
-        await obsWs.send('SetSceneItemProperties', { item: { name: sourceName }, visible: true, 'scene-name': "* Sponsor media", bounds: {}, crop: {}, position: {}, scale: {} });
-        await obsWs.send('SetSceneItemProperties', { item: { name: sponsorDisplayType + '_sponsor' }, visible: true, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+        await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName("* Sponsor media", sourceName), sceneItemEnabled: true, sceneName: "* Sponsor media" });
+        await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName(SceneName.Sponsors, sponsorDisplayType + '_sponsor'), sceneItemEnabled: true, sceneName: SceneName.Sponsors });
         let id: number;
         if(sponsorDisplayType) {
           switch (previousScene) {
@@ -935,7 +1012,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
               id = sponsorDisplayType === SponsorDisplayType.Small  ? SponsorDisplayTypeSceneIdSmall.Live : SponsorDisplayTypeSceneIdBig.Live;
               break;
           }
-          await obsWs.send('SetSceneItemProperties', { item: { id }, visible: true, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+          await obsWs.call('SetSceneItemEnabled', { sceneItemId: id, sceneItemEnabled: true, sceneName: SceneName.Sponsors });
         }
         await this.changeActiveScene(SceneName.Sponsors);
       } else {
@@ -948,18 +1025,18 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   resetSponosorScene = async (): Promise<void> => {
     try {
-      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_video', sourceSettings: { local_file: "" } });
-      await obsWs.send('SetSourceSettings', { sourceName: 'sponsor_image', sourceSettings: { file: "" } });
-      await obsWs.send('SetSceneItemProperties', { item: { name: 'sponsor_video' }, visible: false, 'scene-name': "* Sponsor media", bounds: {}, crop: {}, position: {}, scale: {} });
-      await obsWs.send('SetSceneItemProperties', { item: { name: 'sponsor_image' }, visible: false, 'scene-name': "* Sponsor media", bounds: {}, crop: {}, position: {}, scale: {} });
+      await obsWs.call('SetInputSettings', { inputName: 'sponsor_video', inputSettings: { local_file: "" } });
+      await obsWs.call('SetInputSettings', { inputName: 'sponsor_image', inputSettings: { file: "" } });
+      await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName("* Sponsor media", 'sponsor_video'), sceneItemEnabled: false, sceneName: "* Sponsor media" });
+      await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName("* Sponsor media", 'sponsor_image'), sceneItemEnabled: false, sceneName: "* Sponsor media" });
       Object.values(SponsorDisplayType).forEach(async element => {
-        await obsWs.send('SetSceneItemProperties', { item: { name: element + '_sponsor' }, visible: false, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+        await obsWs.call('SetSceneItemEnabled', { sceneItemId:await  this.findIdFromSceneItemName(SceneName.Sponsors, element + '_sponsor'), sceneItemEnabled: false, sceneName: SceneName.Sponsors });
         if(element === SponsorDisplayType.Small) {
           Object.values(SponsorDisplayTypeSceneIdSmall).forEach(async id => {
             if (isNaN(Number(id))) {
               return;
             }
-            await obsWs.send('SetSceneItemProperties', { item: { id: id as number }, visible: false, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+            await obsWs.call('SetSceneItemEnabled', { sceneItemId: id as number, sceneItemEnabled: false, sceneName: SceneName.Sponsors });
           });
         }
         if(element === SponsorDisplayType.Big) {
@@ -967,7 +1044,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
             if (isNaN(Number(id))) {
               return;
             }
-            await obsWs.send('SetSceneItemProperties', { item: { id: id as number }, visible: false, 'scene-name': SceneName.Sponsors, bounds: {}, crop: {}, position: {}, scale: {} });
+            await obsWs.call('SetSceneItemEnabled', { sceneItemId: id as number, sceneItemEnabled: false, sceneName: SceneName.Sponsors });
           });
         }
       });
@@ -982,15 +1059,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       let GameStatut: IGameStatut = {...store.GameStatut};
       GameStatut.AwayTeam.logo = this.state.Utilitites!.getImageFullPath(GameStatut.AwayTeam.logo);
       GameStatut.HomeTeam.logo = this.state.Utilitites!.getImageFullPath(GameStatut.HomeTeam.logo);
-      await ipc.sendWithoutResponse('scoreboard-info', { 
-        responseChannel: 'scoreboard-update', 
-        params: {
-          body: {
-            GameStatut: store.GameStatut,
-            LiveSettings: store.LiveSettings,
-          }
-        }
-      });
+      window.app.sendToScoreboard({ body: { GameStatut: store.GameStatut, LiveSettings: store.LiveSettings }});
     } catch (error) {
       
     }
@@ -1015,7 +1084,74 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       
     }
   }
-  
+
+  addCamera = async (camera: CameraHardware): Promise<void> => {
+    try {
+      const cameraSettings = {
+        active: true,
+        deactivate_when_not_showing: false,
+        directory: "../../../../appDatas",
+        duration: await (await obsWs.call('GetInputSettings', { inputName: 'Replay Video' })).inputSettings.duration,
+        end_action: 0,
+        file_format: "%CCYY-%MM-%DD %hh.%mm.%ss",
+        last_video_device_id: camera.deviceid,
+        load_switch_scene: SceneName.Replay,
+        next_scene: SceneName.Live,
+        sound_trigger: false,
+        source: 'Camera - ' + camera.title,
+        use_custom_audio_device: false,
+        video_device_id: camera.deviceid,
+        visibility_action: 0
+      }
+      const { sceneItemId } = await obsWs.call('CreateInput', { sceneName: SceneName.Live, inputName: 'Camera - ' + camera.title, inputKind: 'dshow_input_replay', inputSettings: cameraSettings, sceneItemEnabled: false });
+      await obsWs.call('SetSceneItemIndex', { sceneName: SceneName.Live, sceneItemId, sceneItemIndex: 4 });
+      let store = this.state.store!;
+      store.CamerasHardware.push(camera);
+      await this.setState({ store });
+    } catch (error) {
+      
+    }
+  }
+
+  editCamera = async (camera: CameraHardware): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      // const camIndex = store.CamerasHardware.findIndex((cam) => cam.deviceId === camera.deviceId);
+      // this.state.scenes?.scenes.
+      // await obsWs.send('DeleteSceneItem', { scene: SceneName.Live, item: { name: '', id: '' } });      
+      const cameraSettings = {
+        last_video_device_id: camera.deviceid,
+        source: 'Camera - ' + camera.title,
+        video_device_id: camera.deviceid,
+      }
+      await obsWs.call('SetInputSettings', { inputName: 'Camera - ' + camera.title, inputSettings: cameraSettings });
+      const camIndex = store.CamerasHardware.findIndex((cam) => cam.deviceid === camera.deviceid);
+      store.CamerasHardware[camIndex] = camera;
+      await this.setState({ store });
+    } catch (error) {
+      
+    }
+  }
+
+  removeCamera = async (camera: CameraHardware): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      await obsWs.call('RemoveInput', { inputName: 'Camera - ' + camera.title });
+      const camIndex = store.CamerasHardware.findIndex((cam) => cam.deviceid === camera.deviceid);
+      store.CamerasHardware.splice(camIndex, 1);
+      await this.setState({ store });
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  getAvailableCameras = async (): Promise<OBSVideoInput[]> => {
+    try {
+      return await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'Camera - Field', propertyName: 'video_device_id'})).propertyItems as OBSVideoInput[];
+    } catch (error) {
+      throw error;
+    }
+  }
 
   disconnectObs = (): void => {
     obsWs.disconnect();

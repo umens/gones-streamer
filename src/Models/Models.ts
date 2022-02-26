@@ -1,6 +1,13 @@
+// import { FileWithPath } from "react-dropzone";
+
 /**
  * Types
  */
+export type OBSVideoInput = {
+  itemEnabled: boolean;
+  itemName: string;
+  itemValue: string;
+}
 export type PathsType = {
   binFolder: string;
   appFolder: string;
@@ -58,7 +65,7 @@ export type FileUp = {
 export type CameraHardware = {
   title: string;
   active: boolean;
-  device?: MediaDeviceInfo;
+  deviceid?: MediaDeviceInfo["deviceId"];
 }
 
 export type GameClock = {
@@ -187,6 +194,13 @@ export enum SponsorDisplayTypeSceneIdSmall {
   Starting = 14,
 }
 
+export enum FPS {
+  slow = 1000/15, // var 15fps = 1000/15; // 66
+  normal = 1000/24, // var 24fps = 1000/24; // 42
+  regular = 1000/30, // var 30fps = 1000/30; // 33
+  fast = 1000/60, // var 60fps = 1000/60; // 16
+}
+
 /** 
  * Functions
 */
@@ -233,8 +247,9 @@ export function GetDefaultConfig(): StoreType {
   };
   const CamerasHardware: CameraHardware[] = [
     {
-      title: 'Camera 1',
+      title: 'Field',
       active: true,
+      deviceid: 'OBS Virtual Camera:'
     }
   ];
   const Sponsors: Sponsor[] = [];

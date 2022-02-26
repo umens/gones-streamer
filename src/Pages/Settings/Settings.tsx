@@ -1,13 +1,10 @@
 import React from "react";
-import { IObsRemote, PlayerControl, SponsorControl } from "../../Components";
-import { Row, Col, message, Form, Input, Button, Select, Card, Alert } from "antd";
+import { CameraControl, IObsRemote, PlayerControl, SponsorControl } from "../../Components";
+import { Row, Col, message, Form, Input, Button, Select, Card } from "antd";
 import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../Utils/IpcService";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
-import { StreamingService, StreamingSport } from "../../Models";
-
-const ipc = new IpcService();
+import { FileUp, StreamingService, StreamingSport } from "../../Models";
 
 type SettingsProps = {  
   ObsRemote: IObsRemote;
@@ -37,6 +34,16 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     // console.log(devices.filter(({ kind }) => kind === "videoinput"));
   }
 
+  uploadElectronFile = async () => {
+    try {
+      const fileData = await window.app.selectElectronFile(true);
+      if(fileData) {
+        await this.onChangeHandler([fileData], [], null);
+      }
+    } catch (error) {
+    }
+  }    
+
   beforeUpload = (file: File) => {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
     if (!isJpgOrPng) {
@@ -49,12 +56,12 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     return isJpgOrPng && isLt2M;
   }
 
-  onChangeHandler = async (acceptedFiles: File[], fileRejections: any[], event: any): Promise<void> => {
+  onChangeHandler = async (acceptedFiles: FileUp[], fileRejections: any[], event: any): Promise<void> => {
     try {
-      if(this.beforeUpload(acceptedFiles[0])) {
+      if(this.beforeUpload(acceptedFiles[0].file)) {
         await this.setState({ loadingFile: true });
-        const data = await ipc.send<string>('file-upload', { params: { file: acceptedFiles[0]?.path, isBg: true }});
-        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0], pathElectron: data.split('#').shift()! }, bg: true});
+        const data = await window.app.setFile({ file: acceptedFiles[0]?.pathElectron, isBg: true });
+        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0].file, pathElectron: data.split('#').shift()! }, bg: true});
         await this.setState({ loadingFile: false });
       }
     } catch (error) {
@@ -129,28 +136,29 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     ];
 
     const contentList: { [key: string]: JSX.Element } = {
-      background: <ReactDropzone onDrop={this.onChangeHandler}>
-      {({getRootProps, getInputProps}: any) => (
-        <section className="container">
-          <span className="avatar-uploader ant-upload-picture-card-wrapper">
-            <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', style: { width: '100%', height: 'auto' }})}>
-              <input {...getInputProps({ multiple: false })} />
-              <span tabIndex={0} className="ant-upload" role="button">
-                <div>
-                  {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.Utilitites?.getImageFullPath(this.props.ObsRemote.store?.BackgroundImage)} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
-                </div>
-              </span>
-            </div>
-          </span>
-        </section>
-      )}
-    </ReactDropzone>,
-      cameras: <Alert
-        message="Feature in progress"
-        description="Gerez et configurez les caméras disponible pour la retransmission."
-        type="info"
-        showIcon
-      />,
+      background: <ReactDropzone noDrag={true} /*onDrop={this.onChangeHandler}*/>
+        {({getRootProps, getInputProps}: any) => (
+          <section className="container">
+            <span className="avatar-uploader ant-upload-picture-card-wrapper">
+              <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', onClick: async (e: Event) => { e.stopPropagation(); await this.uploadElectronFile(); }, style: { width: '100%', height: 'auto' }})}>
+                <input {...getInputProps({ multiple: false })} />
+                <span tabIndex={0} className="ant-upload" role="button">
+                  <div>
+                    {this.props.ObsRemote.store?.BackgroundImage ? <img src={this.props.ObsRemote.Utilitites?.getImageFullPath(this.props.ObsRemote.store?.BackgroundImage)} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                  </div>
+                </span>
+              </div>
+            </span>
+          </section>
+        )}
+      </ReactDropzone>,
+      cameras: <CameraControl ObsRemote={this.props.ObsRemote} editable={true} />,
+      // <Alert
+      //   message="Feature in progress"
+      //   description="Gerez et configurez les caméras disponible pour la retransmission."
+      //   type="info"
+      //   showIcon
+      // />,
     //   <List
     //   grid={{
     //     gutter: 16,        

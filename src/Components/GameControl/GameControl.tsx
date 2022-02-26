@@ -58,7 +58,7 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
   startReplay = async (e: any) => {
     try {
       if(e.code === "F10") {
-        if(this.props.ObsRemote.scenes?.["current-scene"] !== SceneName.Replay) {
+        if(this.props.ObsRemote.scenes?.currentScene !== SceneName.Replay) {
           await this.props.ObsRemote.changeActiveScene(SceneName.Replay);
         }
       }
@@ -152,7 +152,7 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
 
     const flagButton = this.props.ObsRemote.store?.GameStatut.Options.flag ? <Button style={{ backgroundColor: '#ffe066', color: '#000000', borderColor: '#fab005', }} onClick={this.toggleFlagVisibility} type="primary" block><FlagOutlined /> Flag</Button> : <Button onClick={this.toggleFlagVisibility} block><FlagOutlined /> Flag</Button>;
     // TODO: to start highlight a better way wait for https://github.com/Palakis/obs-websocket/issues/427
-    const replayButton = this.props.ObsRemote.scenes?.["current-scene"] === SceneName.Replay ? <Button onClick={async () => await this.props.ObsRemote.changeActiveScene(SceneName.Live)} type="primary" block><PauseCircleOutlined /> Stop Replay</Button> : <Tooltip title="Appuyer sur F10 pour lancer le ralenti"><Button disabled onClick={this.startReplay} block><PlayCircleOutlined /> Start Replay</Button></Tooltip>;
+    const replayButton = this.props.ObsRemote.scenes?.currentScene === SceneName.Replay ? <Button onClick={async () => await this.props.ObsRemote.changeActiveScene(SceneName.Live)} type="primary" block><PauseCircleOutlined /> Stop Replay</Button> : <Tooltip title="Appuyer sur F10 pour lancer le ralenti"><Button disabled onClick={this.startReplay} block><PlayCircleOutlined /> Start Replay</Button></Tooltip>;
     const scoreboardButton = this.props.ObsRemote.store?.GameStatut.Options.showScoreboard ? <Button onClick={this.toggleScoreboardVisibility} type="primary" block><EyeOutlined /> Scoreboard</Button> : <Button onClick={this.toggleScoreboardVisibility} block><EyeInvisibleOutlined /> Scoreboard</Button>;
 
     const options = [

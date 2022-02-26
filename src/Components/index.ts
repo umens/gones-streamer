@@ -14,6 +14,8 @@ import { PlayerControl } from "./PlayerControl/PlayerControl";
 import { VideoPreview } from "./VideoPreview/VideoPreview";
 import { SponsorForm, SponsorFormValues } from "./SponsorForm/SponsorForm";
 import { StatsTinyChart } from "./StatsTinyChart/StatsTinyChart";
+import { CameraControl } from "./CameraControl/CameraControl";
+import { CameraForm, CameraFormValues } from "./CameraForm/CameraForm";
 
-export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, StatsTinyChart };
-export type { IObsRemote, SponsorFormValues };
+export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, StatsTinyChart, CameraControl, CameraForm };
+export type { IObsRemote, SponsorFormValues, CameraFormValues };

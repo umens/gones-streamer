@@ -1,5 +1,5 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
-import { IpcMainEvent } from 'electron';
+import { IpcMainInvokeEvent } from 'electron';
 import { IpcRequest, StoreType, GetDefaultConfig } from "../../../src/Models";
 import Store from 'electron-store';
 import ElectronLog from "electron-log";
@@ -17,11 +17,11 @@ export class StoredConfigChannel implements IpcChannelInterface {
     return 'stored-config';
   }
 
-  async handle(event: IpcMainEvent, request: IpcRequest): Promise<void> {
+  async handle(event: IpcMainInvokeEvent, request: IpcRequest): Promise<StoreType> {
     try {
-      if (!request.responseChannel) {
-        request.responseChannel = `${this.getName()}_response`;
-      }
+      // if (!request.responseChannel) {
+      //   request.responseChannel = `${this.getName()}_response`;
+      // }
       const defaultConfig = GetDefaultConfig();
       const GameStatut = await this.store.get("GameStatut", defaultConfig.GameStatut);
       const LiveSettings = await this.store.get("LiveSettings", defaultConfig.LiveSettings);
@@ -37,9 +37,11 @@ export class StoredConfigChannel implements IpcChannelInterface {
         Sponsors,
         Players,
       };
-      event.sender.send(request.responseChannel, { storedConfig });
+      // event.sender.send(request.responseChannel, { storedConfig });
+      return storedConfig;
     } catch (error) {
       this.log.error(error);
+      throw error;
     }
   }
 }

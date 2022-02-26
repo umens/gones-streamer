@@ -7,19 +7,19 @@ import reportWebVitals from './reportWebVitals';
 
 import {
   HashRouter as Router,
-  Switch,
-  Route
+  Route,
+  Routes
 } from "react-router-dom";
 import { Scoreboard } from './Components';
 
 ReactDOM.render(
   // <React.StrictMode>
-    <Router>
-      <Switch>
-        <Route exact path="/scoreboard" component={Scoreboard} />
-        <Route path="/" component={App} />
-      </Switch>
-    </Router>,
+  <Router>
+    <Routes>
+      <Route path="/scoreboard" element={<Scoreboard />} />
+      <Route path="/*" element={<App />} />
+    </Routes>
+  </Router>,
   // </React.StrictMode>, 
   document.getElementById('root')
 );

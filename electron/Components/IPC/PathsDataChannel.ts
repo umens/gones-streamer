@@ -1,8 +1,6 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
-import { IpcMainEvent } from 'electron';
-import { IpcRequest, PathsType, Sponsor } from "../../../src/Models";
-import { join } from 'path';
-import { promises as fs } from 'fs';
+import { IpcMainInvokeEvent } from 'electron';
+import { IpcRequest, PathsType } from "../../../src/Models";
 
 export class PathsDataChannel implements IpcChannelInterface {
 
@@ -16,15 +14,11 @@ export class PathsDataChannel implements IpcChannelInterface {
     return 'paths-data';
   }
 
-  async handle(event: IpcMainEvent, request: IpcRequest): Promise<void> {
+  async handle(event: IpcMainInvokeEvent, request: IpcRequest): Promise<PathsType> {
     try {
-      if (!request.responseChannel) {
-        request.responseChannel = `${this.getName()}_response`;
-      }
-      
-      event.sender.send(request.responseChannel, this.paths);
+      return this.paths;
     } catch (error) {
-
+      throw error;
     }
   }
 }

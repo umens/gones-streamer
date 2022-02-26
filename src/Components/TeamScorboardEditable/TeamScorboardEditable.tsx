@@ -5,11 +5,8 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import classNames from "classnames";
 import './TeamScorboardEditable.css';
 import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../Utils/IpcService";
 import { ChromePicker } from 'react-color';
-import { Timeout, Team as TeamModel, TeamPossession } from "../../Models";
-
-const ipc = new IpcService();
+import { Timeout, Team as TeamModel, TeamPossession, FileUp } from "../../Models";
 
 type TeamScorboardEditableProps = {
   ObsRemote: IObsRemote;
@@ -120,12 +117,23 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
     return isJpgOrPng && isLt2M;
   }
 
-  onChangeHandler = async (acceptedFiles: File[], fileRejections: any[], event: any): Promise<void> => {
+  uploadElectronFile = async () => {
     try {
-      if(this.beforeUpload(acceptedFiles[0])) {
+      const fileData = await window.app.selectElectronFile(true);
+      if(fileData) {
+        await this.onChangeHandler([fileData], [], null);
+      }
+    } catch (error) {
+      
+    }
+  }
+
+  onChangeHandler = async (acceptedFiles: FileUp[], fileRejections: any[], event: any): Promise<void> => {
+    try {
+      if(this.beforeUpload(acceptedFiles[0].file)) {
         await this.setState({ loadingFile: true });
-        const data = await ipc.send<string>('file-upload', { params: { file: acceptedFiles[0]?.path, isHomeTeam: this.props.isHomeTeam }});
-        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0], pathElectron: data.split('#').shift()! }, homeTeam: this.props.isHomeTeam});
+        const data = await window.app.setFile({ file: acceptedFiles[0]?.pathElectron, isHomeTeam: this.props.isHomeTeam });
+        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0].file, pathElectron: data.split('#').shift()! }, homeTeam: this.props.isHomeTeam});
         await this.setState({ loadingFile: false });
       }
     } catch (error) {
@@ -197,11 +205,11 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
 
         <div className="teamblock-scoreboard" style={(this.props.isHomeTeam) ? { width: '360px', background: team?.color } : { width: '360px', background: team?.color, marginLeft: '5px' }} >
           <div className="teamcolor-scoreboard" onClick={ this.handleClickColorPickerBtn }></div>
-          <ReactDropzone onDrop={this.onChangeHandler}>
+          <ReactDropzone noDrag={true} /*onDrop={this.onChangeHandler}*/ >
             {({getRootProps, getInputProps}: any) => (
               <section className="container teamlogo-scoreboard">
                 <span className="avatar-uploader ant-upload-picture-card-wrapper">
-                  <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', style: { width: 50, height: 50, backgroundColor: 'transparent', border: 0 }})}>
+                  <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', onClick: async (e: Event) => { e.stopPropagation(); await this.uploadElectronFile(); }, style: { width: 50, height: 50, backgroundColor: 'transparent', border: 0 }})}>
                     <input {...getInputProps({ multiple: false })} />
                     <span tabIndex={0} style={{ padding: 0 }} className="ant-upload" role="button">
                       <div>

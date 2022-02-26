@@ -166,16 +166,18 @@ export default class Main {
       show: false,
       webPreferences: {
         // nodeIntegration: true
-        nodeIntegration: false, // is default value after Electron v5
+        // nodeIntegration: false, // is default value after Electron v5
         // contextIsolation: true, // protect against prototype pollution
-        enableRemoteModule: false, // turn off remote
+        // enableRemoteModule: false, // turn off remote
         webSecurity: false, // handle local file bug
+        allowRunningInsecureContent: false,
         additionalArguments: ['--allow-file-access-from-files'], // handle local file bug
         preload: join(__dirname, "preload.bundle.js") // use a preload script
       }
     };
     this.log.info('%cCreating Window', 'color: blue');
     this.mainWindow = new BrowserWindow(this.mainConfig);
+    require("@electron/remote/main").enable(this.mainWindow.webContents);
 
     if (isDev) {
       this.mainWindow.loadURL('http://localhost:3000/index.html');

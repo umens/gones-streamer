@@ -1,4 +1,4 @@
-import { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel } from "./IPC";
+import { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel, CamerasDataChannel } from "./IPC";
 import { ipcMain, WebContents } from "electron";
 import ElectronLog from 'electron-log';
 import { PathsType } from "../../src/Models";
@@ -24,23 +24,28 @@ export default class IPCChannels {
       new SponsorsDataChannel(this.paths),
       new PlayersDataChannel(this.paths),
       new PathsDataChannel(this.paths),
+      new CamerasDataChannel(),
     ])
   }
 
   private registerIpcChannels(ipcChannels: IpcChannelInterface[]) {
-    ipcChannels.forEach((channel: IpcChannelInterface) => {
-      this.log.verbose(`register Ipc Channel : ${channel.getName()}`);
-      ipcMain.on(channel.getName(), async (event, request) => {
-        try {
-          if(channel.getName() === 'scoreboard-info') {
-            await channel.handle(event, request, this.scoreboardWindow);
-          } else {            
-          await channel.handle(event, request, this.mainWindow);
+    try {
+      ipcChannels.forEach((channel: IpcChannelInterface) => {
+        this.log.verbose(`register Ipc Channel : ${channel.getName()}`);
+        ipcMain.handle(channel.getName(), async (event, request) => {
+          try {
+            if(channel.getName() === 'scoreboard-info') {
+              return await channel.handle(event, request, this.scoreboardWindow);
+            } else {            
+              return await channel.handle(event, request, this.mainWindow);
+            }
+          } catch (error) {
+            this.log.error(error);
           }
-        } catch (error) {
-          this.log.error(error);
-        }
+        });
       });
-    });
+    } catch (error) {
+      this.log.error(error)
+    }
   }
 }

@@ -5,11 +5,8 @@ import { LoadingOutlined, PlusOutlined, BgColorsOutlined } from '@ant-design/ico
 import classNames from "classnames";
 import './Team.css';
 import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../Utils/IpcService";
 import { ChromePicker } from 'react-color';
-import { Timeout, Team as TeamModel } from "../../Models";
-
-const ipc = new IpcService();
+import { Timeout, Team as TeamModel, FileUp } from "../../Models";
 
 type TeamProps = {
   ObsRemote: IObsRemote;
@@ -79,6 +76,16 @@ class Team extends React.Component<TeamProps, TeamState> {
     }
   }
 
+  uploadElectronFile = async () => {
+    try {
+      const fileData = await window.app.selectElectronFile(true);
+      if(fileData) {
+        await this.onChangeHandler([fileData], [], null);
+      }
+    } catch (error) {
+    }
+  }  
+
   beforeUpload = (file: File) => {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
     if (!isJpgOrPng) {
@@ -91,12 +98,12 @@ class Team extends React.Component<TeamProps, TeamState> {
     return isJpgOrPng && isLt2M;
   }
 
-  onChangeHandler = async (acceptedFiles: File[], fileRejections: any[], event: any): Promise<void> => {
+  onChangeHandler = async (acceptedFiles: FileUp[], fileRejections: any[], event: any): Promise<void> => {
     try {
-      if(this.beforeUpload(acceptedFiles[0])) {
-        await this.setState({ loadingFile: true });
-        const data = await ipc.send<string>('file-upload', { params: { file: acceptedFiles[0]?.path, isHomeTeam: this.props.isHomeTeam }});
-        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0], pathElectron: data.split('#').shift()! }, homeTeam: this.props.isHomeTeam});
+      if(this.beforeUpload(acceptedFiles[0].file)) {
+        await this.setState({ loadingFile: true });        
+        const data = await window.app.setFile({ file: acceptedFiles[0]?.pathElectron!, isHomeTeam: this.props.isHomeTeam });
+        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0].file, pathElectron: data.split('#').shift()! }, homeTeam: this.props.isHomeTeam});
         await this.setState({ loadingFile: false });
       }
     } catch (error) {
@@ -182,11 +189,11 @@ class Team extends React.Component<TeamProps, TeamState> {
           </Space>
         </Col>
         <Col span={6}>
-          <ReactDropzone onDrop={this.onChangeHandler}>
+          <ReactDropzone noDrag={true} /*onDrop={this.onChangeHandler}*/>
             {({getRootProps, getInputProps}: any) => (
               <section className="container">
                 <span className="avatar-uploader ant-upload-picture-card-wrapper">
-                  <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card'})}>
+                  <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', onClick: async (e: Event) => { e.stopPropagation(); await this.uploadElectronFile(); }})}>
                     <input {...getInputProps({ multiple: false })} />
                     <span tabIndex={0} className="ant-upload" role="button">
                       <div>

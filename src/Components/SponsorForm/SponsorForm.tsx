@@ -43,7 +43,7 @@ const SponsorForm: React.FC<SponsorFormProps> = ({
       setFile([]);
     },
     beforeUpload: file => {
-      const ext = getExtension(file.path).toLowerCase();
+      const ext = getExtension((file as any).path).toLowerCase();
       switch (ext) {
         case 'jpg':
         case 'jpeg':

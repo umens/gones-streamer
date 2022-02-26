@@ -1,4 +1,4 @@
-import { PathsType } from "../Models";
+import { FileUp, PathsType } from "../Models";
 
 export class Utilities {
 
@@ -22,5 +22,24 @@ export class Utilities {
 
   getImageFullPath = (path: string): string => {
     return path.replace('../../../../appDatas', this.paths.appFolder);
-  };  
+  };    
+
+  getBase64 = (img: FileUp): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+  
+      reader.onload = () => {
+        resolve(reader.result! as string);
+      };
+  
+      reader.onerror = reject;
+  
+      reader.readAsDataURL(img.file);
+    });
+  }
+
+  getBase64FromFilePath = async (path: string): Promise<string> => {
+    const fullpath = window.app.getFileFromPath(this.getImageFullPath(path));
+    return await this.getBase64(fullpath);
+  }
 }

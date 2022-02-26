@@ -5,9 +5,7 @@ import { SearchOutlined, EyeOutlined, EyeInvisibleOutlined, EditOutlined, Delete
 import FilterResults from 'react-filter-search';
 import './SponsorControl.css';
 import { MediaType, SceneName, Sponsor, SponsorDisplayType } from "../../Models";
-import { IpcService, Utilities } from "../../Utils";
-
-const ipc = new IpcService();
+import { Utilities } from "../../Utils";
 
 type SponsorControlProps = typeof SponsorControl.defaultProps & {
   ObsRemote: IObsRemote;
@@ -47,7 +45,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
       const store = this.props.ObsRemote.store!;
       const sponsor: Sponsor | undefined = store.Sponsors.find(p => p.uuid === uuid);
       let delay = sponsor?.mediaType === MediaType.Video ? sponsor.duration! * 1000 : 10000;
-      await this.setState({ showingSponsor: uuid, previousScene: this.props.ObsRemote.scenes?.["current-scene"] as SceneName });
+      await this.setState({ showingSponsor: uuid, previousScene: this.props.ObsRemote.scenes?.currentScene as SceneName });
       await this.props.ObsRemote.toggleSponsor({ show: true, uuid, previousScene: this.state.previousScene!, sponsorDisplayType });
       this.timeout = setTimeout(async () => {
         await this.props.ObsRemote.toggleSponsor({ show: false, uuid, previousScene: this.state.previousScene!, sponsorDisplayType });
@@ -78,9 +76,9 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
       let newSponsors;
       values.label = values.label.charAt(0).toUpperCase() + values.label.slice(1).toLowerCase();
       if(values.uuid) {
-        newSponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'edit', sponsor: values }});
+        newSponsors = await window.app.manageSponsors({ action: 'edit', sponsor: values });
       } else {
-        newSponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'add', sponsor: values }});
+        newSponsors = await window.app.manageSponsors({ action: 'add', sponsor: values });
       }
       await this.props.ObsRemote.updateSponsorsList(newSponsors);
       await this.setState({ visibleModal: false, initialValuesForm: undefined, loadingForm: false });
@@ -111,7 +109,7 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
           deleteLoading: newLoadings,
         };
       });
-      let newSponsors = await ipc.send<Sponsor[]>('sponsors-data', { params: { action: 'delete', id: uuid }});
+      let newSponsors = await window.app.manageSponsors({ action: 'delete', id: uuid });
       await this.props.ObsRemote.updateSponsorsList(newSponsors);
       await this.setState(({ deleteLoading }) => {
         const newLoadings = [...deleteLoading];

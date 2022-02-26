@@ -1,6 +1,7 @@
 import React from "react";
 import { IObsRemote } from "../";
 import { Row, Col, Image, Empty } from "antd";
+import { FPS } from "../../Models";
 
 type PreviewProps = {
   ObsRemote: IObsRemote;
@@ -63,7 +64,7 @@ class Preview extends React.Component<PreviewProps, PreviewState> {
         if (data && data.img) {
           await this.setState({ preview: data.img });
         }
-        let timeoutId = setTimeout(this.getScreenshot, 75);
+        let timeoutId = setTimeout(this.getScreenshot, FPS.slow);
         await this.setState({ timeout: timeoutId });
       } else {
         if (this.state.timeout) {

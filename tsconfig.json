@@ -25,6 +25,6 @@
   "include": [
     "src",
     "common.d.ts",
-    // "shared"
+    "exposedInMainWorld.d.ts"
   ]
 }

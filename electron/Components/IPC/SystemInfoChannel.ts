@@ -1,5 +1,5 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
-import { IpcMainEvent } from 'electron';
+import { IpcMainInvokeEvent } from 'electron';
 import { IpcRequest,  } from "../../../src/Models";
 import { exec } from "child_process";
 
@@ -8,15 +8,16 @@ export class SystemInfoChannel implements IpcChannelInterface {
     return 'system-info';
   }
 
-  async handle(event: IpcMainEvent, request: IpcRequest): Promise<void> {
+  async handle(event: IpcMainInvokeEvent, request: IpcRequest): Promise<{ kernel: string }> {
     try {
-      if (!request.responseChannel) {
-        request.responseChannel = `${this.getName()}_response`;
-      }
+      // if (!request.responseChannel) {
+      //   request.responseChannel = `${this.getName()}_response`;
+      // }
       var kernel = await this.execPromise('systeminfo');
-      event.sender.send(request.responseChannel, { kernel });
+      // event.sender.send(request.responseChannel, { kernel });
+      return { kernel };
     } catch (error) {
-
+      throw error;
     }
   }
 
