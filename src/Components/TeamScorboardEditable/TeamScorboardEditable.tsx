@@ -221,10 +221,10 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
               </section>
             )}
           </ReactDropzone>
-          <div onClick={(e) => this.showModalTeam()} className="teamname-scoreboard" style={{ fontWeight: 700 }}>
+          <div onClick={(e) => this.showModalTeam()} className="teamname-scoreboard" style={{ fontWeight: 700, color: this.props.ObsRemote.Utilitites?.pickTextColorBasedOnBgColorAdvanced(team?.color, '#FFFFFF', '#000000') }}>
             { team?.name || 'Name' }
           </div>
-          <div onClick={(e) => this.showModal()} className="teamscore-scoreboard" style={{ fontWeight: 700 }}>
+          <div onClick={(e) => this.showModal()} className="teamscore-scoreboard" style={{ fontWeight: 700, color: this.props.ObsRemote.Utilitites?.pickTextColorBasedOnBgColorAdvanced(team?.color, '#FFFFFF', '#000000') }}>
             { team?.score.toLocaleString('fr-FR', { minimumIntegerDigits:2, useGrouping: false }) }
           </div>
           <div className="teamtimeoutblock-scoreboard">

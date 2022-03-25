@@ -34,6 +34,22 @@ class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
       LiveSettings: data.detail.LiveSettings,
     })
   };
+
+  pickTextColorBasedOnBgColorAdvanced = (bgColor: string = '#FFFFFF', lightColor: string, darkColor: string): string => {
+    var color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
+    var r = parseInt(color.substring(0, 2), 16); // hexToR
+    var g = parseInt(color.substring(2, 4), 16); // hexToG
+    var b = parseInt(color.substring(4, 6), 16); // hexToB
+    var uicolors = [r / 255, g / 255, b / 255];
+    var c = uicolors.map((col) => {
+      if (col <= 0.03928) {
+        return col / 12.92;
+      }
+      return Math.pow((col + 0.055) / 1.055, 2.4);
+    });
+    var L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
+    return (L > 0.179) ? darkColor : lightColor;
+  };
   
   render() {
     const homeTeam = this.state.GameStatut?.HomeTeam;
@@ -47,10 +63,10 @@ class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
 
               <div className="teamblock-scoreboard" style={{ width: '360px', background: homeTeam?.color }} >
                 <img className='img-thumbnail teamlogo-scoreboard noselect' alt='home team logo' src={ homeTeam?.logo } />
-                <div className="teamname-scoreboard noselect" style={{ fontWeight: 700 }}>
+                <div className="teamname-scoreboard noselect" style={{ fontWeight: 700, color: this.pickTextColorBasedOnBgColorAdvanced(homeTeam?.color, '#FFFFFF', '#000000') }}>
                   { homeTeam?.name }
                 </div>
-                <div className="teamscore-scoreboard noselect" style={{ fontWeight: 700 }}>
+                <div className="teamscore-scoreboard noselect" style={{ fontWeight: 700, color: this.pickTextColorBasedOnBgColorAdvanced(homeTeam?.color, '#FFFFFF', '#000000') }}>
                   { homeTeam?.score.toLocaleString('fr-FR', { minimumIntegerDigits:2, useGrouping: false }) }
                 </div>
                 <div className="teamtimeoutblock-scoreboard noselect">
@@ -63,10 +79,10 @@ class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
 
               <div className="teamblock-scoreboard" style={{ marginLeft: '5px', width: '360px', background: awayTeam?.color }} >
                 <img className='img-thumbnail teamlogo-scoreboard noselect' alt='home team logo' src={ awayTeam?.logo } />
-                <div className="teamname-scoreboard noselect" style={{ fontWeight: 700 }}>
+                <div className="teamname-scoreboard noselect" style={{ fontWeight: 700, color: this.pickTextColorBasedOnBgColorAdvanced(awayTeam?.color, '#FFFFFF', '#000000') }}>
                   { awayTeam?.name }
                 </div>
-                <div className="teamscore-scoreboard noselect" style={{ fontWeight: 700 }}>
+                <div className="teamscore-scoreboard noselect" style={{ fontWeight: 700, color: this.pickTextColorBasedOnBgColorAdvanced(awayTeam?.color, '#FFFFFF', '#000000') }}>
                   { awayTeam?.score.toLocaleString('fr-FR', { minimumIntegerDigits:2, useGrouping: false }) }
                 </div>
                 <div className="teamtimeoutblock-scoreboard noselect">
