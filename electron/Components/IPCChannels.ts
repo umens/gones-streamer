@@ -16,7 +16,7 @@ export default class IPCChannels {
     this.mainWindow = mainWindow;
     this.scoreboardWindow = scoreboardWindow;
     this.registerIpcChannels([
-      new SystemInfoChannel(),
+      // new SystemInfoChannel(),
       new StoredConfigChannel(),
       new ObsSettingsChannel(this.paths),
       new FileUploadChannel(this.paths),

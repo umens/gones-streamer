@@ -16,8 +16,6 @@ import { promises as fs, existsSync } from 'fs';
 import ScoreboardWindow from "./ScoreboardWindow";
 import { autoUpdater } from "electron-updater";
 
-const isPackaged = require('electron-is-packaged').isPackaged;
-
 export default class Main {
   
   log: ElectronLog.LogFunctions;
@@ -36,7 +34,7 @@ export default class Main {
   constructor() {
     this.log = ElectronLog.scope('Main');    
     autoUpdater.logger = ElectronLog.scope('Auto Updater');
-    const extraResources = (isPackaged) ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
+    const extraResources = (app.isPackaged) ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
     this.paths = {
       binFolder: join(extraResources, '/bin'),
       appFolder: join(extraResources, '/appDatas'),
@@ -200,13 +198,6 @@ export default class Main {
 
     // Hot Reloading
     if (isDev) {
-      // 'node_modules/.bin/electronPath'
-      // require('electron-reload')(__dirname, {
-      //   electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-      //   forceHardReset: true,
-      //   hardResetMethod: 'exit'
-      // });
-
       // DevTools
       installExtension(REACT_DEVELOPER_TOOLS)
       .then((name: any) => this.log.verbose(`Added Extension:  ${name}`))

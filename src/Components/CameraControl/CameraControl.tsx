@@ -36,10 +36,13 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
     try {
       await this.setState({ loadingForm: true });
       values.title = values.title.charAt(0).toUpperCase() + values.title.slice(1).toLowerCase();
-      if(this.props.ObsRemote.store?.CamerasHardware.some(({ deviceid }) => deviceid === values.deviceid)) {        
+      console.log(values)
+      if(this.props.ObsRemote.store?.CamerasHardware.some(({ deviceid }) => deviceid === values.deviceid)) {    
+        console.log('edit')    
         await window.app.manageCamera({ action: 'edit', camera: values });
         await this.props.ObsRemote.editCamera(values);
       } else {
+        console.log('add')    
         await window.app.manageCamera({ action: 'add', camera: values });
         await this.props.ObsRemote.addCamera(values);
       }
@@ -146,7 +149,6 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
                           </Card>
                         )
                       } else {
-                        console.log(item)
                         return (
                           <Card
                             cover={                        

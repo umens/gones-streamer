@@ -44,8 +44,17 @@ const CameraForm: React.FC<CameraFormProps> = ({
     () => {
       async function fetchAvailableCam() {
         // You can await here
-        return await ObsRemote.getAvailableCameras();
-        // ...
+        const obsCams = await ObsRemote.getAvailableCameras();
+        const webcams = await (await navigator.mediaDevices.enumerateDevices()).filter(device => device.kind === 'videoinput');
+        let devices: OBSVideoInput[] = [];
+        obsCams.forEach(obscam => {
+          let webcam = webcams.find(webc => webc.label === obscam.itemName);
+          if(webcam) {
+            obscam.itemValue += '|' + webcam.deviceId ;
+          }
+          devices.push(obscam);
+        });
+        return devices;
       }
       fetchAvailableCam().then(handleDevices);
       // navigator.mediaDevices.enumerateDevices().then(handleDevices);
@@ -124,7 +133,7 @@ const CameraForm: React.FC<CameraFormProps> = ({
           >
           </Checkbox>
         </Form.Item>
-        { displayCam !== '' && <Webcam audio={false} width={472} height={266} videoConstraints={{ deviceId: displayCam, width: { min: 472 }, height: { max: 266 } }} /> }
+        { displayCam !== '' && <Webcam audio={false} width={472} height={266} videoConstraints={{ deviceId: displayCam.split('|')[1], width: { min: 472 }, height: { max: 266 } }} /> }
       </Form>
     </Modal>
   );

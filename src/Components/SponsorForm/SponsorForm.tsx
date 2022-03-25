@@ -95,7 +95,7 @@ const SponsorForm: React.FC<SponsorFormProps> = ({
           .then(values => {
             // console.log(values)
             form.resetFields();
-            values['media'] = values['media'].originFileObj.path;
+            // values['media'] = values['media'].originFileObj.path;
             onCreate(values as Sponsor);
           })
           .catch(info => {

@@ -129,8 +129,8 @@ class Team extends React.Component<TeamProps, TeamState> {
   
   render() {
     let team = (this.props.isHomeTeam) ? this.props.ObsRemote.store?.GameStatut?.HomeTeam : this.props.ObsRemote.store?.GameStatut?.AwayTeam;
-    const inputNameRef = createRef<Input>();
-    const inputCityRef = createRef<Input>();
+    const inputNameRef = createRef<any>();
+    const inputCityRef = createRef<any>();
 
     const uploadButton = (
       <div>

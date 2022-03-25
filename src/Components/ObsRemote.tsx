@@ -44,7 +44,7 @@ type ObsRemoteState = {
   changePossession: () => Promise<void>;
   updateGameEventProps: ({ props, value }: { props: keyof GameEvent; value: boolean | Quarter | TeamPossession | string; }) => Promise<void>;
   startReplay: () => Promise<void>;
-  getScreenshot: () => Promise<{ img?: string }>;
+  getScreenshot: ({ imageWidth, imageHeight }: { imageWidth?: number, imageHeight?: number }) => Promise<{ img?: string }>;
   resetGame: () => Promise<void>;
   newGame: ({ name1, name2, city1, city2, logo1, logo2 }: { name1: string, name2: string, city1?: string, city2?: string, logo1?: string, logo2?: string }) => Promise<void>;
   startStopClock: (isTimeout?: boolean) => Promise<void>;
@@ -777,9 +777,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   }
 
   
-  getScreenshot = async (): Promise<{ img?: string }> => {
+  getScreenshot = async ({ imageWidth = 450, imageHeight = 254 }: { imageWidth?: number, imageHeight?: number }): Promise<{ img?: string }> => {
     try {
-      let data = await obsWs.call('GetSourceScreenshot', { sourceName: this.state.scenes?.currentScene!, imageFormat: 'jpeg', imageWidth: 450, imageHeight: 254 });
+      let data = await obsWs.call('GetSourceScreenshot', { sourceName: this.state.scenes?.currentScene!, imageFormat: 'jpeg', imageWidth, imageHeight });
       return { img: data.imageData };
     } catch (error) {
       return {};
@@ -1094,13 +1094,13 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         duration: await (await obsWs.call('GetInputSettings', { inputName: 'Replay Video' })).inputSettings.duration,
         end_action: 0,
         file_format: "%CCYY-%MM-%DD %hh.%mm.%ss",
-        last_video_device_id: camera.deviceid,
+        last_video_device_id: camera.deviceid?.split('|')[0],
         load_switch_scene: SceneName.Replay,
         next_scene: SceneName.Live,
         sound_trigger: false,
         source: 'Camera - ' + camera.title,
         use_custom_audio_device: false,
-        video_device_id: camera.deviceid,
+        video_device_id: camera.deviceid?.split('|')[0],
         visibility_action: 0
       }
       const { sceneItemId } = await obsWs.call('CreateInput', { sceneName: SceneName.Live, inputName: 'Camera - ' + camera.title, inputKind: 'dshow_input_replay', inputSettings: cameraSettings, sceneItemEnabled: false });
@@ -1120,9 +1120,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       // this.state.scenes?.scenes.
       // await obsWs.send('DeleteSceneItem', { scene: SceneName.Live, item: { name: '', id: '' } });      
       const cameraSettings = {
-        last_video_device_id: camera.deviceid,
+        last_video_device_id: camera.deviceid?.split('|')[0],
         source: 'Camera - ' + camera.title,
-        video_device_id: camera.deviceid,
+        video_device_id: camera.deviceid?.split('|')[0],
       }
       await obsWs.call('SetInputSettings', { inputName: 'Camera - ' + camera.title, inputSettings: cameraSettings });
       const camIndex = store.CamerasHardware.findIndex((cam) => cam.deviceid === camera.deviceid);

@@ -7,7 +7,7 @@ import {
 // import logo from './logo.svg';
 import './App.css';
 import { Layout, Menu, Avatar, Button, Tooltip } from 'antd';
-import { ApiFilled, WifiOutlined, LoadingOutlined } from '@ant-design/icons';
+import { ApiFilled, WifiOutlined, LoadingOutlined, SettingOutlined } from '@ant-design/icons';
 // import { BasicLayout } from './Layouts';
 import { Cockpit, Settings } from './Pages';
 import { ObsRemote, IObsRemote } from './Components';
@@ -29,10 +29,10 @@ const App = (props: AppProps) => {
               <Menu.Item key="/">
                 <Link to="/">Cockpit</Link>
               </Menu.Item>
-              <Menu.Item key="/settings">
+              <Menu.Item key="/settings" icon={<SettingOutlined />}>
                 <Link to="/settings">Settings</Link>
               </Menu.Item>
-              <div style={{ float: "right" }}>
+              <div style={{ float: 'right' }}>
                 {(() => { if (ObsRemoteState.connectingObs) {
                     return <Tooltip title="Connexion à OBS"><Avatar shape='square' size="large" style={{ color: '#1890ff' }} icon={<LoadingOutlined />} /></Tooltip>;
                   } else {

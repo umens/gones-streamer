@@ -37,7 +37,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
 
   componentDidMount = async () => {
     try {
-      await this.getStoredConfig();
+      // await this.getStoredConfig();
       // setTimeout(async () => {
       //   await this.setState({ displayPreview: true });
       // }, 500);
@@ -151,8 +151,8 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
         <Menu.Item key="reset">Reset Game</Menu.Item>
       </Menu>
     );
-    const inputCompetRef = createRef<Input>();
-    const inputWeekRef = createRef<Input>();
+    const inputCompetRef = createRef<any>();
+    const inputWeekRef = createRef<any>();
 
     return (
       <>

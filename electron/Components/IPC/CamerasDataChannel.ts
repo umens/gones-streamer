@@ -48,6 +48,9 @@ export class CamerasDataChannel implements IpcChannelInterface {
               let camera = request.params.camera as CameraHardware;
               cameras = this.store.get('CamerasHardware');
               const cameraIndex = cameras.findIndex((obj => obj.deviceid === camera.deviceid));
+              console.log(request.params.camera)
+              console.log(cameras)
+              console.log(cameraIndex)
               // update sponsor
               cameras[cameraIndex].title = camera.title;
               cameras[cameraIndex].deviceid = camera.deviceid;

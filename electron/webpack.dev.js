@@ -4,7 +4,7 @@ const ElectronReloadPlugin = require('webpack-electron-reload')({
   path: path.join(__dirname, '../build/main.bundle.js'),
 });
 const { merge } = require('webpack-merge');
-const WebpackShellPlugin = require('webpack-shell-plugin');
+const WebpackShellPlugin = require('webpack-shell-plugin-next');
 
 const common = require('./webpack.common.js');
 
@@ -39,9 +39,11 @@ module.exports =
         ],
       }),
       new WebpackShellPlugin({
-        // onBuildStart:['echo "Webpack Start"'],
-        onBuildStart:['yarn pretypecheck-renderer'],
-        // onBuildEnd:['yarn pretypecheck-renderer']
+        onBeforeBuild:{
+          scripts: ['yarn pretypecheck-renderer'],
+          blocking: true,
+          parallel: false
+        },
       }),
     ],
   }),
