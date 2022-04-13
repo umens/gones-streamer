@@ -160,7 +160,7 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
       { label: 'Q2', value: Quarter.Q2 },
       { label: 'Q3', value: Quarter.Q3 },
       { label: 'Q4', value: Quarter.Q4 },
-      { label: 'Overtime', value: Quarter.OT },
+      { label: 'OT', value: Quarter.OT },
     ];
 
     return (

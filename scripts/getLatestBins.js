@@ -35,7 +35,7 @@ const isCI = require('is-ci');
     console.log('* getting latest Obs Websocket');
     console.log('** getting latest Obs Websocket release');
     let releaseObsWebsocket = await octokit.request('GET /repos/{owner}/{repo}/releases/latest', {
-      owner: 'Palakis',
+      owner: 'obsproject',
       repo: 'obs-websocket'
     });
     console.log('** getting latest Obs Websocket release zip url');
@@ -47,6 +47,10 @@ const isCI = require('is-ci');
     console.log('** latest Obs Websocket release OK!');
     console.log('* getting latest Obs Replay');
     console.log('** getting latest Obs Replay release');
+    let latestReleaseTagObsReplay = await octokit.request('GET /repos/{owner}/{repo}/releases/latest', {
+      owner: 'exeldro',
+      repo: 'obs-replay-source'
+    });
     let releaseObsReplay = await octokit.request('GET /repos/{owner}/{repo}/actions/artifacts', {
       owner: 'exeldro',
       repo: 'obs-replay-source'
@@ -69,6 +73,13 @@ const isCI = require('is-ci');
     await fs.unlink(path.join(__dirname, './latest-obs-websocket.zip'));
     await fs.unlink(path.join(__dirname, './latest-obs-replay.zip'));
     console.log('* Cleaning files OK!');
+    console.log('-------------------------------------------------------');
+    console.log('-------------------------------------------------------');
+    console.log('          Obs : v' + releaseObs.data.tag_name);
+    console.log('          Obs websocket : v' + releaseObsWebsocket.data.tag_name);
+    console.log('          Obs replay source : v' + latestReleaseTagObsReplay.data.tag_name);
+    console.log('-------------------------------------------------------');
+    console.log('-------------------------------------------------------');
   } catch (error) {
     console.error(error);
     process.exit(1);

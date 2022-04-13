@@ -1,5 +1,5 @@
 import { Component } from "react";
-import OBSWebSocket from 'obs-websocket-js';
+import OBSWebSocket, { EventSubscription } from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
 import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSVideoInput } from "../Models";
@@ -60,6 +60,15 @@ type ObsRemoteState = {
   editCamera: (camera: CameraHardware) => Promise<void>;
   removeCamera: (camera: CameraHardware) => Promise<void>;
   getAvailableCameras: () => Promise<OBSVideoInput[]>;
+  getAudioSources: () => Promise<any[]>;
+  startListenerVolumeter: (listenerFunc: (args_0: { inputs: any; }) => void) => void;
+  stopListenerVolumeter: () => void;
+  startListenerMutedState: (listenerFunc: (args_0: { inputName: string; inputMuted: boolean; }) => void) => void;
+  stopListenerMutedState: () => void;
+  startListenerVolumeChanged: (listenerFunc: (args_0: { inputName: string; inputVolumeMul: number; inputVolumeDb: number; }) => void) => void;
+  stopListenerVolumeChanged: () => void;
+  getVolumeFromInput: (inputName: string) => Promise<number>;
+  getMuteStateFromInput: (inputName: string) => Promise<boolean>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -105,6 +114,15 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       removeCamera: this.removeCamera.bind(this),
       getAvailableCameras: this.getAvailableCameras.bind(this),
       // resetSponosorScene: this.resetSponosorScene.bind(this),
+      getAudioSources: this.getAudioSources.bind(this),
+      startListenerVolumeter: this.startListenerVolumeter.bind(this),
+      stopListenerVolumeter: this.stopListenerVolumeter.bind(this),
+      startListenerMutedState: this.startListenerMutedState.bind(this),
+      stopListenerMutedState: this.stopListenerMutedState.bind(this),
+      startListenerVolumeChanged: this.startListenerVolumeChanged.bind(this),
+      stopListenerVolumeChanged: this.stopListenerVolumeChanged.bind(this),
+      getVolumeFromInput: this.getVolumeFromInput.bind(this),
+      getMuteStateFromInput: this.getMuteStateFromInput.bind(this),
     };
 
     // obsWs.on('StreamStarted', async () => {
@@ -433,7 +451,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     try {
       await this.setState({ connectingObs: true });
       // await obsWs.connect({ address: 'localhost:4444' });
-      await obsWs.connect('ws://127.0.0.1:4444', 'IxqGV59RRNzMyQNo');
+      await obsWs.connect('ws://127.0.0.1:4444', 'IxqGV59RRNzMyQNo', { 
+        eventSubscriptions: EventSubscription.All | EventSubscription.InputVolumeMeters,
+      });
       notification['success']({
         message: 'Connecté à OBS',
         // description: '',
@@ -454,11 +474,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   getScenes = async (): Promise<void> => {
     try {
       let scenesData = await obsWs.call('GetSceneList');
-      const scenesDataState = scenesData.scenes.filter(item => {
+      const scenesDataState = scenesData.scenes.filter((item: any) => {
         const itemGrbg: {sceneIndex: number, sceneName: string} = item as {sceneIndex: number, sceneName: string};
         return !itemGrbg.sceneName.startsWith('*');
         // return !item!.name.startsWith('*');
-      });      
+      });
       await this.changeActiveScene(scenesData.currentProgramSceneName as SceneName);
       await this.setState({ scenes: { currentScene: scenesData.currentProgramSceneName as SceneName, scenes: scenesDataState } });
     } catch (error) {
@@ -1161,6 +1181,48 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   goLive = async (): Promise<void> => {
     await this.setState({ live: !this.state.live });
   }
+
+  getAudioSources = async (): Promise<any[]> => {
+    let audioSources = await obsWs.call('GetSceneItemList', {sceneName: SceneName.Soundboard});
+    // console.log(await obsWs.call('GetSceneItemList', {sceneName: SceneName.Live}))
+    // console.log(await obsWs.call('GetInputList', {inputKind: 'wasapi_output_capture'}))
+    // console.log(audioSources);
+    return audioSources.sceneItems.filter((source: any) => source && source.inputKind === 'audio');
+  }
+
+  startListenerVolumeter = (listenerFunc: (args_0: { inputs: any; }) => void): void => {
+    obsWs.addListener("InputVolumeMeters", listenerFunc);
+  }
+
+  stopListenerVolumeter = (): void => {
+    obsWs.removeAllListeners("InputVolumeMeters");
+  }
+
+  startListenerMutedState = (listenerFunc: (args_0: { inputName: string; inputMuted: boolean; }) => void): void => {
+    obsWs.addListener("InputMuteStateChanged", listenerFunc);
+  }
+
+  stopListenerMutedState = (): void => {
+    obsWs.removeAllListeners("InputMuteStateChanged");
+  } 
+
+  startListenerVolumeChanged = (listenerFunc: (args_0: { inputName: string; inputVolumeMul: number; inputVolumeDb: number; }) => void): void => {
+    obsWs.addListener("InputVolumeChanged", listenerFunc);
+  }
+
+  stopListenerVolumeChanged = (): void => {
+    obsWs.removeAllListeners("InputVolumeChanged");
+  }
+
+  getVolumeFromInput = async (inputName: string): Promise<number> => {
+    const vol = await obsWs.call('GetInputVolume', { inputName });
+    return vol.inputVolumeDb;
+  }
+
+  getMuteStateFromInput = async (inputName: string): Promise<boolean> => {
+    const vol = await obsWs.call('GetInputMute', { inputName });
+    return vol.inputMuted;
+  } 
 
   render() {
     return this.props.children(this.state);

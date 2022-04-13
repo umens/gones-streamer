@@ -16,6 +16,8 @@ import { SponsorForm, SponsorFormValues } from "./SponsorForm/SponsorForm";
 import { StatsTinyChart } from "./StatsTinyChart/StatsTinyChart";
 import { CameraControl } from "./CameraControl/CameraControl";
 import { CameraForm, CameraFormValues } from "./CameraForm/CameraForm";
+import { AudioVuMeters } from "./AudioVuMeters/AudioVuMeters";
+import { VuMeter } from "./VuMeter/VuMeter";
 
-export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, StatsTinyChart, CameraControl, CameraForm };
+export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, StatsTinyChart, CameraControl, CameraForm, AudioVuMeters, VuMeter };
 export type { IObsRemote, SponsorFormValues, CameraFormValues };

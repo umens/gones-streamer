@@ -3,7 +3,6 @@ import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Drop
 import { GameEvent, SceneName, StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, StatsTinyChart } from "../../Components";
-// import ReactDropzone from "react-dropzone";
 import './Cockpit.css';
 import { FormInstance } from "antd/lib/form";
 import prettyBytes from 'pretty-bytes';

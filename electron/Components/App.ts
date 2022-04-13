@@ -34,7 +34,7 @@ export default class Main {
   constructor() {
     this.log = ElectronLog.scope('Main');    
     autoUpdater.logger = ElectronLog.scope('Auto Updater');
-    const extraResources = (app.isPackaged) ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
+    const extraResources = app.isPackaged ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
     this.paths = {
       binFolder: join(extraResources, '/bin'),
       appFolder: join(extraResources, '/appDatas'),

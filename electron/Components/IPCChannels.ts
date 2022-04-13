@@ -1,4 +1,4 @@
-import { IpcChannelInterface, SystemInfoChannel, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel, CamerasDataChannel } from "./IPC";
+import { IpcChannelInterface, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel, CamerasDataChannel } from "./IPC";
 import { ipcMain, WebContents } from "electron";
 import ElectronLog from 'electron-log';
 import { PathsType } from "../../src/Models";

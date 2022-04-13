@@ -127,17 +127,17 @@ class ScoreTable extends React.Component<ScoreTableProps, ScoreTableState> {
         
         <Row gutter={[16, 0]}>
           <Col span={6}>
-            <Button key={`td-${(this.props.isHomeTeam) ? 'home': 'away'}`} ghost={!this.props.isHomeTeam} onClick={this.handleMenuClick(ScoreType.TOUCHDOWN)} type="primary" block>Touchdown</Button>
+            <Button key={`td-${(this.props.isHomeTeam) ? 'home': 'away'}`} ghost={!this.props.isHomeTeam} onClick={this.handleMenuClick(ScoreType.TOUCHDOWN)} type="primary" block>TD</Button>
           </Col>
           <Col span={6}>
               <Button key={`safety-${(this.props.isHomeTeam) ? 'home': 'away'}`} ghost={!this.props.isHomeTeam} onClick={this.handleMenuClick(ScoreType.SAFETY)} type="primary" block>Safety</Button>
           </Col>
           <Col span={6}>
-              <Button key={`fg-${(this.props.isHomeTeam) ? 'home': 'away'}`} ghost={!this.props.isHomeTeam} type="primary" onClick={this.handleMenuClick(ScoreType.FIELDGOAL)} block>Field Goal</Button>
+              <Button key={`fg-${(this.props.isHomeTeam) ? 'home': 'away'}`} ghost={!this.props.isHomeTeam} type="primary" onClick={this.handleMenuClick(ScoreType.FIELDGOAL)} block>FG</Button>
           </Col>
           <Col span={6}>
             <Dropdown overlay={menu}>
-              <Button key={`extra-${(this.props.isHomeTeam) ? 'home': 'away'}`} ghost={!this.props.isHomeTeam} type="primary" block>Extra Point <DownOutlined /></Button>
+              <Button key={`extra-${(this.props.isHomeTeam) ? 'home': 'away'}`} ghost={!this.props.isHomeTeam} type="primary" block>Extra <DownOutlined /></Button>
             </Dropdown>
           </Col>
         </Row>
