@@ -219,7 +219,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                     </div>
                   </div>
                 </Col>
-                <Col span={8}>
+                <Col span={3}>
                   <Descriptions size="small" column={1}>
                     <Descriptions.Item label="Compétition">
                       <Editable
@@ -243,6 +243,22 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                     </Descriptions.Item>
                   </Descriptions>
                 </Col>
+                {/* <Col span={9}> */}
+                  {/* <Card bordered={false} title="Preview" loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} extra={this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }>
+                    <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
+                  </Card> */}
+                  {/* <Descriptions size="small" column={1}>
+                  <Descriptions.Item label={<>Preview  { this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }</>}>
+                    <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
+                  </Descriptions.Item>
+                  </Descriptions> */}
+                  {/* <div className={'ant-statistic'}>
+                    <div className={'ant-statistic-title'}>Preview { this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }</div>
+                    <div className={'ant-statistic-content'} style={{ padding: 25 }} >
+                      <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
+                    </div>
+                  </div> */}
+                {/* </Col> */}
               </Row>
             </PageHeader>
           </Col>

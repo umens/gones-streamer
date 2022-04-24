@@ -1,5 +1,5 @@
  import React, { SyntheticEvent } from "react";
-import { AudioVuMeters, IObsRemote } from "..";
+import { AudioSources, IObsRemote } from "..";
 import { List, Tag, Row, Col } from "antd";
 import { SyncOutlined, VideoCameraFilled } from '@ant-design/icons';
 import { SceneName } from "../../Models";
@@ -81,7 +81,7 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
             />
           </Col>
           <Col span={12}>
-            <AudioVuMeters ObsRemote={this.props.ObsRemote}/>
+            <AudioSources ObsRemote={this.props.ObsRemote}/>
           </Col>
         </Row>
       );
