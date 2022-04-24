@@ -4,23 +4,26 @@ import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import Webcam from "react-webcam";
 import FilterResults from 'react-filter-search';
 import { CameraForm, IObsRemote } from "../";
-import { CameraHardware } from '../../Models';
+import { CameraHardware, OBSInputProps } from '../../Models';
 import { Utilities } from "../../Utils";
+import { v4 as uuidv4 } from 'uuid';
 
 type CameraControlProps = typeof CameraControl.defaultProps & {
   ObsRemote: IObsRemote;
 };
 type CameraControlState = {
-  // visibleModal: boolean;
   visibleModal: boolean;
   initialValuesForm?: CameraHardware;
   loadingForm: boolean;
-  deleteLoading: boolean[];
+  deleteLoading: {[key: string]: boolean};
+  webcams: MediaDeviceInfo[];
+  availableCameras: OBSInputProps[];
 };
 class CameraControl extends React.Component<CameraControlProps, CameraControlState> {
 
   static defaultProps = {
     editable: false,
+
   };
 
   constructor(props: Readonly<CameraControlProps>) {
@@ -28,23 +31,32 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
     this.state = {
       visibleModal: false,
       loadingForm: false,
-      deleteLoading: [],
+      deleteLoading: {},
+      webcams: [],
+      availableCameras: [],
     };
+  }
+
+  componentDidMount = async () => {
+    const availableCameras = await this.props.ObsRemote.getAvailableCameras();
+    let webcams = await (await navigator.mediaDevices.enumerateDevices()).filter(device => device.kind === 'videoinput');
+    await this.setState({ webcams, availableCameras });
   }
   
   createCamera = async (values: CameraHardware): Promise<void> => {
     try {
       await this.setState({ loadingForm: true });
       values.title = values.title.charAt(0).toUpperCase() + values.title.slice(1).toLowerCase();
-      console.log(values)
-      if(this.props.ObsRemote.store?.CamerasHardware.some(({ deviceid }) => deviceid === values.deviceid)) {    
-        console.log('edit')    
-        await window.app.manageCamera({ action: 'edit', camera: values });
-        await this.props.ObsRemote.editCamera(values);
-      } else {
-        console.log('add')    
+      if(!values.uuid) {
+        // add action
+        values.uuid = uuidv4();
         await window.app.manageCamera({ action: 'add', camera: values });
         await this.props.ObsRemote.addCamera(values);
+      }
+      else {
+        //edit action
+        await window.app.manageCamera({ action: 'edit', camera: values });
+        await this.props.ObsRemote.editCamera(values);
       }
       await this.setState({ visibleModal: false, initialValuesForm: undefined, loadingForm: false });
       this.forceUpdate()
@@ -53,10 +65,9 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
     }
   }
   
-  editCamera = async (deviceId: MediaDeviceInfo["deviceId"]): Promise<void> => {
+  editCamera = async (id: string): Promise<void> => {
     try {
-      let camera: CameraHardware = {...this.props.ObsRemote.store!.CamerasHardware.find(p => p.deviceid === deviceId)!};
-      // camera.media = undefined;
+      let camera: CameraHardware = this.props.ObsRemote.store!.CamerasHardware.find(p => p.uuid === id)!;
       await this.setState({ initialValuesForm: camera });
       await this.setState({ visibleModal: true });
     } catch (error) {
@@ -64,21 +75,21 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
     }
   }
   
-  deleteCamera = async (deviceId: MediaDeviceInfo["deviceId"], id: number): Promise<void> => {
+  deleteCamera = async (id: string): Promise<void> => {
     try {
+      let camera: CameraHardware = this.props.ObsRemote.store!.CamerasHardware.find(p => p.uuid === id)!;
       await this.setState(({ deleteLoading }) => {
-        const newLoadings = [...deleteLoading];
+        const newLoadings = {...deleteLoading};
         newLoadings[id] = true;
   
         return {
           deleteLoading: newLoadings,
         };
       });
-      await window.app.manageCamera({ action: 'delete', id: deviceId });
-      const oldCam = { deviceId, title: 'remove', active: false };
-      await this.props.ObsRemote.removeCamera(oldCam);
+      await window.app.manageCamera({ action: 'delete', id });
+      await this.props.ObsRemote.removeCamera(camera);
       await this.setState(({ deleteLoading }) => {
-        const newLoadings = [...deleteLoading];
+        const newLoadings = {...deleteLoading};
         newLoadings[id] = false;
   
         return {
@@ -89,6 +100,14 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
     } catch (error) {
       
     }
+  }
+
+  getWebcamId = (id: string): string => {
+    if(this.state.availableCameras.length > 0 && this.state.webcams.length > 0) {
+      const name = this.state.availableCameras.find(item => item.itemValue === id)!.itemName;
+      return this.state.webcams.find(item => item['label'].includes(name))?.deviceId!;
+    }
+    return '';
   }
   
   render() {
@@ -101,7 +120,7 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
               data={this.props.ObsRemote.store?.CamerasHardware ? this.props.ObsRemote.store?.CamerasHardware : []}
               renderResults={(results: CameraHardware[]) => {
                 if(this.props.editable) {
-                  results.push({title: "add", active: false });
+                  results.push({title: "add", active: false, deviceid: '' });
                 }
                 return (
                   <List
@@ -135,95 +154,60 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
                                 </Button>
                               </Col>
                             </Row>
-                            <CameraForm
-                              ObsRemote={this.props.ObsRemote}
-                              inUseCameras={results.slice(0, -1).map(item => item.deviceid!)}
-                              loadingForm={this.state.loadingForm}
-                              initialValues={this.state.initialValuesForm}
-                              visible={this.state.visibleModal}
-                              onCreate={this.createCamera}
-                              onCancel={async () => {
-                                await this.setState({ visibleModal: false, initialValuesForm: undefined });
-                              }}
-                            />
+                            { this.state.visibleModal && 
+                              <CameraForm
+                                ObsRemote={this.props.ObsRemote}
+                                inUseCameras={results.slice(0, -1).map(item => item.deviceid) || []}
+                                availableCameras={this.state.availableCameras}
+                                webcams={this.state.webcams}
+                                loadingForm={this.state.loadingForm}
+                                initialValues={this.state.initialValuesForm}
+                                visible={this.state.visibleModal}
+                                onCreate={this.createCamera}
+                                onCancel={async () => {
+                                  await this.setState({ visibleModal: false, initialValuesForm: undefined });
+                                }}
+                              />
+                            }
                           </Card>
                         )
                       } else {
                         return (
                           <Card
                             cover={                        
-                              <Webcam audio={false} width={392.16} height={221} videoConstraints={{ deviceId: item.deviceid!.split(':')[1], width: { min: 392.16 }, height: { max: 221 } }} />
+                              <Webcam audio={false} width={392.16} height={221} videoConstraints={{ deviceId: this.getWebcamId(item.deviceid), width: { min: 392.16 }, height: { max: 221 } }} />
                             }
                             actions={
                               this.props.editable ?
-                                [
-                                  <Tooltip title="Editer">
-                                    <Button 
-                                      type="text" 
-                                      onClick={async (e) => { await this.editCamera(item.deviceid!)}}
-                                      icon={<EditOutlined />} 
-                                    />
-                                  </Tooltip>,
-                                  <Tooltip title="Supprimer">
-                                    <Button 
-                                      type="text" 
-                                      loading={this.state.deleteLoading[index]}
-                                      onClick={async (e) => { await this.deleteCamera(item.deviceid!, index)}}
-                                      icon={<DeleteOutlined />} 
-                                    />
-                                  </Tooltip>,
-                                ] :
+                                item.title === 'Field' ?
+                                  [
+                                    <Tooltip title="Editer">
+                                      <Button 
+                                        type="text" 
+                                        onClick={async (e) => { await this.editCamera(item.uuid!)}}
+                                        icon={<EditOutlined />} 
+                                      />
+                                    </Tooltip>,
+                                  ] :
+                                  [
+                                    <Tooltip title="Editer">
+                                      <Button 
+                                        type="text" 
+                                        onClick={async (e) => { await this.editCamera(item.uuid!)}}
+                                        icon={<EditOutlined />} 
+                                      />
+                                    </Tooltip>,
+                                    <Tooltip title="Supprimer">
+                                      <Button 
+                                        type="text" 
+                                        loading={this.state.deleteLoading[item.uuid!]}
+                                        onClick={async (e) => { await this.deleteCamera(item.uuid!!)}}
+                                        icon={<DeleteOutlined />} 
+                                      />
+                                    </Tooltip>,
+                                  ]
+                                :
                                 []
-                                // this.state.showingSponsor !== null ?
-                                //   this.state.showingSponsor !== item.uuid ?
-                                //     [
-                                //       <Tooltip title="Show small sponsor">
-                                //         <Button 
-                                //           type="text" 
-                                //           onClick={async (e) => { await this.showSponsor(item.uuid!, SponsorDisplayType.Small)}} 
-                                //           disabled={true} 
-                                //           icon={<EyeOutlined />} 
-                                //         />
-                                //       </Tooltip>,
-                                //       <Tooltip title="Show big sponsor">
-                                //         <Button 
-                                //           type="text" 
-                                //           onClick={async (e) => { await this.showSponsor(item.uuid!, SponsorDisplayType.Big)}} 
-                                //           disabled={true} 
-                                //           icon={<EyeOutlined />} 
-                                //         />
-                                //       </Tooltip>,
-                                //       <Tooltip title="Show fullscreen sponsor">
-                                //         <Button 
-                                //           type="text" 
-                                //           onClick={async (e) => { await this.showSponsor(item.uuid!, SponsorDisplayType.Fullscreen)}} 
-                                //           disabled={true} 
-                                //           icon={<EyeOutlined />} 
-                                //         />
-                                //       </Tooltip>
-                                //     ] 
-                                //     :
-                                //     [
-                                //       <Tooltip title="Hide sponsor">
-                                //         <Button 
-                                //           type="text" 
-                                //           onClick={async (e) => { await this.hideSponsor(item.uuid!)}}
-                                //           icon={<EyeInvisibleOutlined />} 
-                                //         />
-                                //       </Tooltip>
-                                //     ]
-                                // :
-                                // [
-                                //   <Tooltip title="Show small sponsor">
-                                //     <Button type="text" onClick={(e) => this.showSponsor(item.uuid!, SponsorDisplayType.Small)} disabled={false} icon={<EyeOutlined />} />
-                                //   </Tooltip>,
-                                //   <Tooltip title="Show big sponsor">
-                                //     <Button type="text" onClick={(e) => this.showSponsor(item.uuid!, SponsorDisplayType.Big)} disabled={false} icon={<EyeOutlined />} />
-                                //   </Tooltip>,
-                                //   <Tooltip title="Show fullscreen sponsor">
-                                //     <Button type="text" onClick={(e) => this.showSponsor(item.uuid!, SponsorDisplayType.Fullscreen)} disabled={false} icon={<EyeOutlined />} />
-                                //   </Tooltip>,
-                                // ]
                             }
                           >
                             <Card.Meta

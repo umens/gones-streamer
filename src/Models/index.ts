@@ -1,5 +1,5 @@
 import { IpcRequest } from "./IpcRequest";
-import { GameStatut, GameEvent, Quarter, Team, TeamPossession, Timeout, LiveSettings, StoreType, SceneName, ScoreType, FileUp, StreamingSport, StreamingService, GetDefaultConfig, CameraHardware, GameClock, AnimationType, Sponsor, Player, MediaType, SponsorDisplayType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, PathsType, StreamingStats, FPS, OBSVideoInput } from "./Models";
+import { GameStatut, GameEvent, Quarter, Team, TeamPossession, Timeout, LiveSettings, StoreType, SceneName, ScoreType, FileUp, StreamingSport, StreamingService, GetDefaultConfig, CameraHardware, AudioHardware, GameClock, AnimationType, Sponsor, Player, MediaType, SponsorDisplayType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, PathsType, StreamingStats, FPS, OBSInputProps, AudioType, TextsSettings, IVolmeter } from "./Models";
 
-export type { IpcRequest, GameStatut, GameEvent, Team, LiveSettings, StoreType, FileUp, CameraHardware, GameClock, Sponsor, Player, PathsType, StreamingStats, OBSVideoInput };
-export { GetDefaultConfig, Quarter, TeamPossession, Timeout, SceneName, ScoreType, StreamingSport, StreamingService, AnimationType, MediaType, SponsorDisplayType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, FPS };
+export type { IpcRequest, GameStatut, GameEvent, Team, LiveSettings, StoreType, FileUp, CameraHardware, AudioHardware, GameClock, Sponsor, Player, PathsType, StreamingStats, OBSInputProps, TextsSettings, IVolmeter };
+export { GetDefaultConfig, Quarter, TeamPossession, Timeout, SceneName, ScoreType, StreamingSport, StreamingService, AnimationType, MediaType, SponsorDisplayType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, FPS, AudioType };

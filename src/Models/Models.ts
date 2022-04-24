@@ -3,11 +3,12 @@
 /**
  * Types
  */
-export type OBSVideoInput = {
+export type OBSInputProps = {
   itemEnabled: boolean;
   itemName: string;
   itemValue: string;
 }
+
 export type PathsType = {
   binFolder: string;
   appFolder: string;
@@ -20,9 +21,18 @@ export type StoreType = {
   LiveSettings: LiveSettings;
   BackgroundImage: string | null;
   CamerasHardware: CameraHardware[];
+  AudioHardware: AudioHardware[];
   Sponsors: Sponsor[];
   Players: Player[];
 };
+
+export type TextsSettings = {
+  font: string;
+  homeTeamColor: string;
+  awayTeamColor: string;
+  scoreColor: string;
+  journeyColor: string;
+}
 
 export type GameStatut = {
   AwayTeam: Team;
@@ -63,9 +73,17 @@ export type FileUp = {
 }
 
 export type CameraHardware = {
+  uuid?: string;
   title: string;
   active: boolean;
-  deviceid?: MediaDeviceInfo["deviceId"];
+  deviceid: MediaDeviceInfo["deviceId"];
+}
+
+export type AudioHardware = {
+  uuid?: string;
+  title: string;
+  deviceid: MediaDeviceInfo["deviceId"];
+  type: AudioType;
 }
 
 export type GameClock = {
@@ -201,6 +219,17 @@ export enum FPS {
   fast = 1000/60, // var 60fps = 1000/60; // 16
 }
 
+export enum AudioType {
+  Input = 'wasapi_input_capture',
+  Output = 'wasapi_output_capture',
+}
+
+export interface IVolmeter {
+  magnitude: number[];
+  peak: number[];
+  inputPeak: number[];
+}
+
 /** 
  * Functions
 */
@@ -252,6 +281,7 @@ export function GetDefaultConfig(): StoreType {
       deviceid: 'OBS Virtual Camera:'
     }
   ];
+  const AudioHardware: AudioHardware[] = [];
   const Sponsors: Sponsor[] = [];
   const Players: Player[] = [];
   const BackgroundImage = '../../../../appDatas/bg.jpg';
@@ -260,6 +290,7 @@ export function GetDefaultConfig(): StoreType {
     LiveSettings,
     BackgroundImage,
     CamerasHardware,
+    AudioHardware,
     Sponsors,
     Players,
   };

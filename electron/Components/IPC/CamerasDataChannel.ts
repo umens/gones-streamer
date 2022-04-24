@@ -37,8 +37,9 @@ export class CamerasDataChannel implements IpcChannelInterface {
             if(request.params.id) {
               const id = request.params.id as string;
               cameras = this.store.get('CamerasHardware');
-              const cameraIndex = cameras.findIndex((obj => obj.deviceid === id));
-              cameras.splice(cameraIndex, 1);
+              cameras = cameras.filter(function(item) {
+                return item.uuid !== id;
+              });
               this.store.set('CamerasHardware', cameras);
               // event.sender.send(request.responseChannel, cameras);
             }            
@@ -47,10 +48,7 @@ export class CamerasDataChannel implements IpcChannelInterface {
             if(request.params.camera) {
               let camera = request.params.camera as CameraHardware;
               cameras = this.store.get('CamerasHardware');
-              const cameraIndex = cameras.findIndex((obj => obj.deviceid === camera.deviceid));
-              console.log(request.params.camera)
-              console.log(cameras)
-              console.log(cameraIndex)
+              const cameraIndex = cameras.findIndex((obj => obj.uuid === camera.uuid));
               // update sponsor
               cameras[cameraIndex].title = camera.title;
               cameras[cameraIndex].deviceid = camera.deviceid;

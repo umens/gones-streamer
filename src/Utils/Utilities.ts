@@ -58,4 +58,17 @@ export class Utilities {
     var L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
     return (L > 0.179) ? darkColor : lightColor;
   };
+
+  HEXToVBColor = (rrggbb: string): number => {
+    if(rrggbb.includes("#"))
+      rrggbb = rrggbb.replace('#', '');
+    var bbggrr = rrggbb.substr(4, 2) + rrggbb.substr(2, 2) + rrggbb.substr(0, 2);
+    return parseInt(bbggrr, 16);
+  }
+
+  VBColorToHEX = (i: number): string => {
+    var bbggrr =  ("000000" + i.toString(16)).slice(-6);
+    var rrggbb = bbggrr.substr(4, 2) + bbggrr.substr(2, 2) + bbggrr.substr(0, 2);
+    return "#" + rrggbb;
+  }
 }

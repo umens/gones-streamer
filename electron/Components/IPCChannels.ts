@@ -1,4 +1,4 @@
-import { IpcChannelInterface, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel, CamerasDataChannel } from "./IPC";
+import { IpcChannelInterface, StoredConfigChannel, ObsSettingsChannel, FileUploadChannel, ScoreboardInfoChannel, SponsorsDataChannel, PlayersDataChannel, PathsDataChannel, CamerasDataChannel, AudioDataChannel, NodeDataChannel } from "./IPC";
 import { ipcMain, WebContents } from "electron";
 import ElectronLog from 'electron-log';
 import { PathsType } from "../../src/Models";
@@ -24,6 +24,8 @@ export default class IPCChannels {
       new PlayersDataChannel(this.paths),
       new PathsDataChannel(this.paths),
       new CamerasDataChannel(),
+      new AudioDataChannel(),
+      new NodeDataChannel(),
     ])
   }
 
@@ -35,7 +37,7 @@ export default class IPCChannels {
           try {
             if(channel.getName() === 'scoreboard-info') {
               return await channel.handle(event, request, this.scoreboardWindow);
-            } else {            
+            } else {
               return await channel.handle(event, request, this.mainWindow);
             }
           } catch (error) {

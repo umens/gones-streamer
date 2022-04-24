@@ -2,7 +2,7 @@ import { Component } from "react";
 import OBSWebSocket, { EventSubscription } from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSVideoInput } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSInputProps, AudioHardware, AudioType, TextsSettings } from "../Models";
 import { Utilities } from "../Utils";
 import moment from "moment";
 
@@ -59,7 +59,7 @@ type ObsRemoteState = {
   addCamera: (camera: CameraHardware) => Promise<void>;
   editCamera: (camera: CameraHardware) => Promise<void>;
   removeCamera: (camera: CameraHardware) => Promise<void>;
-  getAvailableCameras: () => Promise<OBSVideoInput[]>;
+  getAvailableCameras: () => Promise<OBSInputProps[]>;
   getAudioSources: () => Promise<any[]>;
   startListenerVolumeter: (listenerFunc: (args_0: { inputs: any; }) => void) => void;
   stopListenerVolumeter: () => void;
@@ -69,6 +69,14 @@ type ObsRemoteState = {
   stopListenerVolumeChanged: () => void;
   getVolumeFromInput: (inputName: string) => Promise<number>;
   getMuteStateFromInput: (inputName: string) => Promise<boolean>;
+  getAvailableAudios: () => Promise<{ type: AudioType, devices: OBSInputProps[] }[]>;
+  addAudio: (audio: AudioHardware) => Promise<void>;
+  editAudio: (audio: AudioHardware) => Promise<void>;
+  removeAudio: (audio: AudioHardware) => Promise<void>;
+  getTextParameters: () => Promise<TextsSettings>;
+  updateTextsSettings: (values: TextsSettings) => Promise<void>;
+  toggleMute: (inputName: string) => Promise<void>;
+  changeVolume: (volume: number, inputName: string) => Promise<void>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -123,6 +131,14 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       stopListenerVolumeChanged: this.stopListenerVolumeChanged.bind(this),
       getVolumeFromInput: this.getVolumeFromInput.bind(this),
       getMuteStateFromInput: this.getMuteStateFromInput.bind(this),
+      getAvailableAudios: this.getAvailableAudios.bind(this),
+      addAudio: this.addAudio.bind(this),
+      editAudio: this.editAudio.bind(this),
+      removeAudio: this.removeAudio.bind(this),
+      getTextParameters: this.getTextParameters.bind(this),
+      updateTextsSettings: this.updateTextsSettings.bind(this),
+      toggleMute: this.toggleMute.bind(this),
+      changeVolume: this.changeVolume.bind(this),
     };
 
     // obsWs.on('StreamStarted', async () => {
@@ -543,12 +559,15 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       
       const Sponsors = await window.app.manageSponsors({ action: 'get' });
       const Players = await window.app.managePlayers({ action: 'get' });
+      const CamerasHardware = await window.app.manageCamera({ action: 'get' });
+      const AudioHardware = await window.app.manageAudio({ action: 'get' });
 
       let store: StoreType = {
         GameStatut,
         LiveSettings,
         BackgroundImage: bgImg64,
-        CamerasHardware: defaultConfig.CamerasHardware,
+        CamerasHardware,
+        AudioHardware,
         Sponsors,
         Players,
       };
@@ -589,8 +608,10 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       let oldCam = CamerasHardware.find(item => item.active)!;
       const indexOldCam = CamerasHardware.findIndex(item => item.active)!;
       const sceneItemIdOldCam = await this.findIdFromSceneItemName(SceneName.Live, `Camera - ${oldCam.title}`);
-      oldCam.active = false;
-      CamerasHardware[indexOldCam] = oldCam;
+      if(oldCam.title !== 'Field') {
+        oldCam.active = false;
+        CamerasHardware[indexOldCam] = oldCam;
+      }
 
       let newCam = CamerasHardware.find(item => item.title === name)!;
       const indexNewCam = CamerasHardware.findIndex(item => item.title === name)!;
@@ -601,7 +622,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       store.CamerasHardware = CamerasHardware;
 
       await obsWs.call('SetSceneItemEnabled', { sceneItemId: sceneItemIdNewCam, sceneItemEnabled: true, sceneName: SceneName.Live });
-      await obsWs.call('SetSceneItemEnabled', { sceneItemId: sceneItemIdOldCam, sceneItemEnabled: false, sceneName: SceneName.Live });
+      if(oldCam.title !== 'Field') {
+        await obsWs.call('SetSceneItemEnabled', { sceneItemId: sceneItemIdOldCam, sceneItemEnabled: false, sceneName: SceneName.Live });
+      }
       await this.setState({ store });
     } catch (error) {
 
@@ -777,22 +800,19 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
 
-  /**
-   * @deprecated Waiting for obs-websocket to handle button click in plugin settings - https://github.com/Palakis/obs-websocket/issues/456
-   * temporary Fix : handling keydown event to save buffer then switch to Replay Scene
-   *
-   */
   startReplay = async () => {
     try {
       if(this.state.scenes?.currentScene !== SceneName.Replay) {
-        await obsWs.call('SaveReplayBuffer');
+        // console.log(await obsWs.call('GetSceneItemList', { sceneName: SceneName.Replay }));
+        // await obsWs.call('PressInputPropertiesButton', { inputName: 'Replay Video', propertyName: 'Load Replay' });
+        await obsWs.call('TriggerHotkeyByKeySequence', { keyId: 'OBS_KEY_F10' });
         await this.changeActiveScene(SceneName.Replay);
-        setTimeout(async () => {
-          await this.changeActiveScene(SceneName.Live);
-        }, this.state.store?.LiveSettings.buffer);
+        // setTimeout(async () => {
+        //   await this.changeActiveScene(SceneName.Live);
+        // }, this.state.store?.LiveSettings.buffer);
       }
     } catch (error) {
-      
+      console.log(error)
     }
   }
 
@@ -1108,26 +1128,14 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   addCamera = async (camera: CameraHardware): Promise<void> => {
     try {
       const cameraSettings = {
-        active: true,
-        deactivate_when_not_showing: false,
-        directory: "../../../../appDatas",
-        duration: await (await obsWs.call('GetInputSettings', { inputName: 'Replay Video' })).inputSettings.duration,
-        end_action: 0,
-        file_format: "%CCYY-%MM-%DD %hh.%mm.%ss",
-        last_video_device_id: camera.deviceid?.split('|')[0],
-        load_switch_scene: SceneName.Replay,
-        next_scene: SceneName.Live,
-        sound_trigger: false,
-        source: 'Camera - ' + camera.title,
-        use_custom_audio_device: false,
-        video_device_id: camera.deviceid?.split('|')[0],
-        visibility_action: 0
+        last_video_device_id: camera.deviceid,
+        video_device_id: camera.deviceid,
       }
-      const { sceneItemId } = await obsWs.call('CreateInput', { sceneName: SceneName.Live, inputName: 'Camera - ' + camera.title, inputKind: 'dshow_input_replay', inputSettings: cameraSettings, sceneItemEnabled: false });
-      await obsWs.call('SetSceneItemIndex', { sceneName: SceneName.Live, sceneItemId, sceneItemIndex: 4 });
+      await obsWs.call('CreateInput', { sceneName: SceneName.Live, inputName: 'Camera - ' + camera.title, inputKind: 'dshow_input', inputSettings: cameraSettings, sceneItemEnabled: camera.active });
       let store = this.state.store!;
       store.CamerasHardware.push(camera);
       await this.setState({ store });
+      await this.reorderLiveScene();
     } catch (error) {
       
     }
@@ -1138,14 +1146,19 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       let store = this.state.store!;
       // const camIndex = store.CamerasHardware.findIndex((cam) => cam.deviceId === camera.deviceId);
       // this.state.scenes?.scenes.
-      // await obsWs.send('DeleteSceneItem', { scene: SceneName.Live, item: { name: '', id: '' } });      
-      const cameraSettings = {
-        last_video_device_id: camera.deviceid?.split('|')[0],
+      // await obsWs.send('DeleteSceneItem', { scene: SceneName.Live, item: { name: '', id: '' } });
+      const cameraSettings = (camera.title === 'Field') ?
+      {
+        last_video_device_id: camera.deviceid,
         source: 'Camera - ' + camera.title,
-        video_device_id: camera.deviceid?.split('|')[0],
-      }
+        video_device_id: camera.deviceid,
+      } :
+      {
+        last_video_device_id: camera.deviceid,
+        video_device_id: camera.deviceid,
+      }; 
       await obsWs.call('SetInputSettings', { inputName: 'Camera - ' + camera.title, inputSettings: cameraSettings });
-      const camIndex = store.CamerasHardware.findIndex((cam) => cam.deviceid === camera.deviceid);
+      const camIndex = store.CamerasHardware.findIndex((cam) => cam.uuid === camera.uuid);
       store.CamerasHardware[camIndex] = camera;
       await this.setState({ store });
     } catch (error) {
@@ -1156,21 +1169,178 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   removeCamera = async (camera: CameraHardware): Promise<void> => {
     try {
       let store = this.state.store!;
-      await obsWs.call('RemoveInput', { inputName: 'Camera - ' + camera.title });
-      const camIndex = store.CamerasHardware.findIndex((cam) => cam.deviceid === camera.deviceid);
+      const { sceneItemId } = await obsWs.call('GetSceneItemId', { sceneName: SceneName.Live, sourceName: 'Camera - ' + camera.title });
+      await obsWs.call('RemoveSceneItem', { sceneName: SceneName.Live , sceneItemId });
+      const camIndex = store.CamerasHardware.findIndex((item) => item.uuid === camera.uuid);
       store.CamerasHardware.splice(camIndex, 1);
+      await this.setState({ store });
+      await this.reorderLiveScene();
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  getAvailableCameras = async (): Promise<OBSInputProps[]> => {
+    try {
+      const itemsIn = await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'Camera - Field', propertyName: 'video_device_id'})).propertyItems as OBSInputProps[]
+      return itemsIn;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  reorderLiveScene = async (): Promise<void> => {
+    let index = 0;
+    // soundboard
+    let sceneItem = await obsWs.call('GetSceneItemId', { sceneName: SceneName.Live, sourceName: SceneName.Soundboard });    
+    await obsWs.call('SetSceneItemIndex', { sceneName: SceneName.Live , sceneItemId: sceneItem.sceneItemId, sceneItemIndex: index }); 
+    index++;
+    // Cameras
+    if(this.state.store?.CamerasHardware) {
+      for (const camera of this.state.store?.CamerasHardware) {
+        sceneItem = await obsWs.call('GetSceneItemId', { sceneName: SceneName.Live, sourceName: 'Camera - ' + camera.title });
+        await obsWs.call('SetSceneItemIndex', { sceneName: SceneName.Live , sceneItemId: sceneItem.sceneItemId, sceneItemIndex: index });   
+        index++;
+      }
+    }
+    // player Highlight
+    sceneItem = await obsWs.call('GetSceneItemId', { sceneName: SceneName.Live, sourceName: 'Player Highlight' });
+    await obsWs.call('SetSceneItemIndex', { sceneName: SceneName.Live , sceneItemId: sceneItem.sceneItemId, sceneItemIndex: index });   
+    index++;
+    // Animations
+    sceneItem = await obsWs.call('GetSceneItemId', { sceneName: SceneName.Live, sourceName: 'Animations' });
+    await obsWs.call('SetSceneItemIndex', { sceneName: SceneName.Live , sceneItemId: sceneItem.sceneItemId, sceneItemIndex: index });   
+    index++;
+    // scoreboard
+    sceneItem = await obsWs.call('GetSceneItemId', { sceneName: SceneName.Live, sourceName: 'scoreboard' });
+    await obsWs.call('SetSceneItemIndex', { sceneName: SceneName.Live , sceneItemId: sceneItem.sceneItemId, sceneItemIndex: index });
+  }
+
+  addAudio = async (audio: AudioHardware): Promise<void> => {
+    try {
+      const audioSettings = {
+        active: true,
+        device_id: audio.deviceid,
+      }
+      await obsWs.call('CreateInput', { sceneName: SceneName.Soundboard, inputName: audio.title, inputKind: audio.type, inputSettings: audioSettings });
+      let store = this.state.store!;
+      store.AudioHardware.push(audio);
+      await this.setState({ store });
+    } catch (error) {
+      
+    }
+  }
+
+  editAudio = async (audio: AudioHardware): Promise<void> => {
+    try {
+      let store = this.state.store!;    
+      const cameraSettings = {
+        device_id: audio.deviceid,
+      }
+      await obsWs.call('SetInputSettings', { inputName: audio.title, inputSettings: cameraSettings });
+      const audioIndex = store.AudioHardware.findIndex((item) => item.uuid === audio.uuid);
+      store.AudioHardware[audioIndex] = audio;
+      await this.setState({ store });
+    } catch (error) {
+      
+    }
+  }
+
+  removeAudio = async (audio: AudioHardware): Promise<void> => {
+    try {
+      let store = this.state.store!;
+      const { sceneItemId } = await obsWs.call('GetSceneItemId', { sceneName: SceneName.Soundboard, sourceName: audio.title });
+      await obsWs.call('RemoveSceneItem', { sceneName: SceneName.Soundboard , sceneItemId });
+      const audioIndex = store.AudioHardware.findIndex((item) => item.uuid === audio.uuid);
+      store.AudioHardware.splice(audioIndex, 1);
       await this.setState({ store });
     } catch (error) {
       console.log(error)
     }
   }
 
-  getAvailableCameras = async (): Promise<OBSVideoInput[]> => {
+  getAvailableAudios = async (): Promise<{ type: AudioType, devices: OBSInputProps[] }[]> => {
     try {
-      return await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'Camera - Field', propertyName: 'video_device_id'})).propertyItems as OBSVideoInput[];
+      const { sceneItemId: sceneItemIdIn } = await obsWs.call('CreateInput', { sceneName: SceneName.Soundboard, inputName: 'tempInput', inputKind: AudioType.Input, sceneItemEnabled: false });
+      const itemsIn = await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'tempInput', propertyName: 'device_id'})).propertyItems as OBSInputProps[]
+      await obsWs.call('RemoveSceneItem', { sceneName: SceneName.Soundboard , sceneItemId: sceneItemIdIn });
+
+      const { sceneItemId: sceneItemIdOut } = await obsWs.call('CreateInput', { sceneName: SceneName.Soundboard, inputName: 'tempOutput', inputKind: AudioType.Output, sceneItemEnabled: false });
+      const itemOut = await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'tempOutput', propertyName: 'device_id'})).propertyItems as OBSInputProps[]
+      await obsWs.call('RemoveSceneItem', { sceneName: SceneName.Soundboard , sceneItemId: sceneItemIdOut });
+      return [{ type: AudioType.Input, devices: itemsIn }, { type: AudioType.Output, devices: itemOut }];
+
     } catch (error) {
       throw error;
     }
+  }
+  
+  getTextParameters = async (): Promise<TextsSettings> => {
+    const journeyColor = await (await obsWs.call('GetInputSettings', { inputName: 'Coming Soon Text' })).inputSettings.color as number;
+    let font = (await (await obsWs.call('GetInputSettings', { inputName: 'Coming Soon Text' })).inputSettings.font as any).face;
+
+    // home color
+    const homeColor = await (await obsWs.call('GetInputSettings', { inputName: 'Home Name Text' })).inputSettings.color as number;
+    // away color
+    const awayColor = await (await obsWs.call('GetInputSettings', { inputName: 'Away Name Text' })).inputSettings.color as number;
+    // score color
+    const scoreColor = await (await obsWs.call('GetInputSettings', { inputName: 'Home Score Text' })).inputSettings.color as number;
+
+    // await obsWs.call('SetInputSettings', { inputName: 'Home Name Text', inputSettings: { color: this.HEXToVBColor('#2aff5f')} });
+    return {
+      font: font,
+      homeTeamColor: homeColor ? this.state.Utilitites!.VBColorToHEX(homeColor) : "#000000",
+      awayTeamColor: awayColor ? this.state.Utilitites!.VBColorToHEX(awayColor) : "#000000",
+      journeyColor: journeyColor ? this.state.Utilitites!.VBColorToHEX(journeyColor) : "#000000",
+      scoreColor: scoreColor ? this.state.Utilitites!.VBColorToHEX(scoreColor) : "#000000",
+    };
+  }
+
+  
+  updateTextsSettings = async (values: TextsSettings): Promise<void> => {
+    // titles
+    let font = await (await obsWs.call('GetInputSettings', { inputName: 'Coming Soon Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Coming Soon Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.journeyColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Week Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Week Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.journeyColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Halftime Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Halftime Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.journeyColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Ending Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Ending Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.journeyColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Replay Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Replay Text', inputSettings: { font } });
+
+    // home team
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Home Name Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Home Name Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.homeTeamColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Home City Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Home City Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.homeTeamColor), font } });
+
+    // away team
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Away Name Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Away Name Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.awayTeamColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Away City Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Away City Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.awayTeamColor), font } });
+
+    // score
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Score Separator Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Score Separator Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.scoreColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Away Score Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Away Score Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.scoreColor), font } });
+    font = await (await obsWs.call('GetInputSettings', { inputName: 'Home Score Text' })).inputSettings.font as any;
+    font.face = values.font;
+    await obsWs.call('SetInputSettings', { inputName: 'Home Score Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.scoreColor), font } });
   }
 
   disconnectObs = (): void => {
@@ -1215,13 +1385,42 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   }
 
   getVolumeFromInput = async (inputName: string): Promise<number> => {
-    const vol = await obsWs.call('GetInputVolume', { inputName });
-    return vol.inputVolumeDb;
+    try {
+      const vol = await obsWs.call('GetInputVolume', { inputName });
+      return vol.inputVolumeDb;
+    } catch (error) {
+      console.log(error);
+      throw error;      
+    }      
   }
 
   getMuteStateFromInput = async (inputName: string): Promise<boolean> => {
-    const vol = await obsWs.call('GetInputMute', { inputName });
-    return vol.inputMuted;
+    try {
+      const vol = await obsWs.call('GetInputMute', { inputName });
+      return vol.inputMuted;
+    } catch (error) {
+      console.log(error);
+      throw error;      
+    }      
+  } 
+
+  toggleMute = async (inputName: string): Promise<void> => {
+    try {
+      await obsWs.call('ToggleInputMute', { inputName });
+    } catch (error) {
+      console.log(error);
+      throw error;      
+    }
+  }
+
+  
+  changeVolume = async (inputVolumeDb: number, inputName: string): Promise<void> => {    
+    try {
+      await obsWs.call('SetInputVolume', { inputName, inputVolumeDb });
+    } catch (error) {
+      console.log(error);
+      throw error;      
+    }
   } 
 
   render() {

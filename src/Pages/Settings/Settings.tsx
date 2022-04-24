@@ -1,5 +1,5 @@
 import React from "react";
-import { CameraControl, IObsRemote, PlayerControl, SponsorControl } from "../../Components";
+import { CameraControl, IObsRemote, PlayerControl, SponsorControl, AudioControl, BackgroundTextControl } from "../../Components";
 import { Row, Col, message, Form, Input, Button, Select, Card } from "antd";
 import ReactDropzone from "react-dropzone";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -122,8 +122,16 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
         tab: 'Image d\'arrière plan',
       },
       {
+        key: 'colorsText',
+        tab: 'Paramètres des textes de présentation',
+      },
+      {
         key: 'cameras',
         tab: 'Cameras',
+      },
+      {
+        key: 'audio',
+        tab: 'Audio',
       },
       {
         key: 'playersAdmin',
@@ -135,7 +143,8 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
       },
     ];
 
-    const contentList: { [key: string]: JSX.Element } = {
+    const contentList: { [key: string]: JSX.Element } = 
+    {
       background: <ReactDropzone noDrag={true} /*onDrop={this.onChangeHandler}*/>
         {({getRootProps, getInputProps}: any) => (
           <section className="container">
@@ -152,7 +161,9 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
           </section>
         )}
       </ReactDropzone>,
+      colorsText: <BackgroundTextControl ObsRemote={this.props.ObsRemote} />,
       cameras: <CameraControl ObsRemote={this.props.ObsRemote} editable={true} />,
+      audio: <AudioControl ObsRemote={this.props.ObsRemote} editable={true} />,
       // <Alert
       //   message="Feature in progress"
       //   description="Gerez et configurez les caméras disponible pour la retransmission."

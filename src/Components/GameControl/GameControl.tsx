@@ -1,6 +1,6 @@
 import React from "react";
 import { IObsRemote, ScoreTable } from "../";
-import { Button, Row, Col, Radio, Tooltip } from "antd";
+import { Button, Row, Col, Radio, Popconfirm } from "antd";
 import { EyeOutlined, EyeInvisibleOutlined, FlagOutlined, PlayCircleOutlined, PauseCircleOutlined, PauseOutlined, CaretRightOutlined, SyncOutlined } from '@ant-design/icons';
 import './GameControl.css';
 import { Quarter, SceneName } from "../../Models";
@@ -18,15 +18,6 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
     this.state = {
       loadingsclock: [],
     };
-  }
-
-  componentDidMount = () => {
-    // TODO: to start highlight a better way wait for https://github.com/Palakis/obs-websocket/issues/427
-    document.addEventListener("keydown", async (e) => await this.startReplay(e), false);
-  }
-  componentWillUnmount = () => {
-    // TODO: to start highlight a better way wait for https://github.com/Palakis/obs-websocket/issues/427
-    document.removeEventListener("keydown", async (e) => await this.startReplay(e), false);
   }
 
   changeQuarter = async (e: any) => {
@@ -52,16 +43,10 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
       
     }
   };
-
-  // TODO: Ask for confirmation with popup
-  // TODO: to start highlight a better way wait for https://github.com/Palakis/obs-websocket/issues/427
-  startReplay = async (e: any) => {
+  
+  startReplay = (e: any) => {
     try {
-      if(e.code === "F10") {
-        if(this.props.ObsRemote.scenes?.currentScene !== SceneName.Replay) {
-          await this.props.ObsRemote.changeActiveScene(SceneName.Replay);
-        }
-      }
+      this.props.ObsRemote.startReplay();
     } catch (error) {
       
     }
@@ -139,20 +124,38 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
     }
   };
 
-  // Clock management
+  replayButton = () => {
+    switch (this.props.ObsRemote.scenes?.currentScene) {
+      case SceneName.Replay:
+        return  <Button onClick={async () => await this.props.ObsRemote.changeActiveScene(SceneName.Live)} type="primary" block>
+                  <PauseCircleOutlined /> Stop Replay
+                </Button>;
+        
+      case SceneName.Live:
+        return  <Popconfirm
+                  placement="bottomRight"
+                  title='Do you Want to start the replay?'
+                  onConfirm={this.startReplay}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button block>
+                    <PlayCircleOutlined /> Start Replay
+                  </Button>
+                </Popconfirm>
+    
+      default:
+        return  <Button block disabled>
+                  <PlayCircleOutlined /> Start Replay
+                </Button>
+    }
+  }
 
   
   render() {
-    // const menu = (
-    //   <Menu>
-    //     <Menu.Item onClick={this.handleMenuClick(ScoreType.PAT)}>PAT</Menu.Item>
-    //     <Menu.Item onClick={this.handleMenuClick(ScoreType.EXTRAPOINT)}>2 points</Menu.Item>
-    //   </Menu>
-    // );
 
     const flagButton = this.props.ObsRemote.store?.GameStatut.Options.flag ? <Button style={{ backgroundColor: '#ffe066', color: '#000000', borderColor: '#fab005', }} onClick={this.toggleFlagVisibility} type="primary" block><FlagOutlined /> Flag</Button> : <Button onClick={this.toggleFlagVisibility} block><FlagOutlined /> Flag</Button>;
-    // TODO: to start highlight a better way wait for https://github.com/Palakis/obs-websocket/issues/427
-    const replayButton = this.props.ObsRemote.scenes?.currentScene === SceneName.Replay ? <Button onClick={async () => await this.props.ObsRemote.changeActiveScene(SceneName.Live)} type="primary" block><PauseCircleOutlined /> Stop Replay</Button> : <Tooltip title="Appuyer sur F10 pour lancer le ralenti"><Button disabled onClick={this.startReplay} block><PlayCircleOutlined /> Start Replay</Button></Tooltip>;
+    const replayButton = this.replayButton();
     const scoreboardButton = this.props.ObsRemote.store?.GameStatut.Options.showScoreboard ? <Button onClick={this.toggleScoreboardVisibility} type="primary" block><EyeOutlined /> Scoreboard</Button> : <Button onClick={this.toggleScoreboardVisibility} block><EyeInvisibleOutlined /> Scoreboard</Button>;
 
     const options = [

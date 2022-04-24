@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ipcRenderer, contextBridge } from 'electron';
-import { CameraHardware, FileUp, GameStatut, LiveSettings, PathsType, Player, Sponsor, StoreType } from '../src/Models';
+import { AudioHardware, CameraHardware, FileUp, GameStatut, LiveSettings, PathsType, Player, Sponsor, StoreType } from '../src/Models';
 import { dialog } from '@electron/remote'
 import { LocalFileData, constructFileFromLocalFileData } from 'get-file-object-from-local-path';
 
@@ -99,6 +99,15 @@ contextBridge.exposeInMainWorld('app', {
     }
   },
   
+  getFonts: async (): Promise<string[]> => {
+    try {
+      return await ipcRenderer.invoke('node-data', { params: { action: 'get-font' } });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+  
   manageSponsors: async (params: { action: string, sponsor?: Sponsor, id?: string }): Promise<Sponsor[]> => {
     try {
       return await ipcRenderer.invoke('sponsors-data', { params });
@@ -126,9 +135,18 @@ contextBridge.exposeInMainWorld('app', {
     }
   },
 
-  manageCamera: async (params: { action: string, camera?: CameraHardware, id?: string }): Promise<CameraHardware> => {
+  manageCamera: async (params: { action: string, camera?: CameraHardware, id?: string }): Promise<CameraHardware[]> => {
     try {
       return await ipcRenderer.invoke('camera-data', { params });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  manageAudio: async (params: { action: string, audio?: AudioHardware, id?: string }): Promise<AudioHardware[]> => {
+    try {
+      return await ipcRenderer.invoke('audio-data', { params });
     } catch (error) {
       console.error(error);
       throw error;

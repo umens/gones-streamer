@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, Checkbox } from 'antd';
-import { CameraHardware, OBSVideoInput } from '../../Models';
+import { CameraHardware, OBSInputProps } from '../../Models';
 import Webcam from 'react-webcam';
 import { IObsRemote } from '..';
 const { Option } = Select;
@@ -15,6 +15,8 @@ type CameraFormProps = {
   onCancel: () => void;
   inUseCameras: MediaDeviceInfo['deviceId'][];
   ObsRemote: IObsRemote;
+  webcams: MediaDeviceInfo[];
+  availableCameras: OBSInputProps[];
 }
 
 const CameraForm: React.FC<CameraFormProps> = ({
@@ -25,45 +27,54 @@ const CameraForm: React.FC<CameraFormProps> = ({
   onCancel,
   inUseCameras,
   ObsRemote,
+  webcams,
+  availableCameras,
 }) => {
   
   let [form] = Form.useForm<CameraFormValues>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [deviceId, setDeviceId] = useState({});
-  const [devices, setDevices] = useState<OBSVideoInput[]>([]);
+  const [devices, setDevices] = useState<OBSInputProps[]>([]);
   const [displayCam, setDisplayCam] = useState('');
 
   const handleDevices = useCallback(
-    (mediaDevices: OBSVideoInput[]) =>
-      setDevices(mediaDevices.filter(({ itemValue }) => !inUseCameras.includes(itemValue) )),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setDevices]
+    (mediaDevices: OBSInputProps[]) => {
+      if(!initialValues || !initialValues!.uuid) {
+        setDevices(mediaDevices.filter(({ itemValue }) => !inUseCameras.includes(itemValue) ))
+      }
+      else {
+        setDevices(mediaDevices);
+      }
+    },
+    [setDevices, initialValues, inUseCameras]
   );
+
+  const getWebcamId = (id: string): string => {
+    const name = devices.find(item => item.itemValue === id)!.itemName
+    const arr = webcams.filter(device => device.kind === 'videoinput');
+    return arr.find(item => item['label'].includes(name))?.deviceId!;
+  }
 
   useEffect(
     () => {
-      async function fetchAvailableCam() {
-        // You can await here
-        const obsCams = await ObsRemote.getAvailableCameras();
-        const webcams = await (await navigator.mediaDevices.enumerateDevices()).filter(device => device.kind === 'videoinput');
-        let devices: OBSVideoInput[] = [];
-        obsCams.forEach(obscam => {
-          let webcam = webcams.find(webc => webc.label === obscam.itemName);
-          if(webcam) {
-            obscam.itemValue += '|' + webcam.deviceId ;
-          }
-          devices.push(obscam);
-        });
-        return devices;
-      }
-      fetchAvailableCam().then(handleDevices);
-      // navigator.mediaDevices.enumerateDevices().then(handleDevices);
+      handleDevices(availableCameras);
     },
-    [handleDevices, ObsRemote]
+    [availableCameras, handleDevices]
   );
 
+  const mustActivate = (): boolean => {
+    if(ObsRemote.store?.CamerasHardware.length === 0) {
+      return true;
+    }
+    else {
+      const arr = ObsRemote.store?.CamerasHardware.filter(val => val.active);
+      return arr ? arr.length === 0 : true;
+    }
+  }
+
   const handleChange = (value: MediaDeviceInfo['deviceId']) => {
-    value === undefined ? setDisplayCam('') : setDisplayCam(value);
+    value === undefined ? setDisplayCam('') : setDisplayCam(getWebcamId(value));
+    form.setFieldsValue({active: mustActivate()});
   };
 
   return (
@@ -99,12 +110,20 @@ const CameraForm: React.FC<CameraFormProps> = ({
         initialValues={initialValues}
       >
         <Form.Item
-          key='titleKey'
-          name="title"
-          label="Nom camera"
-          rules={[{ required: true, message: 'Please fill in the name of camera!' }]}
+          key='uuidKey'
+          name="uuid"
+          hidden
         >
           <Input />
+        </Form.Item>
+
+        <Form.Item
+          key='titleKey'
+          name="title"
+          label="Nom caméra"
+          rules={[{ required: true, message: 'Please fill in the name of camera!' }]}
+        >
+          <Input disabled={initialValues?.title === 'Field'} />
         </Form.Item>
 
         <Form.Item
@@ -114,11 +133,12 @@ const CameraForm: React.FC<CameraFormProps> = ({
           valuePropName="deviceid"
           rules={[{ required: true, message: 'Please select a camera!' }]}
         >
-          <Select 
+          <Select
+            defaultValue={initialValues?.deviceid}
             onChange={handleChange}
             placeholder="Selectionnez une caméra"
           >
-            {devices.map((device: OBSVideoInput, key: number) => (
+            {devices.map((device: OBSInputProps, key: number) => (
               <Option key={key + 1} value={device.itemValue}>{ device.itemName || `Device ${key + 1}` }</Option>
             ))}
           </Select>
@@ -126,14 +146,14 @@ const CameraForm: React.FC<CameraFormProps> = ({
         <Form.Item 
           key='activeKey'
           name="active" 
-          hidden={true}
+          hidden
         >
           <Checkbox
             checked={false}
           >
           </Checkbox>
         </Form.Item>
-        { displayCam !== '' && <Webcam audio={false} width={472} height={266} videoConstraints={{ deviceId: displayCam.split('|')[1], width: { min: 472 }, height: { max: 266 } }} /> }
+        { displayCam !== '' && <Webcam audio={false} width={472} height={266} videoConstraints={{ deviceId: displayCam, width: { min: 472 }, height: { max: 266 } }} /> }
       </Form>
     </Modal>
   );
