@@ -104,8 +104,14 @@ class CameraControl extends React.Component<CameraControlProps, CameraControlSta
 
   getWebcamId = (id: string): string => {
     if(this.state.availableCameras.length > 0 && this.state.webcams.length > 0) {
-      const name = this.state.availableCameras.find(item => item.itemValue === id)!.itemName;
-      return this.state.webcams.find(item => item['label'].includes(name))?.deviceId!;
+      const webcam = this.state.availableCameras.find(item => item.itemValue === id)
+      if(webcam) {
+        const name = this.state.availableCameras.find(item => item.itemValue === id)!.itemName;
+        return this.state.webcams.find(item => item['label'].includes(name))?.deviceId!;
+      }
+      else {
+        return '';
+      }
     }
     return '';
   }
