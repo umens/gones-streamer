@@ -3,18 +3,20 @@
 import { BrowserWindowConstructorOptions, screen, BrowserWindow, app, protocol } from "electron";
 import { join } from 'path';
 import isDev from 'electron-is-dev';
-import Store from 'electron-store';
 import ElectronLog from 'electron-log';
 import firstRun from 'electron-first-run';
 import url from 'url';
 import installExtension, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
+import Store from 'electron-store';
+import { autoUpdater } from "electron-updater";
+import { promises as fs, existsSync } from 'fs';
+
 import SplashScreen from "./SplashScreen";
-import { StoreType, GetDefaultConfig, PathsType } from "../../src/Models";
+import { PathsType, StoreType } from "../../src/Models";
 import IPCChannels from "./IPCChannels";
 import ObsProcess from "./ObsProcess";
-import { promises as fs, existsSync } from 'fs';
 import ScoreboardWindow from "./ScoreboardWindow";
-import { autoUpdater } from "electron-updater";
+import StoreConfig from "./StoreConfig";
 
 export default class Main {
   
@@ -27,9 +29,7 @@ export default class Main {
   private splashScreen: SplashScreen | null = null;
   private scoreboardWindow: ScoreboardWindow | null = null;
   private IpcChannels: IPCChannels | null = null;
-  private store: Store<StoreType> = new Store<StoreType>({
-		defaults: GetDefaultConfig()
-  });
+  private store: Store<StoreType> = StoreConfig;
 
   constructor() {
     this.log = ElectronLog.scope('Main');    
@@ -137,6 +137,15 @@ export default class Main {
     }
   }
 
+  installExtensions = async () => {
+    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+    const extensions = ['REACT_DEVELOPER_TOOLS'];
+  
+    return Promise.all(
+      extensions.map(name => installExtension(REACT_DEVELOPER_TOOLS, forceDownload))
+    ).catch(err => console.log(err));
+  }
+
   private createWindow = async () => {
     // handle local file bug
     protocol.registerFileProtocol('file', (request, callback) => {
@@ -199,13 +208,19 @@ export default class Main {
     // Hot Reloading
     if (isDev) {
       // DevTools
-      installExtension(REACT_DEVELOPER_TOOLS)
-      .then((name: any) => this.log.verbose(`Added Extension:  ${name}`))
-      .catch((err: any) => this.log.verbose('An error occurred: ', err));
-
-      this.mainWindow.webContents.once('dom-ready', () => {
-        this.mainWindow && this.mainWindow.webContents.openDevTools()
+      this.mainWindow.webContents.on("did-frame-finish-load", async () => {
+        // if (process.env.NODE_ENV === 'development') {
+          await this.installExtensions();
+          this.mainWindow && this.mainWindow.webContents.openDevTools()
+        // }
       });
+      // installExtension(REACT_DEVELOPER_TOOLS)
+      // .then((name: any) => this.log.verbose(`Added Extension:  ${name}`))
+      // .catch((err: any) => this.log.verbose('An error occurred: ', err));
+
+      // this.mainWindow.webContents.once('dom-ready', () => {
+      //   this.mainWindow && this.mainWindow.webContents.openDevTools()
+      // });
     }
 
     this.mainWindow.webContents.on('did-finish-load', () => {
