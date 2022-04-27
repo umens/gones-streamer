@@ -13,7 +13,6 @@ import { SponsorControl } from "./SponsorControl/SponsorControl";
 import { PlayerControl } from "./PlayerControl/PlayerControl";
 import { VideoPreview } from "./VideoPreview/VideoPreview";
 import { SponsorForm, SponsorFormValues } from "./SponsorForm/SponsorForm";
-import { StatsTinyChart } from "./StatsTinyChart/StatsTinyChart";
 import { CameraControl } from "./CameraControl/CameraControl";
 import { CameraForm, CameraFormValues } from "./CameraForm/CameraForm";
 import { AudioSources } from "./AudioSources/AudioSources";
@@ -22,6 +21,7 @@ import { AudioControl } from './AudioControl/AudioControl';
 import { AudioForm } from './AudioForm/AudioForm';
 import { BackgroundTextControl } from './BackgroundTextControl/BackgroundTextControl';
 import ColorPicker from "./ColorPicker/ColorPicker";
+import { RealTimeLineChart, RealTimeBarChart } from './Charts';
 
-export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, StatsTinyChart, CameraControl, CameraForm, AudioSources, VuMeter, AudioControl, AudioForm, BackgroundTextControl, ColorPicker };
+export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, CameraControl, CameraForm, AudioSources, VuMeter, AudioControl, AudioForm, BackgroundTextControl, ColorPicker, RealTimeLineChart, RealTimeBarChart };
 export type { IObsRemote, SponsorFormValues, CameraFormValues };

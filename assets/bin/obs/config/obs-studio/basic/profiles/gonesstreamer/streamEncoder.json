@@ -1,1 +1,4 @@
-{"bitrate":6000,"preset":"faster"}
+{
+  "bitrate": 4500,
+  "preset": "faster"
+}

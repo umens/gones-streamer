@@ -2,10 +2,11 @@ import React, { createRef } from "react";
 import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
 import { GameEvent, SceneName, StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, StatsTinyChart } from "../../Components";
+import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, RealTimeLineChart, RealTimeBarChart } from "../../Components";
 import './Cockpit.css';
 import { FormInstance } from "antd/lib/form";
 import prettyBytes from 'pretty-bytes';
+import { PointTooltipProps } from "@nivo/line";
 
 type CockpitProps = {
   ObsRemote: IObsRemote;
@@ -193,10 +194,10 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   <Statistic title="Length" value={this.props.ObsRemote.streamingStats ? this.props.ObsRemote.streamingStats?.totalStreamTime : '00:00:00'} />
                   <Statistic
                     title="Dropped Frame"
-                    prefix={this.props.ObsRemote.streamingStats ? (this.props.ObsRemote.streamingStats?.droppedFrame > this.props.ObsRemote.streamingStats?.oldDroppedFrame) ? <ArrowUpOutlined /> : <ArrowDownOutlined /> : ''}
+                    prefix={this.props.ObsRemote.coreStats ? (this.props.ObsRemote.coreStats?.droppedFrame > this.props.ObsRemote.coreStats?.oldDroppedFrame) ? <ArrowUpOutlined /> : <ArrowDownOutlined /> : ''}
                     suffix="%"
-                    value={this.props.ObsRemote.streamingStats ? this.props.ObsRemote.streamingStats?.droppedFrame : '0.00'}
-                    valueStyle={this.props.ObsRemote.streamingStats ? (this.props.ObsRemote.streamingStats?.droppedFrame > this.props.ObsRemote.streamingStats?.oldDroppedFrame) ? { color: '#cf1322' } : { color: '#3f8600' } : { color: 'rgba(255, 255, 255, 0.85)' }}
+                    value={this.props.ObsRemote.coreStats ? this.props.ObsRemote.coreStats?.droppedFrame.toFixed(2) : '0.00'}
+                    valueStyle={this.props.ObsRemote.coreStats ? (this.props.ObsRemote.coreStats?.droppedFrame > this.props.ObsRemote.coreStats?.oldDroppedFrame) ? { color: '#cf1322' } : { color: '#3f8600' } : { color: 'rgba(255, 255, 255, 0.85)' }}
                     style={{
                       margin: '0 32px',
                     }}
@@ -204,18 +205,65 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   <Statistic title="Transfert Speed" value={this.props.ObsRemote.streamingStats ? `${prettyBytes(this.props.ObsRemote.streamingStats?.bytesPerSec)}ps` : `${prettyBytes(0)}ps`} />
                 </Col>
                 <Col span={3} style={{ display: "flex" }}>
-                  <div className={'ant-statistic'} style={{ margin: '0 32px' }}>
+                  <div className={'ant-statistic'}>
                     <div className={'ant-statistic-title'}>Memory Usage</div>
-                    <div className={'ant-statistic-content'} style={{ width: 130 }}>
-                      <StatsTinyChart chartType="bar" data={this.props.ObsRemote.streamingStats?.memoryUsage} customContent={(title, items) => { return `${items[0] && prettyBytes(+items[0].value * 1000000)}`; }}/>
+                    <div className={'ant-statistic-content'}>                      
+                      <RealTimeBarChart 
+                        data={this.props.ObsRemote.coreStats?.memoryUsage || [{ x : new Date(), y: 0}]}
+                        yFormat={value => 
+                          `${prettyBytes(Number(value) * 1000000)}`
+                        }
+                        tooltip={
+                          (propsTooltip: PointTooltipProps) => (
+                            <div
+                              style={{
+                                padding: 12,
+                                fontSize: 10,
+                                color: propsTooltip.point.color,
+                                // background: '#141414',
+                                backgroundColor: 'transparent'
+                              }}
+                            >
+                              <strong>
+                                {propsTooltip.point.data.yFormatted}
+                              </strong>
+                            </div>
+                          )
+                        }  
+                      />
                     </div>
                   </div>
                 </Col>
                 <Col span={3} style={{ display: "flex" }}>
                   <div className={'ant-statistic'}>
                     <div className={'ant-statistic-title'}>CPU Usage</div>
-                    <div className={'ant-statistic-content'} style={{ width: 130 }}>
-                      <StatsTinyChart maxY={100} chartType="area" data={this.props.ObsRemote.streamingStats?.cpuUsage} formatter={(datum: any) => { return { name: datum.x, value: `${+(datum.y).toFixed(2)}` }; }} customContent={(title, items) => { return `${items[0] && items[0].value}%`; }}/>
+                    <div className={'ant-statistic-content'}>
+                      <RealTimeLineChart 
+                        data={this.props.ObsRemote.coreStats?.cpuUsage || [{ x : new Date(), y: 0}]} 
+                        yFormat={value =>
+                          `${Number(value).toLocaleString('fr-FR', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}%`          
+                        }
+                        tooltip={
+                          (propsTooltip: PointTooltipProps) => (
+                            <div
+                              style={{
+                                padding: 12,
+                                fontSize: 10,
+                                color: propsTooltip.point.color,
+                                // background: '#141414',
+                                backgroundColor: 'transparent'
+                              }}
+                            >
+                              <strong>
+                                {propsTooltip.point.data.yFormatted}
+                              </strong>
+                            </div>
+                          )
+                        }
+                      />
                     </div>
                   </div>
                 </Col>

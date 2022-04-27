@@ -1,5 +1,7 @@
 // import { FileWithPath } from "react-dropzone";
 
+import { Datum } from "@nivo/line";
+
 /**
  * Types
  */
@@ -115,11 +117,14 @@ export type Player = {
 
 export type StreamingStats = {
   totalStreamTime: string;
+  bytesPerSec: number;
+}
+
+export type CoreStats = {
+  cpuUsage: Datum[];
+  memoryUsage: Datum[];
   oldDroppedFrame: number;
   droppedFrame: number;
-  cpuUsage: number[];
-  memoryUsage: number[];
-  bytesPerSec: number;
 }
 
 /**

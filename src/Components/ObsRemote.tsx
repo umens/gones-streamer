@@ -2,9 +2,9 @@ import { Component } from "react";
 import OBSWebSocket, { EventSubscription } from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSInputProps, AudioHardware, AudioType, TextsSettings } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSInputProps, AudioHardware, AudioType, TextsSettings, CoreStats } from "../Models";
 import { Utilities } from "../Utils";
-import moment from "moment";
+import { Datum } from "@nivo/line";
 
 const obsWs = new OBSWebSocket();
 
@@ -32,6 +32,7 @@ type ObsRemoteState = {
   sponsorDisplayType?: SponsorDisplayType;
   Utilitites?: Utilities;
   streamingStats?: StreamingStats;
+  coreStats?: CoreStats;
 
   reconnectObs: () => Promise<void>;
   goLive: () => Promise<void>;
@@ -81,8 +82,9 @@ type ObsRemoteState = {
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
-  intervalClockId?: NodeJS.Timeout;
-  intervalStatsId?: NodeJS.Timeout;
+  intervalClockId?: number;
+  intervalStatsId?: number;
+  intervalCoreStatsId?: number;
 
   constructor(props: Readonly<ObsRemoteProps>) {
     super(props);
@@ -183,44 +185,64 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     //   }
     // });
   }
-
-  handleStatsDatas = async () => {
+  
+  handleCoreStatsDatas = async () => {
     try {
       const stats = await obsWs.call('GetStats');
-      const statsStream = await obsWs.call('GetStreamStatus');
       let oldDroppedFrame = 0;
-      let cpuUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-      let memoryUsage: number[] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-      if(this.state.streamingStats !== undefined) {
-        oldDroppedFrame = this.state.streamingStats.droppedFrame;
-        cpuUsage = this.state.streamingStats.cpuUsage;
-        memoryUsage = this.state.streamingStats.memoryUsage;
+      let cpuUsage: Datum[] = [];
+      let memoryUsage: Datum[] = [];
+      if(this.state.coreStats !== undefined) {
+        oldDroppedFrame = this.state.coreStats.droppedFrame;
+        cpuUsage = this.state.coreStats.cpuUsage;
+        memoryUsage = this.state.coreStats.memoryUsage;
       }
       cpuUsage = this.addToStatArray(stats.cpuUsage, cpuUsage);
       memoryUsage = this.addToStatArray(stats.memoryUsage, memoryUsage);
+      
       await this.setState({
-        streamingStats: {
-          oldDroppedFrame,
-          droppedFrame: statsStream.outputSkippedFrames,
-          // droppedFrame: (100 * data["num-dropped-frames"]) / data["num-total-frames"],
-          totalStreamTime: moment().startOf('day').milliseconds(statsStream.outputDuration).format('HH:mm:ss'),
+        coreStats: {
           cpuUsage,
-          bytesPerSec: statsStream.outputBytes * 10,
           memoryUsage,
+          oldDroppedFrame,
+          droppedFrame: (100 * stats.renderSkippedFrames) / stats.renderTotalFrames,
         }
       });
     } catch (error) {
-      
+      console.log(error)
+    }
+  }
+
+  handleStatsDatas = async () => {
+    try {
+      const statsStream = await obsWs.call('GetStreamStatus');
+      let streamTime = function msToTime(s: number) {
+        // Pad to 2 or 3 digits, default is 2
+        var pad = (n: number, z = 2) => ('00' + n).slice(-z);
+        return pad(s/3.6e6|0) + ':' + pad((s%3.6e6)/6e4 | 0) + ':' + pad((s%6e4)/1000|0);
+      }
+      await this.setState({
+        streamingStats: {
+          totalStreamTime: streamTime(statsStream.outputDuration),
+          bytesPerSec: (statsStream.outputBytes * 10) / (statsStream.outputDuration / 1000),
+        }
+      });
+    } catch (error) {
+      console.log(error)
     }
   }
   
-  startStats = async (): Promise<void> => {
-    this.intervalStatsId = setTimeout(this.handleStatsDatas, 1000);
+  startStats = (): void => {
+    this.intervalStatsId = window.setInterval(this.handleStatsDatas, 1000);
+  }
+  
+  startCoreStats = (): void => {
+    this.intervalCoreStatsId = window.setInterval(this.handleCoreStatsDatas, 1000);
   }
   
   stopStats = (): void => {
     if (this.intervalStatsId) {
-      clearTimeout(this.intervalStatsId);
+      clearInterval(this.intervalStatsId);
       // await this.setState({ timeout: undefined, preview: undefined });
     }
   }
@@ -280,6 +302,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   startApp = async() => {
     try {
+      this.startCoreStats();
       await this.connectObs();
       await this.getScenes();
       await this.initGameStatut();
@@ -631,21 +654,25 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
 
-  addToStatArray = (item: number, originalDatas: number[]): number[] => {
+  addToStatArray = (item: number, originalDatas: Datum[]): Datum[] => {
     let clonnedStats = [...originalDatas];
     if (clonnedStats.length >= 25) {
       clonnedStats.shift();
-      clonnedStats.push(item);
+      clonnedStats.push({ x: new Date(), y: item });
     } else {
-      clonnedStats.push(item);
+      clonnedStats.push({ x: new Date(), y: item });
     }
     return clonnedStats;
   }
 
   updateLiveStatus = async (): Promise<void> => {
     try {
-      const streamingStatus = await (await obsWs.call('ToggleStream')).outputActive;
-      await this.setState({ live: streamingStatus });
+      if(this.state.live) {
+        await obsWs.call('StopStream');
+      } else {
+        await obsWs.call('StartStream');
+      }
+      await this.setState({ live: !this.state.live });
     } catch (error) {
       console.log(error)
     }
@@ -902,7 +929,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           await this.setState({ store });
         } else {
           clock.isOn = true;
-          this.intervalClockId = setInterval(async () => {
+          this.intervalClockId = window.setInterval(async () => {
             try {
               let store = this.state.store!;
               const { clock } = store.GameStatut.Options;
@@ -1343,7 +1370,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     await obsWs.call('SetInputSettings', { inputName: 'Home Score Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.scoreColor), font } });
   }
 
-  disconnectObs = (): void => {
+  disconnectObs = (): void => {    
+    if (this.intervalCoreStatsId) {
+      clearInterval(this.intervalCoreStatsId);
+      // await this.setState({ timeout: undefined, preview: undefined });
+    }
     obsWs.disconnect();
     obsWs.removeListener('ConnectionClosed', () => { });
   }
