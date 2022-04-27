@@ -120,7 +120,7 @@ const AudioForm: React.FC<AudioFormProps> = ({
             placeholder="Selectionnez une entrée/sortie audio"
           >
             {devices.map((group: { type: string, devices: OBSInputProps[] }, key: number) => (
-              <OptGroup label={group.type} key={`optgrp-${key + 1}`}>
+              <OptGroup label={group.type === 'wasapi_input_capture' ? 'Input devices' : 'Output devices'} key={`optgrp-${key + 1}`}>
                 {group.devices.map((device: OBSInputProps, key2: number) => (
                   <Option key={`opt-${key + 1}-${key2 + 1}`} data={{ 'type': group.type }} value={device.itemValue}>{ device.itemName || `Device ${key + 1}${key2 + 1}` }</Option>
                 ))}
