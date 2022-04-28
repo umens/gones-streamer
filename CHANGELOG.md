@@ -1,5 +1,12 @@
 Changelog
 
+# :rocket: Release [v2.1.0-beta.2](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.1...v2.1.0-beta.2) (2022-04-28)
+          
+
+### :sparkles: Enhancements
+
+* **auto updater:** add auto update feature with update channel setting ([ff0bbae](https://github.com/umens/gones-streamer/commit/ff0bbaec66e7483b47738980c1c407454300ab3b))
+
 # :rocket: Release [v2.1.0-beta.1](https://github.com/umens/gones-streamer/compare/v2.0.0...v2.1.0-beta.1) (2022-04-27)
           
 
