@@ -2,7 +2,7 @@ import { Component } from "react";
 import OBSWebSocket, { EventSubscription } from 'obs-websocket-js';
 import { notification } from "antd";
 // import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSInputProps, AudioHardware, AudioType, TextsSettings, CoreStats } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSInputProps, AudioHardware, AudioType, TextsSettings, CoreStats, AutoUpdaterEvent } from "../Models";
 import { Utilities } from "../Utils";
 import { Datum } from "@nivo/line";
 
@@ -13,6 +13,7 @@ type ObsRemoteProps = {
 };
 type ObsRemoteState = {
   live: boolean;
+  firstStart: boolean;
   connectingObs: boolean;
   connected2Obs: boolean;
   firstDatasLoaded: boolean;
@@ -78,6 +79,7 @@ type ObsRemoteState = {
   updateTextsSettings: (values: TextsSettings) => Promise<void>;
   toggleMute: (inputName: string) => Promise<void>;
   changeVolume: (volume: number, inputName: string) => Promise<void>;
+  firstLoadDone: () => Promise<void>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -90,6 +92,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     super(props);
     this.state = {
       live: false,
+      firstStart: true,
       connectingObs: false,
       connected2Obs: false,
       firstDatasLoaded: false,
@@ -141,6 +144,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       updateTextsSettings: this.updateTextsSettings.bind(this),
       toggleMute: this.toggleMute.bind(this),
       changeVolume: this.changeVolume.bind(this),
+      firstLoadDone: this.firstLoadDone.bind(this),
     };
 
     // obsWs.on('StreamStarted', async () => {
@@ -584,6 +588,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       const Players = await window.app.managePlayers({ action: 'get' });
       const CamerasHardware = await window.app.manageCamera({ action: 'get' });
       const AudioHardware = await window.app.manageAudio({ action: 'get' });
+      const UpdateChannel = await (await window.app.GetStoredConfig()).UpdateChannel;
 
       let store: StoreType = {
         GameStatut,
@@ -593,6 +598,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         AudioHardware,
         Sponsors,
         Players,
+        UpdateChannel,
       };
       await this.setState({ store, firstDatasLoaded: true });
       await this.sendUpdateToScoreboardWindow();
@@ -601,11 +607,16 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
 
+  firstLoadDone = async (): Promise<void> => {
+    await this.setState({ firstStart: false });
+  }
+
   updateSettings = async (value: any): Promise<void> => {
     try {
       await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: +value.buffer * 1000 } });
       await obsWs.call('SetStreamServiceSettings', { streamServiceType: 'rtmp_common', streamServiceSettings: { key: value.key } });
       // await obsWs.call('SetProfileParameter', { parameterCategory: 'Output', parameterName: 'VBitrate', parameterValue: value.bitrate });
+      await window.app.handleUpdater(AutoUpdaterEvent.CHANNELCHANGED, value.updateChannel);
       await window.app.manageObsSettings({ setter: true, bitrate: +value.bitrate });
     } catch (error) {
 

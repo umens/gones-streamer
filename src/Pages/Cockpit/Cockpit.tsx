@@ -1,12 +1,13 @@
 import React, { createRef } from "react";
-import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
-import { GameEvent, SceneName, StoreType } from "../../Models";
+import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form, notification, Progress } from 'antd';
+import { AutoUpdaterData, AutoUpdaterEvent, GameEvent, SceneName, StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, RealTimeLineChart, RealTimeBarChart } from "../../Components";
 import './Cockpit.css';
 import { FormInstance } from "antd/lib/form";
 import prettyBytes from 'pretty-bytes';
 import { PointTooltipProps } from "@nivo/line";
+import { ArgsProps } from "antd/lib/notification";
 
 type CockpitProps = {
   ObsRemote: IObsRemote;
@@ -19,8 +20,12 @@ type CockpitState = {
   displayPreview: boolean;
   TabKey: string;
   newGameModalVisible: boolean;
+  changelogModalVisible: boolean;
+  update: { version: string; changelog: string; };
 };
 class Cockpit extends React.Component<CockpitProps, CockpitState> {
+
+  autoUpdaterTimer?: number;
 
   constructor(props: Readonly<CockpitProps>) {
     super(props);
@@ -32,11 +37,15 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       displayPreview: false,
       TabKey: 'GameControl',
       newGameModalVisible: false,
+      changelogModalVisible: false,
+      update: { version: '', changelog: '' },
     };
   }
 
   componentDidMount = async () => {
     try {
+      window.addEventListener('autoUpdaterEvent', this.onData);
+      await this.checkUpdater();
       // await this.getStoredConfig();
       // setTimeout(async () => {
       //   await this.setState({ displayPreview: true });
@@ -45,6 +54,71 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
 
     }
   }
+
+  componentWillUnmount = async () => {
+    window.clearTimeout(this.autoUpdaterTimer);
+    this.autoUpdaterTimer = undefined;
+    window.removeEventListener('autoUpdaterEvent', this.onData);
+  }
+
+  onData = async (data: any) => {
+    try {
+      const detail: {eventType: AutoUpdaterEvent, data: AutoUpdaterData} = data.detail;
+      let key: string;
+      let args: ArgsProps;
+      switch (detail.eventType) {
+        case AutoUpdaterEvent.AVAILABLE:
+          this.setState({ update: { version: detail.data.version!, changelog: detail.data.releaseNote! } });
+          key = `open${Date.now()}`;
+          args = {
+            message: `${detail.data.version} is here !`,
+            description: (
+              <div>
+                <p>A new version is available. Would you like to dowload it ?</p>
+                <Button type="link" size="small" onClick={() => this.setState({ changelogModalVisible: true }) }>Read changelog</Button>
+              </div>
+            ),
+            duration: 0,
+            btn: (
+              <>
+                <Button type="primary" style={{ borderColor: '#f53838', backgroundColor: '#f53838' }} size="small" onClick={() => notification.close(key)}>Later</Button>
+                <span> </span>                
+                <Button type="primary" style={{ borderColor: '#0baf36', backgroundColor: '#0baf36' }} size="small" onClick={() => { notification.close(key); window.app.handleUpdater(AutoUpdaterEvent.DOWNLOADRESQUESTED); }}>Download</Button>
+              </>
+            ),
+            key,
+            placement: 'bottomRight'
+          };
+          notification.info(args);
+          break;
+      
+        case AutoUpdaterEvent.DOWNLOADING:
+        case AutoUpdaterEvent.DOWNLOADED:
+          key = `notifDownload`;
+          args = {
+            message: detail.eventType === AutoUpdaterEvent.DOWNLOADED ? detail.data.message : 'Downloading update...',
+            description: (
+              <div>
+                <Progress percent={ detail.data.download ? +detail.data.download?.percent.toFixed(0) : 100 } />
+                { detail.eventType === AutoUpdaterEvent.DOWNLOADING && <span>{ prettyBytes(detail.data.download?.transferred!) }/{ prettyBytes(detail.data.download?.total!) } @ {prettyBytes(detail.data.download?.bytesPerSecond!)}/s</span> }
+              </div>
+            ),
+            btn: (
+              detail.eventType === AutoUpdaterEvent.DOWNLOADED && <Button size="small" type="primary" onClick={() => { notification.close(key); window.app.handleUpdater(AutoUpdaterEvent.QUITANDINSTALL); } }>Install</Button>
+            ),
+            duration: 0,
+            key,
+            placement: 'bottomRight'
+          };
+          notification.open(args);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   getStoredConfig = async () => {
     try {
@@ -69,6 +143,20 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       }
     } catch (error) {
 
+    }
+  }
+
+  checkUpdater = async () => {
+    if(this.props.ObsRemote.connected2Obs && this.props.ObsRemote.firstStart) {
+      await this.props.ObsRemote.firstLoadDone();
+      window.clearTimeout(this.autoUpdaterTimer);
+      this.autoUpdaterTimer = undefined;
+      window.app.handleUpdater(AutoUpdaterEvent.CHECKRESQUESTED);
+    }
+    else {
+      this.autoUpdaterTimer = window.setTimeout(() => {
+        this.checkUpdater();
+      }, 1000)
     }
   }
 
@@ -444,6 +532,19 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
             </Row>
           </Form>
         </Modal>
+
+        <Modal
+          title={`${this.state.update.version} Changelog`}
+          centered
+          cancelText="Fermer"
+          visible={this.state.changelogModalVisible}
+          onOk={() => this.setState({ changelogModalVisible: false })}
+          onCancel={() => this.setState({ changelogModalVisible: false })}
+          width={'30%'}
+        >
+          <div style={{ height: '50vh', overflow: 'auto' }} dangerouslySetInnerHTML={{ __html: this.state.update.changelog }}></div>
+        </Modal>
+
       </>
     );
   }

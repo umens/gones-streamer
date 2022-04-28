@@ -30,6 +30,7 @@ export class StoredConfigChannel implements IpcChannelInterface {
       const AudioHardware = await this.store.get("AudioHardware", defaultConfig.AudioHardware);
       const Sponsors = await this.store.get("Sponsors", defaultConfig.Sponsors);
       const Players = await this.store.get("Players", defaultConfig.Players);
+      const UpdateChannel = await this.store.get("UpdateChannel", defaultConfig.UpdateChannel);
       let storedConfig: StoreType = {
         GameStatut,
         LiveSettings,
@@ -38,6 +39,7 @@ export class StoredConfigChannel implements IpcChannelInterface {
         AudioHardware,
         Sponsors,
         Players,
+        UpdateChannel,
       };
       // event.sender.send(request.responseChannel, { storedConfig });
       return storedConfig;

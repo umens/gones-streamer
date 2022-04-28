@@ -27,8 +27,6 @@ class Scoreboard extends React.Component<ScoreboardProps, ScoreboardState> {
   }
 
   onData = async (data: any) => {
-    console.log('test')
-    console.log(data)
     await this.setState({
       GameStatut: data.detail.GameStatut,
       LiveSettings: data.detail.LiveSettings,

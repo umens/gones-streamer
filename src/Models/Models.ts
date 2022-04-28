@@ -26,6 +26,7 @@ export type StoreType = {
   AudioHardware: AudioHardware[];
   Sponsors: Sponsor[];
   Players: Player[];
+  UpdateChannel: string;
 };
 
 export type TextsSettings = {
@@ -127,9 +128,39 @@ export type CoreStats = {
   droppedFrame: number;
 }
 
+export type AutoUpdaterData = {
+  message?: string;
+  releaseNote?: string;
+  more?: string;
+  version?: string;
+  download? : {
+    bytesPerSecond: number;
+    percent: number;
+    transferred: number;
+    total: number;
+  }
+}
+
 /**
  * Enums
  */
+
+export enum AutoUpdaterEvent {
+  QUITANDINSTALL = 'install-requested-updater',
+  DOWNLOADRESQUESTED = 'download-requested-updater',
+  CHECKRESQUESTED = 'check-requested-updater',
+  CHECKING = 'checking-for-update-updater',
+  AVAILABLE = 'update-available-updater',
+  NOUPDATE = 'update-not-available-updater',
+  ERROR = 'error-updater',
+  DOWNLOADING = 'download-progress-updater',
+  DOWNLOADED = 'update-downloaded-updater',
+  CHANNELCHANGED = 'channel-changed-updater',
+};
+export enum UpdateChannel {
+  STABLE = 'latest',
+  BETA = 'beta',
+};
 
 export enum Timeout {
   NONE = 0,
@@ -298,6 +329,7 @@ export function GetDefaultConfig(): StoreType {
     AudioHardware,
     Sponsors,
     Players,
-  };
+    UpdateChannel: 'latest',
+  }
   return storedConfigDefault;
 }

@@ -1,10 +1,10 @@
 import React from "react";
 import { CameraControl, IObsRemote, PlayerControl, SponsorControl, AudioControl, BackgroundTextControl } from "../../Components";
-import { Row, Col, message, Form, Input, Button, Select, Card } from "antd";
+import { Row, Col, message, Form, Input, Button, Select, Card, Divider } from "antd";
 import ReactDropzone from "react-dropzone";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
-import { FileUp, StreamingService, StreamingSport } from "../../Models";
+import { AutoUpdaterData, AutoUpdaterEvent, FileUp, StreamingService, StreamingSport, UpdateChannel } from "../../Models";
 
 type SettingsProps = {  
   ObsRemote: IObsRemote;
@@ -14,6 +14,8 @@ type SettingsState = {
   sendingForm: boolean;
   key: string;
   loadingCams: boolean[];
+  checkingUpdate: boolean;
+  updaterMessage: string;
 };
 class Settings extends React.Component<SettingsProps, SettingsState> {
   
@@ -26,13 +28,48 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
       sendingForm: false,
       key: 'background',
       loadingCams: [],
+      checkingUpdate: false,
+      updaterMessage: 'Check Update',
     };
   }
 
   componentDidMount = async () => {    
+    window.addEventListener('autoUpdaterEvent', this.onData);
     // let devices = await navigator.mediaDevices.enumerateDevices();
     // console.log(devices.filter(({ kind }) => kind === "videoinput"));
   }
+
+  onData = async (data: any) => {
+    try {
+      const detail: {eventType: AutoUpdaterEvent, data: AutoUpdaterData} = data.detail;
+      // let key: string;
+      // let args: ArgsProps;
+      switch (detail.eventType) {
+        case AutoUpdaterEvent.CHECKING:
+          await this.setState({ updaterMessage: detail.data.message! });          
+          break;
+        case AutoUpdaterEvent.NOUPDATE:
+          await this.setState({ checkingUpdate: false, updaterMessage: detail.data.message! });
+          break;
+        case AutoUpdaterEvent.AVAILABLE:
+          await this.setState({ updaterMessage: detail.data.message! });
+          window.app.handleUpdater(AutoUpdaterEvent.DOWNLOADRESQUESTED);
+          break;
+      
+        case AutoUpdaterEvent.DOWNLOADING:
+          await this.setState({ updaterMessage: detail.data.message! });
+          break;
+        case AutoUpdaterEvent.DOWNLOADED:
+          await this.setState({ checkingUpdate: false, updaterMessage: detail.data.message! });
+          window.app.handleUpdater(AutoUpdaterEvent.QUITANDINSTALL);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   uploadElectronFile = async () => {
     try {
@@ -109,12 +146,6 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
         <div className="ant-upload-text">Upload</div>
       </div>
     );
-
-    // const data = this.props.ObsRemote.store?.CamerasHardware.map(async (cam, index) => {
-    //   // cam.img = await (await this.props.ObsRemote.getScreenshot()).img;
-    //   return cam;
-    // });
-    // const data = this.props.ObsRemote.store?.CamerasHardware;
     
     const tabList = [
       {
@@ -164,42 +195,6 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
       colorsText: <BackgroundTextControl ObsRemote={this.props.ObsRemote} />,
       cameras: <CameraControl ObsRemote={this.props.ObsRemote} editable={true} />,
       audio: <AudioControl ObsRemote={this.props.ObsRemote} editable={true} />,
-      // <Alert
-      //   message="Feature in progress"
-      //   description="Gerez et configurez les caméras disponible pour la retransmission."
-      //   type="info"
-      //   showIcon
-      // />,
-    //   <List
-    //   grid={{
-    //     gutter: 16,        
-    //     xs: 1,
-    //     sm: 2,
-    //     md: 2,
-    //     lg: 2,
-    //     xl: 2,
-    //     xxl: 2
-    //   }}
-    //   dataSource={data}
-    //   renderItem={(item, index) => (
-    //     <List.Item>
-    //       <Card title={item.title}>
-    //         { item.active ?
-    //           <p>à venir</p>
-    //           :
-    //           <Button
-    //             type="primary"
-    //             icon={<PoweroffOutlined />}
-    //             loading={this.state.loadingCams[index]}
-    //             onClick={() => this.activateCam(index)}
-    //           >
-    //             Activate Camera {index + 1}
-    //           </Button>
-    //         }          
-    //       </Card>
-    //     </List.Item>
-    //   )}
-    // />,
       playersAdmin: <PlayerControl ObsRemote={this.props.ObsRemote} editable={true} />,
       sponsorsAdmin: <SponsorControl ObsRemote={this.props.ObsRemote} editable={true} />,
     };
@@ -219,16 +214,31 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
                 sport: this.props.ObsRemote.store?.LiveSettings?.sport,
                 buffer: (this.props.ObsRemote.store?.LiveSettings?.buffer || 0) / 1000,
                 bitrate: this.props.ObsRemote.store?.LiveSettings?.bitrate,
+                updateChannel:  this.props.ObsRemote.store?.UpdateChannel || UpdateChannel.STABLE
               }}
             >
+              <Divider orientation="left">App</Divider>
               <Form.Item label="Sport" name="sport">
-                <Select style={{ width: '100%' }}>
+                <Select defaultValue={this.props.ObsRemote.store?.LiveSettings?.sport} style={{ width: '100%' }}>
                   <Select.Option value={StreamingSport.Football}>Football Americain</Select.Option>
                   <Select.Option value={StreamingSport.Soccer} disabled>Football</Select.Option>
                   <Select.Option value={StreamingSport.Basketball} disabled>Basketball</Select.Option>
                   <Select.Option value={StreamingSport.Handball} disabled>Handball</Select.Option>
                 </Select>
               </Form.Item>
+              <Form.Item label="Update Channel" name="updateChannel">
+                <Select defaultValue={this.props.ObsRemote.store?.UpdateChannel || UpdateChannel.STABLE} style={{ width: '100%' }}>
+                  <Select.Option value={UpdateChannel.STABLE}>Stable</Select.Option>
+                  <Select.Option value={UpdateChannel.BETA}>Bêta</Select.Option>
+                </Select>
+                <br/>
+                <br/>
+                <div>
+                  <Button loading={this.state.checkingUpdate} onClick={() => { this.setState({ checkingUpdate: true }); window.app.handleUpdater(AutoUpdaterEvent.CHECKRESQUESTED) }}>{ this.state.updaterMessage }</Button> 
+                  {/* { this.state.updaterMessage } */}
+                </div>
+              </Form.Item>
+              <Divider orientation="left">Stream</Divider>
               <Form.Item label="Service de streaming" name="service">
                 <Select style={{ width: '100%' }}>
                   <Select.Option value={StreamingService.Youtube}>Youtube</Select.Option>

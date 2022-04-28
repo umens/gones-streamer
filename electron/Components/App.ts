@@ -1,5 +1,3 @@
-// import { autoUpdater } from "electron-updater";
-
 import { BrowserWindowConstructorOptions, screen, BrowserWindow, app, protocol } from "electron";
 import { join } from 'path';
 import isDev from 'electron-is-dev';
@@ -8,7 +6,6 @@ import firstRun from 'electron-first-run';
 import url from 'url';
 import installExtension, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import Store from 'electron-store';
-import { autoUpdater } from "electron-updater";
 import { promises as fs, existsSync } from 'fs';
 
 import SplashScreen from "./SplashScreen";
@@ -17,11 +14,13 @@ import IPCChannels from "./IPCChannels";
 import ObsProcess from "./ObsProcess";
 import ScoreboardWindow from "./ScoreboardWindow";
 import StoreConfig from "./StoreConfig";
+import AppUpdater from "./Updater";
 
 export default class Main {
   
   log: ElectronLog.LogFunctions;
   paths: PathsType;
+  appUpdater?: AppUpdater;
   
   private obsProcess: ObsProcess | null = null;
   private mainConfig: BrowserWindowConstructorOptions | null = null;
@@ -32,8 +31,7 @@ export default class Main {
   private store: Store<StoreType> = StoreConfig;
 
   constructor() {
-    this.log = ElectronLog.scope('Main');    
-    autoUpdater.logger = ElectronLog.scope('Auto Updater');
+    this.log = ElectronLog.scope('Main');
     const extraResources = app.isPackaged ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
     this.paths = {
       binFolder: join(extraResources, '/bin'),
@@ -123,7 +121,6 @@ export default class Main {
 
       app.on('ready', async () => {
         try {
-          await autoUpdater.checkForUpdatesAndNotify();
           await this.createWindow();
         } catch (error) {
           this.log.error(error)
@@ -231,7 +228,8 @@ export default class Main {
       this.log.info('%cclose Splash Window', 'color: blue');
       this.splashScreen && this.splashScreen.window && this.splashScreen.window.destroy();
       this.log.info('%cShow Main Window', 'color: blue');
-      this.mainWindow && this.mainWindow.maximize();
+      this.mainWindow && this.mainWindow.maximize();      
+      this.appUpdater = new AppUpdater(this.mainWindow?.webContents!);
     });
   }
 

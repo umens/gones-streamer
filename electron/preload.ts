@@ -1,53 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ipcRenderer, contextBridge } from 'electron';
-import { AudioHardware, CameraHardware, FileUp, GameStatut, LiveSettings, PathsType, Player, Sponsor, StoreType } from '../src/Models';
+import { AudioHardware, AutoUpdaterData, AutoUpdaterEvent, CameraHardware, FileUp, GameStatut, LiveSettings, PathsType, Player, Sponsor, StoreType } from '../src/Models';
 import { dialog } from '@electron/remote'
 import { LocalFileData, constructFileFromLocalFileData } from 'get-file-object-from-local-path';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// import { functions, LogFunctions } from 'electron-log';
-// // import * as Store from 'electron-store';
-
-// declare global {
-//   namespace NodeJS {
-//       interface  Global {
-//         ipcRenderer: IpcRenderer;
-//         // log: LogFunctions;
-//         // store: Store;
-//       }
-//   }
-// }
-
-// process.once('loaded', () => {
-//   global.ipcRenderer = ipcRenderer
-//   window.ipcRenderer = ipcRenderer
-//   // global.log = functions
-//   // global.store = new Store()
-// });
-
-// Expose protected methods that allow the renderer process to use
-// the ipcRenderer without exposing the entire object
-// let api: Record<string, any> = {
-//   //send: (channel, data) => {
-//   request: (channel: string, data: any) => {
-//       // whitelist channels
-//       // let validChannels = ["toMain"];
-//       // if (validChannels.includes(channel)) {
-//           ipcRenderer.send(channel, data);
-//       // }
-//   },
-//   //receive: (channel, func) => {
-//   response: (channel: string, fn: any) => {
-//       // let validChannels = ["fromMain"];
-//       // if (validChannels.includes(channel)) {
-//           // Deliberately strip event as it includes `sender`
-//           ipcRenderer.once(channel, (event, ...args) => fn(...args));
-//       // }
-//   }
-// };
-
-// contextBridge.exposeInMainWorld("api", api);
-
 
 function getFileFromPath(path: string): FileUp | null {
   try {
@@ -66,8 +21,14 @@ function getFileFromPath(path: string): FileUp | null {
   }
 };
 
+// send infos to scoreboard window
 ipcRenderer.on('scoreboard-update', (_event, data) => {
   window.dispatchEvent(new CustomEvent('scoreboardUpdateReact', { detail: data }));
+});
+
+// updater event
+ipcRenderer.on('autoUpdate', (_event, data: {eventType: AutoUpdaterEvent, data: AutoUpdaterData}) => {
+  window.dispatchEvent(new CustomEvent<{eventType: AutoUpdaterEvent, data: AutoUpdaterData}>('autoUpdaterEvent', { detail: data }));
 });
 
 contextBridge.exposeInMainWorld('app', {
@@ -185,6 +146,15 @@ contextBridge.exposeInMainWorld('app', {
         datas = getFileFromPath(file.filePaths[0]);
       }  
       return datas;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  handleUpdater: (eventType: AutoUpdaterEvent, data?: string): void => {
+    try {
+      ipcRenderer.invoke('autoUpdater', eventType, data);
     } catch (error) {
       console.error(error);
       throw error;

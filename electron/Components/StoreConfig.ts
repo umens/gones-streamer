@@ -23,6 +23,7 @@ const StoreConfig: Store<StoreType> = new Store<StoreType>({
           deviceid: 'OBS Virtual Camera:'
         }
       ]);
+      store.set('UpdateChannel', 'latest');
 		}
 	}
 });
