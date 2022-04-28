@@ -1,5 +1,12 @@
 Changelog
 
+# :rocket: Release [v2.1.0-beta.3](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2022-04-28)
+          
+
+### :sparkles: Enhancements
+
+* **charts:** add ability to toogle stream and core stats ([82afab8](https://github.com/umens/gones-streamer/commit/82afab8a60cb6db4fe0675d0da73c083bb7b68fa))
+
 # :rocket: Release [v2.1.0-beta.2](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.1...v2.1.0-beta.2) (2022-04-28)
           
 
