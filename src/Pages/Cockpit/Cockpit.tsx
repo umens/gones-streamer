@@ -177,6 +177,9 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       case 'new':
         await this.setState({ newGameModalVisible: true });
         break;
+      case 'toggleStats':
+        this.props.ObsRemote.toogleStats();
+        break;
     
       default:
         break;
@@ -237,6 +240,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       <Menu onClick={async(e) => await this.handleMenuClick(e)}>
         <Menu.Item key="new">Start New Game</Menu.Item>
         <Menu.Item key="reset">Reset Game</Menu.Item>
+        <Menu.Item key="toggleStats">{ this.props.ObsRemote.stats.enable ? 'Disable stats' : 'Enable stats' }</Menu.Item>
       </Menu>
     );
     const inputCompetRef = createRef<any>();

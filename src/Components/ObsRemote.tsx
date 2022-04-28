@@ -34,6 +34,7 @@ type ObsRemoteState = {
   Utilitites?: Utilities;
   streamingStats?: StreamingStats;
   coreStats?: CoreStats;
+  stats: { enable: boolean; core: boolean; stream: boolean; };
 
   reconnectObs: () => Promise<void>;
   goLive: () => Promise<void>;
@@ -80,6 +81,11 @@ type ObsRemoteState = {
   toggleMute: (inputName: string) => Promise<void>;
   changeVolume: (volume: number, inputName: string) => Promise<void>;
   firstLoadDone: () => Promise<void>;
+  startCoreStats: () => void;
+  stoptCoreStats: () => void;
+  startStats: () => void;
+  stopStats: () => void;
+  toogleStats: () => void;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -97,6 +103,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       connected2Obs: false,
       firstDatasLoaded: false,
       scenes: null,
+      stats: { enable: true, core: true, stream: false },
       // homeTeam: null,
       // awayTeam: null,
       store: null,
@@ -145,6 +152,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       toggleMute: this.toggleMute.bind(this),
       changeVolume: this.changeVolume.bind(this),
       firstLoadDone: this.firstLoadDone.bind(this),
+      startCoreStats: this.startCoreStats.bind(this),
+      stoptCoreStats: this.stoptCoreStats.bind(this),
+      startStats: this.startStats.bind(this),
+      stopStats: this.stopStats.bind(this),
+      toogleStats: this.toogleStats.bind(this),
     };
 
     // obsWs.on('StreamStarted', async () => {
@@ -237,17 +249,47 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   }
   
   startStats = (): void => {
-    this.intervalStatsId = window.setInterval(this.handleStatsDatas, 1000);
-  }
-  
-  startCoreStats = (): void => {
-    this.intervalCoreStatsId = window.setInterval(this.handleCoreStatsDatas, 1000);
+    if(this.state.stats.enable) {
+      this.intervalStatsId = window.setInterval(this.handleStatsDatas, 1000);
+      this.setState({ stats: { enable: this.state.stats.enable, core: this.state.stats.core, stream: true }});
+    }
   }
   
   stopStats = (): void => {
     if (this.intervalStatsId) {
       clearInterval(this.intervalStatsId);
       // await this.setState({ timeout: undefined, preview: undefined });
+    }
+    this.setState({ stats: { enable: this.state.stats.enable, core: this.state.stats.core, stream: false }});
+  }
+  
+  startCoreStats = (): void => {
+    if(this.state.stats.enable) {
+      this.intervalCoreStatsId = window.setInterval(this.handleCoreStatsDatas, 1000);
+      this.setState({ stats: { enable: this.state.stats.enable, core: true, stream: this.state.stats.stream }});
+    }
+  }
+  
+  stoptCoreStats = (): void => {
+    if (this.intervalCoreStatsId) {
+      clearInterval(this.intervalCoreStatsId);
+    }
+    this.setState({ stats: { enable: this.state.stats.enable, core: false, stream: this.state.stats.stream }});
+  }
+
+  toogleStats = (): void => {
+    if(this.state.stats.enable === false) {
+      this.startCoreStats();
+      if(this.state.live) {
+        this.startStats();
+      }
+      this.setState({ stats: { enable: true, core: true, stream: this.state.live ? true : false }});
+    } else {
+      this.stoptCoreStats();
+      if(this.state.live) {
+        this.stopStats();
+      }
+      this.setState({ stats: { enable: false, core: false, stream: this.state.live ? true : false }});
     }
   }
 
