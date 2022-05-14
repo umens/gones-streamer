@@ -22,6 +22,13 @@ class Preview extends React.Component<PreviewProps, PreviewState> {
     };
   }
 
+  shouldComponentUpdate = (nextProps: Readonly<PreviewProps>, nextState: Readonly<PreviewState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
+  }
+
   getWidth = () => document.getElementById("previewDisplayImg")!.offsetWidth;
 
   resizeListener = async () => {

@@ -30,9 +30,8 @@ class BackgroundTextControl extends React.Component<BackgroundTextControlProps, 
 
   componentDidMount = async () => {
     try {
-      const data = await this.props.ObsRemote.getTextParameters();
       const policesAvailable = await window.app.getFonts();
-      await this.setState({ initialValues: data, policesAvailable, loadingFonts: false });
+      await this.setState({ initialValues: this.props.ObsRemote.store?.TextsSettings, policesAvailable, loadingFonts: false });
     } catch (error) {
       console.log(error);
     }
@@ -50,6 +49,7 @@ class BackgroundTextControl extends React.Component<BackgroundTextControlProps, 
     try {
       await this.setState({ sendingForm: true });
       await this.props.ObsRemote.updateTextsSettings(values);
+      await window.app.manageStoredConfig({ action: 'set', key: 'TextsSettings', value: values });
       await this.setState({ sendingForm: false });      
       message.success({ content: 'Texts updated !', key: 'textsupdated' });
     } catch (error) {

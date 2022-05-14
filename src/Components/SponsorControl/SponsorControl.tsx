@@ -37,6 +37,13 @@ class SponsorControl extends React.Component<SponsorControlProps, SponsorControl
     };
   }
 
+  shouldComponentUpdate = (nextProps: Readonly<SponsorControlProps>, nextState: Readonly<SponsorControlState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
+  }
+
   componentDidMount = () => {
   }
   

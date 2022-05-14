@@ -25,6 +25,13 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
     }
   }
 
+  shouldComponentUpdate = (nextProps: Readonly<ScenesProps>, nextState: Readonly<ScenesState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
+  }
+
   changeScene = (name: SceneName) => async (event: SyntheticEvent) => {
     try {
       await this.props.ObsRemote.changeActiveScene(name);

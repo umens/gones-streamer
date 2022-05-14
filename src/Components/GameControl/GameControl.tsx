@@ -20,6 +20,13 @@ class GameControl extends React.Component<GameControlProps, GameControlState> {
     };
   }
 
+  shouldComponentUpdate = (nextProps: Readonly<GameControlProps>, nextState: Readonly<GameControlState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
+  }
+
   changeQuarter = async (e: any) => {
     try {
       await this.props.ObsRemote.updateGameEventProps({ props: 'quarter' , value: e.target.value as Quarter });

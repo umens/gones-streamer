@@ -27,7 +27,14 @@ export type StoreType = {
   Sponsors: Sponsor[];
   Players: Player[];
   UpdateChannel: string;
+  TextsSettings: TextsSettings;
+  ScoreboardSettings: ScoreboardSettings;
 };
+
+export type ScoreboardSettings = {
+  position: ScoreboardSettingsPosition,
+  style: ScoreboardSettingsStyle,
+}
 
 export type TextsSettings = {
   font: string;
@@ -145,6 +152,20 @@ export type AutoUpdaterData = {
  * Enums
  */
 
+export enum ScoreboardSettingsPosition {
+  TL = 'top left',
+  TC = 'top center',
+  TR = 'top right',
+  BL = 'bottom left',
+  BC = 'bottom center',
+  BR = 'bottom right',
+}
+
+export enum ScoreboardSettingsStyle {
+  STYLE1 = 'style 1',
+  STYLE2 = 'style 2',
+}
+
 export enum AutoUpdaterEvent {
   QUITANDINSTALL = 'install-requested-updater',
   DOWNLOADRESQUESTED = 'download-requested-updater',
@@ -196,10 +217,11 @@ export enum SceneName {
 }
 
 export enum StreamingSport {
-  Football = 0,
-  Soccer = 1,
-  Basketball = 2,
-  Handball = 3,
+  FOOTBALL = 'football',
+  SOCCER = 'soccer',
+  BASKETBALL = 'basketball',
+  HANDBALL = 'handball',
+  RUGBY = 'rugby',
 }
 
 export enum ScoreType {
@@ -220,8 +242,8 @@ export enum AnimationType {
 }
 
 export enum StreamingService {
-  Youtube = 'youtube',
-  Facebook = 'facebook',
+  YOUTUBE = 'youtube',
+  FACEBOOK = 'facebook',
 }
 
 export enum MediaType {
@@ -307,8 +329,8 @@ export function GetDefaultConfig(): StoreType {
     bitrate: 6000,
     buffer: 15,
     streamKey: '',
-    sport: StreamingSport.Football,
-    streamingService: StreamingService.Youtube,
+    sport: StreamingSport.FOOTBALL,
+    streamingService: StreamingService.YOUTUBE,
   };
   const CamerasHardware: CameraHardware[] = [
     {
@@ -321,6 +343,17 @@ export function GetDefaultConfig(): StoreType {
   const Sponsors: Sponsor[] = [];
   const Players: Player[] = [];
   const BackgroundImage = '../../../../appDatas/bg.jpg';
+  const TextsSettings: TextsSettings = {
+    awayTeamColor: '#ffffff',
+    font: 'Impact',
+    homeTeamColor: '#ffffff',
+    journeyColor: '#ffffff',
+    scoreColor: '#ffffff',
+  };
+  const ScoreboardSettings: ScoreboardSettings = {
+    position: ScoreboardSettingsPosition.TR,
+    style: ScoreboardSettingsStyle.STYLE1
+  };
   let storedConfigDefault: StoreType = {
     GameStatut,
     LiveSettings,
@@ -330,6 +363,8 @@ export function GetDefaultConfig(): StoreType {
     Sponsors,
     Players,
     UpdateChannel: 'latest',
+    TextsSettings,
+    ScoreboardSettings,
   }
   return storedConfigDefault;
 }

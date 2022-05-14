@@ -5,8 +5,8 @@ import { Editable } from "./Editable/Editable";
 import { ScoreTable } from "./ScoreTable/ScoreTable";
 import { GameControl } from "./GameControl/GameControl";
 import { Preview } from "./Preview/Preview";
-import { Scoreboard } from "./Scoreboard/Scoreboard";
-import { ScoreboardEditable } from "./ScoreboardEditable/ScoreboardEditable";
+import { Scoreboard } from "./Scoreboard";
+import { ScoreboardEditable, ScoreboardEditableStyle1, BaseScoreboardEditable } from "./ScoreboardEditable";
 import { GameClockEditable } from "./GameClockEditable/GameClockEditable";
 import { GameClock } from "./GameClock/GameClock";
 import { SponsorControl } from "./SponsorControl/SponsorControl";
@@ -22,6 +22,8 @@ import { AudioForm } from './AudioForm/AudioForm';
 import { BackgroundTextControl } from './BackgroundTextControl/BackgroundTextControl';
 import ColorPicker from "./ColorPicker/ColorPicker";
 import { RealTimeLineChart, RealTimeBarChart } from './Charts';
+import { ScoreboardControl } from "./ScoreboardControl/ScoreboardControl";
 
-export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, CameraControl, CameraForm, AudioSources, VuMeter, AudioControl, AudioForm, BackgroundTextControl, ColorPicker, RealTimeLineChart, RealTimeBarChart };
+
+export { Scenes, ObsRemote, Team, Editable, ScoreTable, GameControl, Preview, Scoreboard, ScoreboardEditable, ScoreboardEditableStyle1, BaseScoreboardEditable, GameClockEditable, GameClock, SponsorControl, PlayerControl, VideoPreview, SponsorForm, CameraControl, CameraForm, AudioSources, VuMeter, AudioControl, AudioForm, BackgroundTextControl, ColorPicker, RealTimeLineChart, RealTimeBarChart, ScoreboardControl };
 export type { IObsRemote, SponsorFormValues, CameraFormValues };
