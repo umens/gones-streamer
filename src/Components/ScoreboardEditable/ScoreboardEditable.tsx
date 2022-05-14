@@ -1,9 +1,8 @@
 import React from "react";
-import { GameClockEditable, IObsRemote } from "../";
-import { Row, Col } from "antd";
-import { Quarter } from "../../Models";
+import { ScoreboardEditableStyle1, ScoreboardEditableStyle2 } from './';
+import { IObsRemote } from "../";
 import './ScoreboardEditable.css';
-import { TeamScorboardEditable } from "../TeamScorboardEditable/TeamScorboardEditable";
+import { ScoreboardSettingsStyle } from "../../Models/Models";
 
 type ScoreboardEditableProps = {
   ObsRemote: IObsRemote;
@@ -18,42 +17,22 @@ class ScoreboardEditable extends React.Component<ScoreboardEditableProps, Scoreb
     };
   }
 
+  shouldComponentUpdate = (nextProps: Readonly<ScoreboardEditableProps>, nextState: Readonly<ScoreboardEditableState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
+  }
+
   render() {
-
-    return (
-      <Row gutter={[0, 0]}>
-        <Col span={24}>
-          <div className="scoreAndTime" style={{ display: 'flex', flexDirection: 'row', justifyContent: "center" }}>
-
-            <TeamScorboardEditable ObsRemote={this.props.ObsRemote} isHomeTeam={true} />
-
-            <TeamScorboardEditable ObsRemote={this.props.ObsRemote} isHomeTeam={false} />
-
-            <div className="teamblock-scoreboard" style={{ marginLeft: '5px', width: this.props.ObsRemote.store?.GameStatut.Options.clock.active ? 180 : 145, background: '#333333', position: 'relative', overflow: "hidden" }}>
-              <div className="quarter-scoreboard" style={{ textAlign: "center", fontWeight: 700, color: 'white'}}>
-                <p style={{ transform: 'skewX(25deg)', margin: 0 }}>
-                  { this.props.ObsRemote.store?.GameStatut.Options.clock.active && <GameClockEditable ObsRemote={this.props.ObsRemote}></GameClockEditable> }
-                  <span>{ this.props.ObsRemote.store?.GameStatut.Options.quarter === Quarter.OT ? 'OT' : 'Q' + this.props.ObsRemote.store?.GameStatut.Options.quarter }</span>
-                </p>
-              </div>
-              <div className="quarter-scoreboard bg-warning" style={{ 
-                textAlign: "center", 
-                fontWeight: 700, 
-                color: "black", 
-                position: "absolute", 
-                top: 0, 
-                right: this.props.ObsRemote.store?.GameStatut.Options.flag ? 0 : this.props.ObsRemote.store?.GameStatut.Options.clock.active ? 180 : 145, 
-                width: this.props.ObsRemote.store?.GameStatut.Options.clock.active ? 180 : 145, 
-                transition: "all ease 0.8s" 
-              }}>
-                <p style={{ transform: 'skewX(25deg)', margin: 0 }}>FLAG</p>
-              </div>
-            </div>
-
-          </div>
-        </Col>
-      </Row>
-    );
+    switch (this.props.ObsRemote.store?.ScoreboardSettings.style || ScoreboardSettingsStyle.STYLE1) {
+      case ScoreboardSettingsStyle.STYLE2:
+        return <ScoreboardEditableStyle2 ObsRemote={this.props.ObsRemote}/>;
+    
+      case ScoreboardSettingsStyle.STYLE1:
+      default:
+        return <ScoreboardEditableStyle1 ObsRemote={this.props.ObsRemote}/>;
+    }
   }
 };
 

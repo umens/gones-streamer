@@ -57,6 +57,9 @@ export default class ScoreboardWindow {
     
     if (isDev) {
       this.window.loadURL('http://localhost:3000/index.html#/scoreboard');
+      this.window.webContents.on("did-frame-finish-load", () => {
+          this.window && this.window.webContents.openDevTools()
+      });
     } else {
       // 'build/index.html'
       this.window.removeMenu();

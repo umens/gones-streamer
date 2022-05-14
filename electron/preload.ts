@@ -1,8 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ipcRenderer, contextBridge } from 'electron';
-import { AudioHardware, AutoUpdaterData, AutoUpdaterEvent, CameraHardware, FileUp, GameStatut, LiveSettings, PathsType, Player, Sponsor, StoreType } from '../src/Models';
+import { AudioHardware, AutoUpdaterData, AutoUpdaterEvent, CameraHardware, FileUp, GameStatut, LiveSettings, PathsType, Player, Quarter, Sponsor, StoreType, TextsSettings, Timeout } from '../src/Models';
 import { dialog } from '@electron/remote'
 import { LocalFileData, constructFileFromLocalFileData } from 'get-file-object-from-local-path';
+import { ScoreboardSettings } from '../src/Models/Models';
 
 function getFileFromPath(path: string): FileUp | null {
   try {
@@ -33,9 +34,10 @@ ipcRenderer.on('autoUpdate', (_event, data: {eventType: AutoUpdaterEvent, data: 
 
 contextBridge.exposeInMainWorld('app', {
   
-  GetStoredConfig: async (): Promise<StoreType> => {
+  manageStoredConfig: async (params: { action: string, key?: string, value?: StoreType | string | number | boolean | Timeout | Quarter | TextsSettings | ScoreboardSettings }): Promise<StoreType> => {
     try {
-      return await ipcRenderer.invoke('stored-config');
+      const store = await ipcRenderer.invoke('stored-config', { params });
+      return store;
     } catch (error) {
       console.error(error);
       throw error;

@@ -1,8 +1,8 @@
-.teamblock-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard {
   height: 50px;
   transform: skewX(-25deg);
 }
-.teamblock-scoreboard .img-thumbnail {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .img-thumbnail {
   padding: .25rem;
   background-color: #fff;
   border: 1px solid #dee2e6;
@@ -10,7 +10,7 @@
   max-width: 100%;
   height: auto;
 }
-.teamblock-scoreboard .teamlogo-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .teamlogo-scoreboard {
   height: 50px;
   transform: skewX(25deg);
   position: absolute;
@@ -19,7 +19,7 @@
   border: none;
   z-index: 2;
 }
-.teamblock-scoreboard .teamname-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .teamname-scoreboard {
   transform: skewX(25deg);
   position: absolute;
   left: 70px;
@@ -31,7 +31,7 @@
   text-overflow: ellipsis;
   z-index: 2;
 }
-.teamblock-scoreboard .teamscore-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .teamscore-scoreboard {
   transform: skewX(25deg);
   position: absolute;
   right: 15px;
@@ -39,31 +39,31 @@
   line-height: 50px;
   z-index: 2;
 }
-.teamblock-scoreboard .teampossession-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .teampossession-scoreboard {
   height: 3px;
   position: absolute;
   bottom: -3px;
   width: 100%;
 }
-.teamblock-scoreboard .teamtimeoutblock-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .teamtimeoutblock-scoreboard {
   display: flex;
   position: absolute;
   bottom: -13px;
 }
-.teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard {
   width: 25px;
   height: 7px;
   margin-right: 3px;
 }
-.teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard:last-child {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard:last-child {
   margin-right: 0;
 }
-.teamblock-scoreboard .quarter-scoreboard {
+#teamScoreboardEditStyle1 > .teamblock-scoreboard .quarter-scoreboard {
   /* transform: skewX(25deg); */
   font-size: 30px;
   line-height: 50px;
 }
-.teamcolor-scoreboard {
+#teamScoreboardEditStyle1 > .teamcolor-scoreboard {
   width: 100%;
   position: absolute;
   height: 50px;

@@ -1,10 +1,11 @@
 import React from "react";
-import { CameraControl, IObsRemote, PlayerControl, SponsorControl, AudioControl, BackgroundTextControl } from "../../Components";
+import { CameraControl, IObsRemote, PlayerControl, SponsorControl, AudioControl, BackgroundTextControl, ScoreboardControl } from "../../Components";
 import { Row, Col, message, Form, Input, Button, Select, Card, Divider } from "antd";
 import ReactDropzone from "react-dropzone";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
 import { AutoUpdaterData, AutoUpdaterEvent, FileUp, StreamingService, StreamingSport, UpdateChannel } from "../../Models";
+import { Utilities } from "../../Utils";
 
 type SettingsProps = {  
   ObsRemote: IObsRemote;
@@ -37,6 +38,13 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
     window.addEventListener('autoUpdaterEvent', this.onData);
     // let devices = await navigator.mediaDevices.enumerateDevices();
     // console.log(devices.filter(({ kind }) => kind === "videoinput"));
+  }
+
+  shouldComponentUpdate = (nextProps: Readonly<SettingsProps>, nextState: Readonly<SettingsState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
   }
 
   onData = async (data: any) => {
@@ -172,6 +180,10 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
         key: 'sponsorsAdmin',
         tab: 'Sponsors',
       },
+      {
+        key: 'scoreboardAdmin',
+        tab: 'Scoreboard',
+      },
     ];
 
     const contentList: { [key: string]: JSX.Element } = 
@@ -197,6 +209,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
       audio: <AudioControl ObsRemote={this.props.ObsRemote} editable={true} />,
       playersAdmin: <PlayerControl ObsRemote={this.props.ObsRemote} editable={true} />,
       sponsorsAdmin: <SponsorControl ObsRemote={this.props.ObsRemote} editable={true} />,
+      scoreboardAdmin: <ScoreboardControl ObsRemote={this.props.ObsRemote} />
     };
 
     return (
@@ -220,16 +233,18 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
               <Divider orientation="left">App</Divider>
               <Form.Item label="Sport" name="sport">
                 <Select defaultValue={this.props.ObsRemote.store?.LiveSettings?.sport} style={{ width: '100%' }}>
-                  <Select.Option value={StreamingSport.Football}>Football Americain</Select.Option>
-                  <Select.Option value={StreamingSport.Soccer} disabled>Football</Select.Option>
-                  <Select.Option value={StreamingSport.Basketball} disabled>Basketball</Select.Option>
-                  <Select.Option value={StreamingSport.Handball} disabled>Handball</Select.Option>
+                { (Object.keys(StreamingSport) as (keyof typeof StreamingSport)[]).map((key, index) => (
+                    <Select.Option key={`sport-${index}`} value={StreamingSport[key]} disabled={StreamingSport[key] !== StreamingSport.FOOTBALL}>{Utilities.capitalize(StreamingSport[key].toLowerCase())}</Select.Option>
+                  ))
+                }
                 </Select>
               </Form.Item>
               <Form.Item label="Update Channel" name="updateChannel">
                 <Select defaultValue={this.props.ObsRemote.store?.UpdateChannel || UpdateChannel.STABLE} style={{ width: '100%' }}>
-                  <Select.Option value={UpdateChannel.STABLE}>Stable</Select.Option>
-                  <Select.Option value={UpdateChannel.BETA}>Bêta</Select.Option>
+                  { (Object.keys(UpdateChannel) as (keyof typeof UpdateChannel)[]).map((key, index) => (
+                      <Select.Option key={`update-${index}`} value={UpdateChannel[key]}>{Utilities.capitalize(UpdateChannel[key].toLowerCase())}</Select.Option>
+                    ))
+                  }
                 </Select>
                 <br/>
                 <br/>
@@ -241,8 +256,10 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
               <Divider orientation="left">Stream</Divider>
               <Form.Item label="Service de streaming" name="service">
                 <Select style={{ width: '100%' }}>
-                  <Select.Option value={StreamingService.Youtube}>Youtube</Select.Option>
-                  <Select.Option value={StreamingService.Facebook} disabled>Facebook</Select.Option>
+                  { (Object.keys(StreamingService) as (keyof typeof StreamingService)[]).map((key, index) => (
+                      <Select.Option key={`service-${index}`} value={StreamingService[key]} disabled={StreamingService[key] !== StreamingService.YOUTUBE}>{Utilities.capitalize(StreamingService[key].toLowerCase())}</Select.Option>
+                    ))
+                  }
                 </Select>
               </Form.Item>
               <Form.Item name="key" label="Clé">

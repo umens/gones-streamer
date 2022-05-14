@@ -10,16 +10,20 @@ import {
   Route,
   Routes
 } from "react-router-dom";
-import { Scoreboard } from './Components';
+import { IObsRemote, ObsRemote, Scoreboard } from './Components';
 
 ReactDOM.render(
   // <React.StrictMode>
-  <Router>
-    <Routes>
-      <Route path="/scoreboard" element={<Scoreboard />} />
-      <Route path="/*" element={<App />} />
-    </Routes>
-  </Router>,
+  <ObsRemote>
+    {( ObsRemoteState: IObsRemote ) => (
+      <Router>
+        <Routes>
+          <Route path="/scoreboard" element={<Scoreboard ObsRemote={ObsRemoteState}/>} />
+          <Route path="/*" element={<App ObsRemote={ObsRemoteState}/>} />
+        </Routes>
+      </Router>
+      )}
+    </ObsRemote>,
   // </React.StrictMode>, 
   document.getElementById('root')
 );

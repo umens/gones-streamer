@@ -1,10 +1,10 @@
 import { Component } from "react";
 import OBSWebSocket, { EventSubscription } from 'obs-websocket-js';
 import { notification } from "antd";
-// import { SceneName, GameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter } from "../Models";
-import { StoreType, SceneName, GameStatut as IGameStatut, LiveSettings as ILiveSettings, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, StreamingService, StreamingSport, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSInputProps, AudioHardware, AudioType, TextsSettings, CoreStats, AutoUpdaterEvent } from "../Models";
+import { StoreType, SceneName, GameStatut as IGameStatut, Timeout, Team, GameEvent, TeamPossession, Quarter, FileUp, ScoreType, GetDefaultConfig, AnimationType, Sponsor, Player, SponsorDisplayType, MediaType, SponsorDisplayTypeSceneIdSmall, SponsorDisplayTypeSceneIdBig, StreamingStats, CameraHardware, OBSInputProps, AudioHardware, AudioType, TextsSettings, CoreStats, AutoUpdaterEvent } from "../Models";
 import { Utilities } from "../Utils";
 import { Datum } from "@nivo/line";
+import { ScoreboardSettings, ScoreboardSettingsStyle } from "../Models/Models";
 
 const obsWs = new OBSWebSocket();
 
@@ -76,16 +76,17 @@ type ObsRemoteState = {
   addAudio: (audio: AudioHardware) => Promise<void>;
   editAudio: (audio: AudioHardware) => Promise<void>;
   removeAudio: (audio: AudioHardware) => Promise<void>;
-  getTextParameters: () => Promise<TextsSettings>;
   updateTextsSettings: (values: TextsSettings) => Promise<void>;
   toggleMute: (inputName: string) => Promise<void>;
   changeVolume: (volume: number, inputName: string) => Promise<void>;
   firstLoadDone: () => Promise<void>;
-  startCoreStats: () => void;
-  stoptCoreStats: () => void;
-  startStats: () => void;
-  stopStats: () => void;
-  toogleStats: () => void;
+  startCoreStats: () => Promise<void>;
+  stoptCoreStats: () => Promise<void>;
+  startStats: () => Promise<void>;
+  stopStats: () => Promise<void>;
+  toogleStats: () => Promise<void>;
+  sendUpdateToScoreboardWindow: () => Promise<void>;
+  updateScoreboardSettings: (values: ScoreboardSettings) => Promise<void>;
 };
 
 class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
@@ -147,7 +148,6 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       addAudio: this.addAudio.bind(this),
       editAudio: this.editAudio.bind(this),
       removeAudio: this.removeAudio.bind(this),
-      getTextParameters: this.getTextParameters.bind(this),
       updateTextsSettings: this.updateTextsSettings.bind(this),
       toggleMute: this.toggleMute.bind(this),
       changeVolume: this.changeVolume.bind(this),
@@ -157,6 +157,8 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       startStats: this.startStats.bind(this),
       stopStats: this.stopStats.bind(this),
       toogleStats: this.toogleStats.bind(this),
+      sendUpdateToScoreboardWindow: this.sendUpdateToScoreboardWindow.bind(this),
+      updateScoreboardSettings: this.updateScoreboardSettings.bind(this),
     };
 
     // obsWs.on('StreamStarted', async () => {
@@ -248,48 +250,63 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
   
-  startStats = (): void => {
+  startStats = async (): Promise<void> => {
     if(this.state.stats.enable) {
       this.intervalStatsId = window.setInterval(this.handleStatsDatas, 1000);
       this.setState({ stats: { enable: this.state.stats.enable, core: this.state.stats.core, stream: true }});
     }
   }
   
-  stopStats = (): void => {
+  stopStats = async (): Promise<void> => {
     if (this.intervalStatsId) {
       clearInterval(this.intervalStatsId);
-      // await this.setState({ timeout: undefined, preview: undefined });
     }
     this.setState({ stats: { enable: this.state.stats.enable, core: this.state.stats.core, stream: false }});
   }
   
-  startCoreStats = (): void => {
+  startCoreStats = async (): Promise<void> => {
     if(this.state.stats.enable) {
       this.intervalCoreStatsId = window.setInterval(this.handleCoreStatsDatas, 1000);
       this.setState({ stats: { enable: this.state.stats.enable, core: true, stream: this.state.stats.stream }});
     }
   }
   
-  stoptCoreStats = (): void => {
+  stoptCoreStats = async (): Promise<void> => {
     if (this.intervalCoreStatsId) {
       clearInterval(this.intervalCoreStatsId);
     }
     this.setState({ stats: { enable: this.state.stats.enable, core: false, stream: this.state.stats.stream }});
   }
 
-  toogleStats = (): void => {
+  toogleStats = async (): Promise<void> => {
     if(this.state.stats.enable === false) {
-      this.startCoreStats();
+      await this.setState({ stats: { enable: true, core: true, stream: this.state.live ? true : false }});
+      await this.startCoreStats();
       if(this.state.live) {
-        this.startStats();
+        await this.startStats();
       }
-      this.setState({ stats: { enable: true, core: true, stream: this.state.live ? true : false }});
     } else {
-      this.stoptCoreStats();
+      await this.setState({ 
+        stats: { 
+          enable: false, 
+          core: false, 
+          stream: this.state.live ? true : false 
+        },
+        streamingStats: {
+          bytesPerSec: 0,
+          totalStreamTime: '00:00:00',
+        },
+        // coreStats: {
+        //   cpuUsage: [{ x : new Date(), y: 0 }],
+        //   droppedFrame: 0,
+        //   memoryUsage: [{ x : new Date(), y: 0 }],
+        //   oldDroppedFrame: 0,
+        // }
+      });
+      await this.stoptCoreStats();
       if(this.state.live) {
-        this.stopStats();
+        await this.stopStats();
       }
-      this.setState({ stats: { enable: false, core: false, stream: this.state.live ? true : false }});
     }
   }
 
@@ -347,8 +364,10 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   } 
 
   startApp = async() => {
-    try {
-      this.startCoreStats();
+    try {      
+      const store = await window.app.manageStoredConfig({ action: 'get'});
+      await this.setState({ store });
+      await this.startCoreStats();
       await this.connectObs();
       await this.getScenes();
       await this.initGameStatut();
@@ -573,79 +592,47 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   initGameStatut = async (): Promise<void> => {
     try {
-      const defaultConfig = GetDefaultConfig();
-      let logoH = await (await obsWs.call('GetInputSettings', { inputName: 'Home Logo' })).inputSettings;
-      const HomeTeam: Team = {
-        name: await (await obsWs.call('GetInputSettings', { inputName: 'Home Name Text' })).inputSettings.text + '',
-        city: await (await obsWs.call('GetInputSettings', { inputName: 'Home City Text' })).inputSettings.text + '',
-        score: +await (await obsWs.call('GetInputSettings', { inputName: 'Home Score Text' })).inputSettings.text!,
-        logo: await this.state.Utilitites!.getBase64FromFilePath(logoH.file as string),
-        color: "#133155",
-        timeout: Timeout.THREE
-      };
-      let logoA = await (await obsWs.call('GetInputSettings', { inputName: 'Away Logo' })).inputSettings;
-      const AwayTeam: Team = {
-        name: await (await obsWs.call('GetInputSettings', { inputName: 'Away Name Text' })).inputSettings.text + '',
-        city: await (await obsWs.call('GetInputSettings', { inputName: 'Away City Text' })).inputSettings.text + '',
-        score: +await (await obsWs.call('GetInputSettings', { inputName: 'Away Score Text' })).inputSettings.text!,
-        logo: await this.state.Utilitites!.getBase64FromFilePath(logoA.file as string),
-        color: "#612323",
-        timeout: Timeout.THREE
-      };
-      const competWeek = (await (await obsWs.call('GetInputSettings', { inputName: 'Week Text' })).inputSettings.text! + '').split(' - ');
-      let Options: GameEvent = { 
-        ...defaultConfig.GameStatut.Options, 
-        ...{ 
-          competition: competWeek[0],
-          journee: competWeek[1]
-        }
-      };
-      let GameStatut: IGameStatut = {
-        HomeTeam,
-        AwayTeam,
-        Options,
-      };
-      const buffer = await (await obsWs.call('GetInputSettings', { inputName: 'Replay Video' })).inputSettings;
-      const bitrate = await window.app.manageObsSettings({ setter: false });
-      // const bitrate = +await (await obsWs.call('GetProfileParameter', { parameterCategory: 'Output', parameterName: 'VBitrate' })).parameterValue;
-      let LiveSettings: ILiveSettings = {
-        bitrate,
-        buffer: buffer.duration as number,
-        streamKey: await (await obsWs.call('GetStreamServiceSettings')).streamServiceSettings.key + '',
-        sport: StreamingSport.Football,
-        streamingService: StreamingService.Youtube,
-      };
+      const store = this.state.store!;
+      // const defaultConfig = GetDefaultConfig();
+
+      //scoreboard      
+      await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName(SceneName.Live, 'scoreboard'), sceneItemEnabled: store.GameStatut.Options.showScoreboard, sceneName: SceneName.Live });
+
+      // home team
+      await obsWs.call('SetInputSettings', { inputName: 'Home Name Text', inputSettings: { text: store.GameStatut.HomeTeam.name } });
+      await obsWs.call('SetInputSettings', { inputName: 'Home City Text', inputSettings: { text: store.GameStatut.HomeTeam.city } });
+      await obsWs.call('SetInputSettings', { inputName: 'Home Score Text', inputSettings: { text: store.GameStatut.HomeTeam.score } });
+      const bgImgH = await (await obsWs.call('GetInputSettings', { inputName: 'Home Logo' })).inputSettings;
+      const bgImgH64 = await this.state.Utilitites!.getBase64FromFilePath(bgImgH.file as string);
+      store.GameStatut.HomeTeam.logo = bgImgH64;
+
+      // away team
+      await obsWs.call('SetInputSettings', { inputName: 'Away Name Text', inputSettings: { text: store.GameStatut.AwayTeam.name } });
+      await obsWs.call('SetInputSettings', { inputName: 'Away City Text', inputSettings: { text: store.GameStatut.AwayTeam.city } });
+      await obsWs.call('SetInputSettings', { inputName: 'Away Score Text', inputSettings: { text: store.GameStatut.AwayTeam.score } });
+      const bgImgA = await (await obsWs.call('GetInputSettings', { inputName: 'Away Logo' })).inputSettings;
+      const bgImgA64 = await this.state.Utilitites!.getBase64FromFilePath(bgImgA.file as string);
+      store.GameStatut.AwayTeam.logo = bgImgA64;
+      
+      await obsWs.call('SetInputSettings', { inputName: 'Week Text', inputSettings: { text: `${store.GameStatut.Options.competition} - ${store.GameStatut.Options.journee}` } });
+      
+      await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: store.LiveSettings.buffer }});
+
+      await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: store.LiveSettings.buffer }});
+      
+      await window.app.manageObsSettings({ setter: true, bitrate: store.LiveSettings.bitrate });
+      await obsWs.call('SetStreamServiceSettings', { streamServiceType: 'rtmp_common', streamServiceSettings: { key: store.LiveSettings.streamKey } });
+
+      await this.updateTextsSettings(store.TextsSettings);
+
       const bgImg = await (await obsWs.call('GetInputSettings', { inputName: 'Background' })).inputSettings;
       const bgImg64 = await this.state.Utilitites!.getBase64FromFilePath(bgImg.file as string);
-      // TODO: wait for GetSceneItemList to be release to list all cams
-      /**
-       * Same for DeleteSceneItem (Available) & DuplicateSceneItem (Available) to implemente adding and removing cams
-       * configuring them with SetSceneItemProperties (Available) and navigator.mediaDevices.enumerateDevices()
-       * use GetSourceSettings to check video input of the cam
-       */
-      // let cameras = await obsWs.send('GetSceneItemList');
-
+      store.BackgroundImage = bgImg64;
       
-      const Sponsors = await window.app.manageSponsors({ action: 'get' });
-      const Players = await window.app.managePlayers({ action: 'get' });
-      const CamerasHardware = await window.app.manageCamera({ action: 'get' });
-      const AudioHardware = await window.app.manageAudio({ action: 'get' });
-      const UpdateChannel = await (await window.app.GetStoredConfig()).UpdateChannel;
-
-      let store: StoreType = {
-        GameStatut,
-        LiveSettings,
-        BackgroundImage: bgImg64,
-        CamerasHardware,
-        AudioHardware,
-        Sponsors,
-        Players,
-        UpdateChannel,
-      };
       await this.setState({ store, firstDatasLoaded: true });
       await this.sendUpdateToScoreboardWindow();
     } catch (error) {
-
+      console.log(error)
     }
   }
 
@@ -658,8 +645,17 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: +value.buffer * 1000 } });
       await obsWs.call('SetStreamServiceSettings', { streamServiceType: 'rtmp_common', streamServiceSettings: { key: value.key } });
       // await obsWs.call('SetProfileParameter', { parameterCategory: 'Output', parameterName: 'VBitrate', parameterValue: value.bitrate });
+    
       await window.app.handleUpdater(AutoUpdaterEvent.CHANNELCHANGED, value.updateChannel);
       await window.app.manageObsSettings({ setter: true, bitrate: +value.bitrate });
+      let store = this.state.store;
+      await window.app.manageStoredConfig({ action: 'set', key: 'LiveSettings.buffer', value: +value.buffer });
+      await window.app.manageStoredConfig({ action: 'set', key: 'LiveSettings.streamKey', value: value.key as string });
+      await window.app.manageStoredConfig({ action: 'set', key: 'LiveSettings.bitrate', value: +value.bitrate });
+      store!.LiveSettings!.bitrate = +value.bitrate;
+      store!.LiveSettings!.streamKey = value.key;
+      store!.LiveSettings!.buffer = value.buffer;
+      await this.setState({ store });
     } catch (error) {
 
     }
@@ -739,9 +735,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           homeTeam ? store.GameStatut.HomeTeam.city = value as string : store.GameStatut.AwayTeam.city = value as string;
           const sourceCityText = homeTeam ? 'Home City Text' : 'Away City Text'
           await obsWs.call('SetInputSettings', { inputName: sourceCityText, inputSettings: { text: value as string } });
+          await window.app.manageStoredConfig({ action: 'set', key: homeTeam ? 'GameStatut.HomeTeam.city' : 'GameStatut.AwayTeam.city', value: value as string });
           break;
         case 'color':
           homeTeam ? store.GameStatut.HomeTeam.color = value as string : store.GameStatut.AwayTeam.color = value as string;
+          await window.app.manageStoredConfig({ action: 'set', key: homeTeam ? 'GameStatut.HomeTeam.color' : 'GameStatut.AwayTeam.color', value: value as string });
           // homeTeam ? await obsWs.send('SetTextGDIPlusProperties', { source: 'Home Name Text', text: value as string }) : await obsWs.send('SetTextGDIPlusProperties', { source: 'Away Name Text', text: value as string });
           break;
         case 'logo':
@@ -764,12 +762,14 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
           homeTeam ? store.GameStatut.HomeTeam.name = value as string : store.GameStatut.AwayTeam.name = value as string;
           const sourceNameText = homeTeam ? 'Home Name Text' : 'Away Name Text'
           await obsWs.call('SetInputSettings', { inputName: sourceNameText, inputSettings: { text: value as string } });
+          await window.app.manageStoredConfig({ action: 'set', key: homeTeam ? 'GameStatut.HomeTeam.name' : 'GameStatut.AwayTeam.name', value: value as string });
           break;
         case 'score':
           homeTeam ? store.GameStatut.HomeTeam.score = Math.trunc(value as number) : store.GameStatut.AwayTeam.score = Math.trunc(value as number);
           const score: string = homeTeam ? '' + store.GameStatut.HomeTeam.score : '' +store.GameStatut.AwayTeam.score;
           const sourceScoreText = homeTeam ? 'Home Score Text' : 'Away Score Text'
           await obsWs.call('SetInputSettings', { inputName: sourceScoreText, inputSettings: { text: score.padStart(2, '0') } });
+          await window.app.manageStoredConfig({ action: 'set', key: homeTeam ? 'GameStatut.HomeTeam.score' : 'GameStatut.AwayTeam.score', value: score });
           break;
         case 'timeout':
           let animate = withAnimation && (homeTeam ? store.GameStatut.HomeTeam.timeout > value : store.GameStatut.AwayTeam.timeout > value);
@@ -781,6 +781,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
               await obsWs.call('SetSceneItemEnabled', { sceneItemId: timeoutItemId, sceneItemEnabled: false, sceneName: SceneName.Live });
             }, 4000);
           }
+          await window.app.manageStoredConfig({ action: 'set', key: homeTeam ? 'GameStatut.HomeTeam.timeout' : 'GameStatut.AwayTeam.timeout', value: value as Timeout });
           break;
 
         default:
@@ -798,11 +799,13 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       let store = this.state.store!;
       switch (props) {
         case 'quarter':
-          store.GameStatut.Options.quarter = value as Quarter;
+          store.GameStatut.Options.quarter = value as Quarter;          
+          await window.app.manageStoredConfig({ action: 'set', key: 'GameStatut.Options.quarter', value: value as Quarter });
           break;
         case 'showScoreboard':
           store.GameStatut.Options.showScoreboard = value as boolean;
           await obsWs.call('SetSceneItemEnabled', { sceneItemId: await this.findIdFromSceneItemName(SceneName.Live, 'scoreboard'), sceneItemEnabled: value as boolean, sceneName: SceneName.Live });
+          await window.app.manageStoredConfig({ action: 'set', key: 'GameStatut.Options.showScoreboard', value: value as boolean });
           break;
         case 'flag':
           store.GameStatut.Options.flag = value as boolean;
@@ -813,10 +816,12 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
         case 'competition':
           store.GameStatut.Options.competition = value as string;
           await obsWs.call('SetInputSettings', { inputName: 'Week Text', inputSettings: { text: value as string + ' - ' + store.GameStatut.Options.journee } });
+          await window.app.manageStoredConfig({ action: 'set', key: 'GameStatut.Options.competition', value: value as string });
           break;
         case 'journee':
           store.GameStatut.Options.journee = value as string;
           await obsWs.call('SetInputSettings', { inputName: 'Week Text', inputSettings: { text: store.GameStatut.Options.competition + ' - ' + value as string } });
+          await window.app.manageStoredConfig({ action: 'set', key: 'GameStatut.Options.journee', value: value as string });
           break;
 
         default:
@@ -915,19 +920,19 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       // scoreboard
       await this.updateGameEventProps({ props: "showScoreboard", value: defaultConfig.GameStatut.Options.showScoreboard });
       // Compet Day
-      await this.updateGameEventProps({ props: "competition", value: defaultConfig.GameStatut.Options.competition });
-      await this.updateGameEventProps({ props: "journee", value: defaultConfig.GameStatut.Options.journee });
+      // await this.updateGameEventProps({ props: "competition", value: defaultConfig.GameStatut.Options.competition });
+      // await this.updateGameEventProps({ props: "journee", value: defaultConfig.GameStatut.Options.journee });
       // home Team
-      await this.updateTextProps({ props: "city", value: defaultConfig.GameStatut.HomeTeam.city, homeTeam: true });
-      await this.updateTextProps({ props: "name", value: defaultConfig.GameStatut.HomeTeam.name, homeTeam: true });
-      await this.updateTextProps({ props: "logo", value: defaultConfig.GameStatut.HomeTeam.logo, homeTeam: true });
+      // await this.updateTextProps({ props: "city", value: defaultConfig.GameStatut.HomeTeam.city, homeTeam: true });
+      // await this.updateTextProps({ props: "name", value: defaultConfig.GameStatut.HomeTeam.name, homeTeam: true });
+      // await this.updateTextProps({ props: "logo", value: defaultConfig.GameStatut.HomeTeam.logo, homeTeam: true });
       // away Team
-      await this.updateTextProps({ props: "city", value: defaultConfig.GameStatut.AwayTeam.city });
-      await this.updateTextProps({ props: "name", value: defaultConfig.GameStatut.AwayTeam.name });
-      await this.updateTextProps({ props: "logo", value: defaultConfig.GameStatut.AwayTeam.logo });
+      // await this.updateTextProps({ props: "city", value: defaultConfig.GameStatut.AwayTeam.city });
+      // await this.updateTextProps({ props: "name", value: defaultConfig.GameStatut.AwayTeam.name });
+      // await this.updateTextProps({ props: "logo", value: defaultConfig.GameStatut.AwayTeam.logo });
 
       // background image
-      await this.updateTextProps({ props: "logo", value: defaultConfig.BackgroundImage!, bg: true });
+      // await this.updateTextProps({ props: "logo", value: defaultConfig.BackgroundImage!, bg: true });
       
       // set beginning scene
       await obsWs.call('SetCurrentProgramScene', { sceneName: SceneName.Starting });
@@ -1342,11 +1347,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
   getAvailableAudios = async (): Promise<{ type: AudioType, devices: OBSInputProps[] }[]> => {
     try {
       const { sceneItemId: sceneItemIdIn } = await obsWs.call('CreateInput', { sceneName: SceneName.Soundboard, inputName: 'tempInput', inputKind: AudioType.Input, sceneItemEnabled: false });
-      const itemsIn = await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'tempInput', propertyName: 'device_id'})).propertyItems as OBSInputProps[]
+      const itemsIn = await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'tempInput', propertyName: 'device_id'})).propertyItems as OBSInputProps[];
       await obsWs.call('RemoveSceneItem', { sceneName: SceneName.Soundboard , sceneItemId: sceneItemIdIn });
 
       const { sceneItemId: sceneItemIdOut } = await obsWs.call('CreateInput', { sceneName: SceneName.Soundboard, inputName: 'tempOutput', inputKind: AudioType.Output, sceneItemEnabled: false });
-      const itemOut = await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'tempOutput', propertyName: 'device_id'})).propertyItems as OBSInputProps[]
+      const itemOut = await (await obsWs.call('GetInputPropertiesListPropertyItems', {inputName: 'tempOutput', propertyName: 'device_id'})).propertyItems as OBSInputProps[];
       await obsWs.call('RemoveSceneItem', { sceneName: SceneName.Soundboard , sceneItemId: sceneItemIdOut });
       return [{ type: AudioType.Input, devices: itemsIn }, { type: AudioType.Output, devices: itemOut }];
 
@@ -1355,30 +1360,11 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
     }
   }
   
-  getTextParameters = async (): Promise<TextsSettings> => {
-    const journeyColor = await (await obsWs.call('GetInputSettings', { inputName: 'Coming Soon Text' })).inputSettings.color as number;
-    let font = (await (await obsWs.call('GetInputSettings', { inputName: 'Coming Soon Text' })).inputSettings.font as any).face;
-
-    // home color
-    const homeColor = await (await obsWs.call('GetInputSettings', { inputName: 'Home Name Text' })).inputSettings.color as number;
-    // away color
-    const awayColor = await (await obsWs.call('GetInputSettings', { inputName: 'Away Name Text' })).inputSettings.color as number;
-    // score color
-    const scoreColor = await (await obsWs.call('GetInputSettings', { inputName: 'Home Score Text' })).inputSettings.color as number;
-
-    // await obsWs.call('SetInputSettings', { inputName: 'Home Name Text', inputSettings: { color: this.HEXToVBColor('#2aff5f')} });
-    return {
-      font: font,
-      homeTeamColor: homeColor ? this.state.Utilitites!.VBColorToHEX(homeColor) : "#000000",
-      awayTeamColor: awayColor ? this.state.Utilitites!.VBColorToHEX(awayColor) : "#000000",
-      journeyColor: journeyColor ? this.state.Utilitites!.VBColorToHEX(journeyColor) : "#000000",
-      scoreColor: scoreColor ? this.state.Utilitites!.VBColorToHEX(scoreColor) : "#000000",
-    };
-  }
-
-  
   updateTextsSettings = async (values: TextsSettings): Promise<void> => {
     // titles
+    let store = this.state.store!;
+    store.TextsSettings = values;
+    await this.setState({ store });
     let font = await (await obsWs.call('GetInputSettings', { inputName: 'Coming Soon Text' })).inputSettings.font as any;
     font.face = values.font;
     await obsWs.call('SetInputSettings', { inputName: 'Coming Soon Text', inputSettings: { color: this.state.Utilitites!.HEXToVBColor(values.journeyColor), font } });
@@ -1506,6 +1492,38 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       throw error;      
     }
   } 
+
+  
+  updateScoreboardSettings = async (values: ScoreboardSettings): Promise<void> => {
+    let store = this.state.store!;
+    store.ScoreboardSettings = values;
+    await this.setState({ store });
+    const sceneItemId = await this.findIdFromSceneItemName(SceneName.Live, 'scoreboard');
+    switch (values.style) {
+      case ScoreboardSettingsStyle.STYLE2:
+        await obsWs.call('SetSceneItemTransform', { 
+          sceneItemId, 
+          sceneName: SceneName.Live,
+          sceneItemTransform: {
+            positionX: (1920 - 1000) / 2,
+            positionY: 1080 - 150,
+          },
+        });
+        break;
+    
+      case ScoreboardSettingsStyle.STYLE1:
+      default:
+        await obsWs.call('SetSceneItemTransform', { 
+          sceneItemId, 
+          sceneName: SceneName.Live, 
+          sceneItemTransform: {
+            positionX: (1920 - 1000),
+            positionY: 0,
+          },
+        });
+        break;
+    }
+  }
 
   render() {
     return this.props.children(this.state);

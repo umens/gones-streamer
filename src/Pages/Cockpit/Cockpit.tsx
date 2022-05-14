@@ -124,7 +124,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     try {
       await this.setState({ loadingSettings: true });
       message.loading({ content: 'Loading settings...', key: 'loadingSettings' });
-      const data = await window.app.GetStoredConfig();
+      const data = await window.app.manageStoredConfig({ action: 'get' });
       // setTimeout(async () => {
         await this.setState({ StoredConfig: data, loadingSettings: false });
         message.success({ content: 'Settings loaded !', duration: 2, key: 'loadingSettings' });
@@ -178,7 +178,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
         await this.setState({ newGameModalVisible: true });
         break;
       case 'toggleStats':
-        this.props.ObsRemote.toogleStats();
+        await this.props.ObsRemote.toogleStats();
         break;
     
       default:
@@ -299,30 +299,32 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                 <Col span={3} style={{ display: "flex" }}>
                   <div className={'ant-statistic'}>
                     <div className={'ant-statistic-title'}>Memory Usage</div>
-                    <div className={'ant-statistic-content'}>                      
-                      <RealTimeBarChart 
-                        data={this.props.ObsRemote.coreStats?.memoryUsage || [{ x : new Date(), y: 0}]}
-                        yFormat={value => 
-                          `${prettyBytes(Number(value) * 1000000)}`
-                        }
-                        tooltip={
-                          (propsTooltip: PointTooltipProps) => (
-                            <div
-                              style={{
-                                padding: 12,
-                                fontSize: 10,
-                                color: propsTooltip.point.color,
-                                // background: '#141414',
-                                backgroundColor: 'transparent'
-                              }}
-                            >
-                              <strong>
-                                {propsTooltip.point.data.yFormatted}
-                              </strong>
-                            </div>
-                          )
-                        }  
-                      />
+                    <div className={'ant-statistic-content'}>         
+                      { this.props.ObsRemote.stats.enable &&              
+                        <RealTimeBarChart 
+                          data={this.props.ObsRemote.coreStats?.memoryUsage || [{ x : new Date(), y: 0}]}
+                          yFormat={value => 
+                            `${prettyBytes(Number(value) * 1000000)}`
+                          }
+                          tooltip={
+                            (propsTooltip: PointTooltipProps) => (
+                              <div
+                                style={{
+                                  padding: 12,
+                                  fontSize: 10,
+                                  color: propsTooltip.point.color,
+                                  // background: '#141414',
+                                  backgroundColor: 'transparent'
+                                }}
+                              >
+                                <strong>
+                                  {propsTooltip.point.data.yFormatted}
+                                </strong>
+                              </div>
+                            )
+                          }  
+                        />
+                      }
                     </div>
                   </div>
                 </Col>
@@ -330,32 +332,34 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   <div className={'ant-statistic'}>
                     <div className={'ant-statistic-title'}>CPU Usage</div>
                     <div className={'ant-statistic-content'}>
-                      <RealTimeLineChart 
-                        data={this.props.ObsRemote.coreStats?.cpuUsage || [{ x : new Date(), y: 0}]} 
-                        yFormat={value =>
-                          `${Number(value).toLocaleString('fr-FR', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}%`          
-                        }
-                        tooltip={
-                          (propsTooltip: PointTooltipProps) => (
-                            <div
-                              style={{
-                                padding: 12,
-                                fontSize: 10,
-                                color: propsTooltip.point.color,
-                                // background: '#141414',
-                                backgroundColor: 'transparent'
-                              }}
-                            >
-                              <strong>
-                                {propsTooltip.point.data.yFormatted}
-                              </strong>
-                            </div>
-                          )
-                        }
-                      />
+                      { this.props.ObsRemote.stats.enable && 
+                        <RealTimeLineChart 
+                          data={this.props.ObsRemote.coreStats?.cpuUsage || [{ x : new Date(), y: 0}]} 
+                          yFormat={value =>
+                            `${Number(value).toLocaleString('fr-FR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}%`          
+                          }
+                          tooltip={
+                            (propsTooltip: PointTooltipProps) => (
+                              <div
+                                style={{
+                                  padding: 12,
+                                  fontSize: 10,
+                                  color: propsTooltip.point.color,
+                                  // background: '#141414',
+                                  backgroundColor: 'transparent'
+                                }}
+                              >
+                                <strong>
+                                  {propsTooltip.point.data.yFormatted}
+                                </strong>
+                              </div>
+                            )
+                          }
+                        />
+                      }
                     </div>
                   </div>
                 </Col>

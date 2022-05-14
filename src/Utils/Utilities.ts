@@ -16,7 +16,7 @@ export class Utilities {
     return Utilities.instance;
   }
 
-  static capitalize = (str: string): string =>{
+  static capitalize = (str: string): string => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
@@ -43,7 +43,7 @@ export class Utilities {
     return await this.getBase64(fullpath);
   }
 
-  pickTextColorBasedOnBgColorAdvanced = (bgColor: string = '#FFFFFF', lightColor: string, darkColor: string): string => {
+  pickTextColorBasedOnBgColorAdvanced = (lightColor: string, darkColor: string, bgColor: string = '#FFFFFF'): string => {
     var color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
     var r = parseInt(color.substring(0, 2), 16); // hexToR
     var g = parseInt(color.substring(2, 4), 16); // hexToG
@@ -70,5 +70,9 @@ export class Utilities {
     var bbggrr =  ("000000" + i.toString(16)).slice(-6);
     var rrggbb = bbggrr.substr(4, 2) + bbggrr.substr(2, 2) + bbggrr.substr(0, 2);
     return "#" + rrggbb;
+  }
+
+  static zeroPad = (num: number, places: number = 2): string => { 
+    return String(num).padStart(places, '0');
   }
 }
