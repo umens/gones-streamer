@@ -69,15 +69,16 @@ class RealTimeLineChart extends Component<RealTimeLineChartProps, RealTimeLineCh
       <ResponsiveLine
         {...commonProperties}
         enableArea={true}
+        data={[
+          { id: 'CPU', data },
+        ]}
         defs={[
           linearGradientDef('gradientA', [
             { offset: 0, color: 'inherit' },
             { offset: 100, color: 'inherit', opacity: 0 },
           ]),
         ]}
-        data={[
-          { id: 'CPU', data },
-        ]}
+        fill={[{ match: '*', id: 'gradientA' }]}
         xScale={{ type: 'time', format: 'native'  }}
         yScale={{ type: 'linear', max: 100, min: 0 }}
         yFormat={this.props.yFormat}
@@ -92,9 +93,9 @@ class RealTimeLineChart extends Component<RealTimeLineChartProps, RealTimeLineCh
         enableGridX={false}
         enableGridY={false}
         enableSlices={false}
+        enableCrosshair={false}
         useMesh={true}
         tooltip={this.props.tooltip}
-        fill={[{ match: '*', id: 'gradientA' }]}
         colors={() => '#177ddc'}        
       />
       </div>

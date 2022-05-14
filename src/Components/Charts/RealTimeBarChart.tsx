@@ -54,13 +54,31 @@ class RealTimeBarChart extends Component<RealTimeBarChartProps, RealTimeBarChart
   }
 
   async componentDidUpdate(prevProps: {data: { x: Date, y: number }[]}) {
-    if(prevProps.data[prevProps.data.length - 1] !== this.props.data[this.props.data.length - 1]) {
-      const data = this.state.data.length >= 25 ? this.state.data.slice(1) : this.state.data;
-      data.push({
-        x: time.timeMillisecond.offset(this.props.data[this.props.data.length - 1].x as Date, 1000),
-        y: this.props.data[this.props.data.length - 1].y,
-      })
-      await this.setState({ data });
+    if(this.props.data.length > 0){
+      if(prevProps.data.length === 0) {
+        const data = this.state.data.length >= 25 ? this.state.data.slice(1) : this.state.data;
+        data.push({
+          x: time.timeMillisecond.offset(this.props.data[this.props.data.length - 1].x as Date, 1000),
+          y: this.props.data[this.props.data.length - 1].y,
+        })
+        await this.setState({ data });
+      }
+      else {
+        if(prevProps.data[prevProps.data.length - 1] !== this.props.data[this.props.data.length - 1]) {
+          // if(prevProps.data.length != this.props.data.length && this.props.data.length !== 1)
+          const data = this.state.data.length >= 25 ? this.state.data.slice(1) : this.state.data;
+          data.push({
+            x: time.timeMillisecond.offset(this.props.data[this.props.data.length - 1].x as Date, 1000),
+            y: this.props.data[this.props.data.length - 1].y,
+          })
+          await this.setState({ data });
+        }
+      }
+    }
+    else {
+      if(prevProps.data.length !== 0 && this.props.data.length === 0) {
+        await this.setState({ data: [{ x : new Date(), y: 0}] });
+      }
     }
   }
 
