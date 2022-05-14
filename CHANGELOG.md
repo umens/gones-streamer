@@ -1,5 +1,18 @@
 Changelog
 
+# :rocket: Release [v2.1.0-beta.4](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2022-05-14)
+          
+
+### :sparkles: Enhancements
+
+* **charts:** toggle chart display ([4a08f43](https://github.com/umens/gones-streamer/commit/4a08f437101cefa147748f2e66faae4f77c71803))
+* **scoreboard:** add multiple scoreboard designs ([960f9ef](https://github.com/umens/gones-streamer/commit/960f9efec657541a46885f652cb4cb498480fe93))
+
+
+### :fast_forward: Performance Improvements
+
+* **chart rerendering:** disable rerendering for component which doesn't need to ([477d4b4](https://github.com/umens/gones-streamer/commit/477d4b4ecf8b0d21f5c5e8a81cb7283700a8005e))
+
 # :rocket: Release [v2.1.0-beta.3](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2022-04-28)
           
 
