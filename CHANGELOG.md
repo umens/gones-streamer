@@ -1,5 +1,18 @@
 Changelog
 
+# :rocket: Release [v2.1.0-beta.5](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.4...v2.1.0-beta.5) (2022-05-30)
+          
+
+### :bug: Bug Fixes
+
+* **charts:** fix infinite value display of bytes/s ([e5c0d7d](https://github.com/umens/gones-streamer/commit/e5c0d7d71bc878beb90ab4a1535e780ab22e035a))
+* **settings:** fix buffer value display in settings ([46dcfe9](https://github.com/umens/gones-streamer/commit/46dcfe93ba52e1e484486055bdf6df7563a425b3))
+
+
+### :robot: Continuous Integration
+
+* **binaries:** lock version of dependencies binaries ([25d7e6a](https://github.com/umens/gones-streamer/commit/25d7e6ae0ba3c65c855d74b98f635781f2b5b354))
+
 # :rocket: Release [v2.1.0-beta.4](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2022-05-14)
           
 
