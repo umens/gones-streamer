@@ -242,7 +242,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       await this.setState({
         streamingStats: {
           totalStreamTime: streamTime(statsStream.outputDuration),
-          bytesPerSec: (statsStream.outputBytes * 10) / (statsStream.outputDuration / 1000),
+          bytesPerSec: (!Number.isFinite((statsStream.outputBytes * 10) / (statsStream.outputDuration / 1000))) ? 0 : (statsStream.outputBytes * 10) / (statsStream.outputDuration / 1000),
         }
       });
     } catch (error) {
@@ -616,9 +616,9 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
       
       await obsWs.call('SetInputSettings', { inputName: 'Week Text', inputSettings: { text: `${store.GameStatut.Options.competition} - ${store.GameStatut.Options.journee}` } });
       
-      await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: store.LiveSettings.buffer }});
+      await obsWs.call('SetInputSettings', { inputName: 'Camera - Field', inputSettings: { duration: store.LiveSettings.buffer * 1000 }});
 
-      await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: store.LiveSettings.buffer }});
+      await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: store.LiveSettings.buffer * 1000 }});
       
       await window.app.manageObsSettings({ setter: true, bitrate: store.LiveSettings.bitrate });
       await obsWs.call('SetStreamServiceSettings', { streamServiceType: 'rtmp_common', streamServiceSettings: { key: store.LiveSettings.streamKey } });
@@ -642,6 +642,7 @@ class ObsRemote extends Component<ObsRemoteProps, ObsRemoteState> {
 
   updateSettings = async (value: any): Promise<void> => {
     try {
+      await obsWs.call('SetInputSettings', { inputName: 'Camera - Field', inputSettings: { duration: +value.buffer * 1000 } });
       await obsWs.call('SetInputSettings', { inputName: 'Replay Video', inputSettings: { duration: +value.buffer * 1000 } });
       await obsWs.call('SetStreamServiceSettings', { streamServiceType: 'rtmp_common', streamServiceSettings: { key: value.key } });
       // await obsWs.call('SetProfileParameter', { parameterCategory: 'Output', parameterName: 'VBitrate', parameterValue: value.bitrate });
