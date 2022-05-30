@@ -225,7 +225,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
                 key: this.props.ObsRemote.store?.LiveSettings?.streamKey,
                 service: this.props.ObsRemote.store?.LiveSettings?.streamingService,
                 sport: this.props.ObsRemote.store?.LiveSettings?.sport,
-                buffer: (this.props.ObsRemote.store?.LiveSettings?.buffer || 0) / 1000,
+                buffer: (this.props.ObsRemote.store?.LiveSettings?.buffer || 0),
                 bitrate: this.props.ObsRemote.store?.LiveSettings?.bitrate,
                 updateChannel:  this.props.ObsRemote.store?.UpdateChannel || UpdateChannel.STABLE
               }}
