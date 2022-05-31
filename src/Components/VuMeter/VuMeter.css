@@ -1,0 +1,24 @@
+/* section {
+  text-align: center;
+}
+canvas {
+  padding: 1em;
+  margin: 0em;
+} */
+
+.volmeter {
+  /* position: absolute; */
+  overflow: hidden;
+  background-color: #141414;
+}
+.volmeter-spacer {
+  margin: 10px 0;
+}
+
+.st0{
+  display:none;
+  fill:#1E1E1E;
+}
+.st1{
+  fill:#1E1E1E;
+}

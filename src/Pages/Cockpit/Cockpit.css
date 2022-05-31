@@ -21,3 +21,11 @@
 .separator::after {
   margin-left: 1em;
 }
+
+.ant-row {
+  margin-bottom: 24px;
+}
+
+.ant-card .ant-row:nth-last-child(1) {
+  margin-bottom: 0;
+}

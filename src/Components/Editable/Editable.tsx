@@ -1,5 +1,4 @@
 import React, { useState, useEffect, FunctionComponent, RefObject } from "react";
-import { Input } from "antd";
 import "./Editable.css";
 
 type EditableProps = {
@@ -7,7 +6,7 @@ type EditableProps = {
     type: string;
     placeholder: string;
     children: React.ReactNode;
-    childRef: RefObject<HTMLInputElement> | RefObject<Input>;
+    childRef: RefObject<HTMLInputElement> | RefObject<any>;
   };
 
 const Editable: FunctionComponent<EditableProps> = ({

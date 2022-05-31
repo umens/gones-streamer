@@ -1,27 +1,26 @@
-// import { autoUpdater } from "electron-updater";
-
 import { BrowserWindowConstructorOptions, screen, BrowserWindow, app, protocol } from "electron";
 import { join } from 'path';
 import isDev from 'electron-is-dev';
-import Store from 'electron-store';
 import ElectronLog from 'electron-log';
 import firstRun from 'electron-first-run';
 import url from 'url';
 import installExtension, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
+import Store from 'electron-store';
+import { promises as fs, existsSync } from 'fs';
+
 import SplashScreen from "./SplashScreen";
-import { StoreType, GetDefaultConfig, PathsType } from "../../src/Models";
+import { PathsType, StoreType } from "../../src/Models";
 import IPCChannels from "./IPCChannels";
 import ObsProcess from "./ObsProcess";
-import { promises as fs, existsSync } from 'fs';
 import ScoreboardWindow from "./ScoreboardWindow";
-import { autoUpdater } from "electron-updater";
-
-const isPackaged = require('electron-is-packaged').isPackaged;
+import StoreConfig from "./StoreConfig";
+import AppUpdater from "./Updater";
 
 export default class Main {
   
   log: ElectronLog.LogFunctions;
   paths: PathsType;
+  appUpdater?: AppUpdater;
   
   private obsProcess: ObsProcess | null = null;
   private mainConfig: BrowserWindowConstructorOptions | null = null;
@@ -29,14 +28,11 @@ export default class Main {
   private splashScreen: SplashScreen | null = null;
   private scoreboardWindow: ScoreboardWindow | null = null;
   private IpcChannels: IPCChannels | null = null;
-  private store: Store<StoreType> = new Store<StoreType>({
-		defaults: GetDefaultConfig()
-  });
+  private store: Store<StoreType> = StoreConfig;
 
   constructor() {
-    this.log = ElectronLog.scope('Main');    
-    autoUpdater.logger = ElectronLog.scope('Auto Updater');
-    const extraResources = (isPackaged) ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
+    this.log = ElectronLog.scope('Main');
+    const extraResources = app.isPackaged ? join(app.getAppPath(), '../') : join(app.getAppPath(), '../assets');
     this.paths = {
       binFolder: join(extraResources, '/bin'),
       appFolder: join(extraResources, '/appDatas'),
@@ -125,7 +121,6 @@ export default class Main {
 
       app.on('ready', async () => {
         try {
-          await autoUpdater.checkForUpdatesAndNotify();
           await this.createWindow();
         } catch (error) {
           this.log.error(error)
@@ -137,6 +132,15 @@ export default class Main {
     } catch (error) {
       this.log.error(error)
     }
+  }
+
+  installExtensions = async () => {
+    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+    const extensions = ['REACT_DEVELOPER_TOOLS'];
+  
+    return Promise.all(
+      extensions.map(name => installExtension(REACT_DEVELOPER_TOOLS, forceDownload))
+    ).catch(err => console.log(err));
   }
 
   private createWindow = async () => {
@@ -166,16 +170,18 @@ export default class Main {
       show: false,
       webPreferences: {
         // nodeIntegration: true
-        nodeIntegration: false, // is default value after Electron v5
+        // nodeIntegration: false, // is default value after Electron v5
         // contextIsolation: true, // protect against prototype pollution
-        enableRemoteModule: false, // turn off remote
+        // enableRemoteModule: false, // turn off remote
         webSecurity: false, // handle local file bug
+        allowRunningInsecureContent: false,
         additionalArguments: ['--allow-file-access-from-files'], // handle local file bug
         preload: join(__dirname, "preload.bundle.js") // use a preload script
       }
     };
     this.log.info('%cCreating Window', 'color: blue');
     this.mainWindow = new BrowserWindow(this.mainConfig);
+    require("@electron/remote/main").enable(this.mainWindow.webContents);
 
     if (isDev) {
       this.mainWindow.loadURL('http://localhost:3000/index.html');
@@ -198,21 +204,20 @@ export default class Main {
 
     // Hot Reloading
     if (isDev) {
-      // 'node_modules/.bin/electronPath'
-      // require('electron-reload')(__dirname, {
-      //   electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-      //   forceHardReset: true,
-      //   hardResetMethod: 'exit'
-      // });
-
       // DevTools
-      installExtension(REACT_DEVELOPER_TOOLS)
-      .then((name: any) => this.log.verbose(`Added Extension:  ${name}`))
-      .catch((err: any) => this.log.verbose('An error occurred: ', err));
-
-      this.mainWindow.webContents.once('dom-ready', () => {
-        this.mainWindow && this.mainWindow.webContents.openDevTools()
+      this.mainWindow.webContents.on("did-frame-finish-load", async () => {
+        // if (process.env.NODE_ENV === 'development') {
+          await this.installExtensions();
+          this.mainWindow && this.mainWindow.webContents.openDevTools()
+        // }
       });
+      // installExtension(REACT_DEVELOPER_TOOLS)
+      // .then((name: any) => this.log.verbose(`Added Extension:  ${name}`))
+      // .catch((err: any) => this.log.verbose('An error occurred: ', err));
+
+      // this.mainWindow.webContents.once('dom-ready', () => {
+      //   this.mainWindow && this.mainWindow.webContents.openDevTools()
+      // });
     }
 
     this.mainWindow.webContents.on('did-finish-load', () => {
@@ -223,7 +228,8 @@ export default class Main {
       this.log.info('%cclose Splash Window', 'color: blue');
       this.splashScreen && this.splashScreen.window && this.splashScreen.window.destroy();
       this.log.info('%cShow Main Window', 'color: blue');
-      this.mainWindow && this.mainWindow.maximize();
+      this.mainWindow && this.mainWindow.maximize();      
+      this.appUpdater = new AppUpdater(this.mainWindow?.webContents!);
     });
   }
 

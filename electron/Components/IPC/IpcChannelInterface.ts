@@ -1,9 +1,9 @@
-import { IpcMainEvent, webContents } from 'electron';
+import { IpcMainInvokeEvent, WebContents } from 'electron';
 import { IpcRequest } from "../../../src/Models";
 
 export interface IpcChannelInterface {
   getName(): string;
 
-  handle(event: IpcMainEvent, request: IpcRequest, to?: webContents): Promise<void>;
+  handle(event: IpcMainInvokeEvent, request: IpcRequest, to?: WebContents): Promise<any>;
 }
 

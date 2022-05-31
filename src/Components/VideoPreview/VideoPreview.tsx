@@ -11,7 +11,7 @@ type VideoPreviewState = {
 };
 class VideoPreview extends Component<VideoPreviewProps, VideoPreviewState> {
 
-  timeout?: NodeJS.Timeout;
+  timeout?: NodeJS.Timer;
   static defaultProps = {
     interval: 450,
   };

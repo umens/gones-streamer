@@ -1,0 +1,79 @@
+#scoreboardEditStyle2 .teamblock-scoreboard {
+  height: 50px;
+  box-shadow: 0px -24px 30px -30px rgb(255 255 255 / 80%) inset;
+  -webkit-box-shadow: 0px -24px 30px -30px rgb(255 255 255 / 80%) inset;
+  -moz-box-shadow: 0px -24px 30px -30px rgb(255 255 255 / 80%) inset;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teamblock-scoreboard-overflow {
+  overflow: hidden;
+  height: 50px;
+  position: relative;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .img-thumbnail {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  max-width: 100%;
+  height: auto;
+  transform: scale(1.7);
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teamlogo-scoreboard {
+  height: 50px;
+  position: absolute;
+  background: none;
+  border: none;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teamname-scoreboard {
+  position: absolute;
+  left: 70px;
+  font-size: 25px;
+  line-height: 40px;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  text-transform: uppercase;
+  padding: 0 5px;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teamscore-scoreboard {
+  position: absolute;
+  right: 0;
+  font-size: 30px;
+  line-height: 50px;
+  width: 50px;
+  text-align: center;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teampossession-scoreboard {
+  height: 3px;
+  position: absolute;
+  bottom: -3px;
+  width: 100%;
+  display: flex;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teamtimeoutblock-scoreboard {
+  display: flex;
+  position: absolute;
+  bottom: 7px;
+  left: 77px;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard {
+  width: 24px;
+  height: 4px;
+  margin-right: 4px;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .teamtimeoutblock-scoreboard .teamtimeout-scoreboard:last-child {
+  margin-right: 0;
+}
+#scoreboardEditStyle2 .teamblock-scoreboard .quarter-scoreboard {
+  font-size: 30px;
+  line-height: 50px;
+}
+
+#scoreboardEditStyle2 .noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}

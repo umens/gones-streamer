@@ -1,34 +1,17 @@
-import React, { ChangeEvent, SyntheticEvent } from "react";
-import { IObsRemote } from "../";
-import { Input, InputNumber, Modal, message, Form } from "antd";
+import React, { ChangeEvent, Component, SyntheticEvent } from "react";
+import { BaseTeamScoreboardEditableProps, BaseTeamScoreboardEditableState } from "../../..";
+import { Input, InputNumber, Modal, Form, message } from "antd";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import classNames from "classnames";
-import './TeamScorboardEditable.css';
+import './TeamScoreboardEditableStyle2.css';
 import ReactDropzone from "react-dropzone";
-import { IpcService } from "../../Utils/IpcService";
 import { ChromePicker } from 'react-color';
-import { Timeout, Team as TeamModel, TeamPossession } from "../../Models";
+import { Timeout, Team as TeamModel, FileUp, TeamPossession } from "../../../../../Models";
+import { Utilities } from "../../../../../Utils";
 
-const ipc = new IpcService();
+class TeamScoreboardEditableStyle2 extends Component<BaseTeamScoreboardEditableProps, BaseTeamScoreboardEditableState> {
 
-type TeamScorboardEditableProps = {
-  ObsRemote: IObsRemote;
-  isHomeTeam: boolean;
-};
-type TeamScorboardEditableState = {
-  visibleModal: boolean;
-  visibleModalTeam: boolean;
-  confirmLoading: boolean;
-  confirmLoadingTeam: boolean;
-  updatedScore: number;
-  updatedName: string;
-  updatedCity: string;
-  loadingFile: boolean;
-  displayColorPicker: boolean;
-};
-class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, TeamScorboardEditableState> {
-
-  constructor(props: Readonly<TeamScorboardEditableProps>) {
+  constructor(props: Readonly<BaseTeamScoreboardEditableProps>) {
     super(props);
     this.state = {
       visibleModal: false,
@@ -108,7 +91,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
     }
   }
 
-  beforeUpload = (file: File) => {
+  beforeUpload = (file: File): boolean => {
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
     if (!isJpgOrPng) {
       message.error('You can only upload JPG/PNG file!');
@@ -120,12 +103,23 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
     return isJpgOrPng && isLt2M;
   }
 
-  onChangeHandler = async (acceptedFiles: File[], fileRejections: any[], event: any): Promise<void> => {
+  uploadElectronFile = async () => {
     try {
-      if(this.beforeUpload(acceptedFiles[0])) {
+      const fileData = await window.app.selectElectronFile(true);
+      if(fileData) {
+        await this.onChangeHandler([fileData], [], null);
+      }
+    } catch (error) {
+      
+    }
+  }
+
+  onChangeHandler = async (acceptedFiles: FileUp[], fileRejections: any[], event: any): Promise<void> => {
+    try {
+      if(this.beforeUpload(acceptedFiles[0].file)) {
         await this.setState({ loadingFile: true });
-        const data = await ipc.send<string>('file-upload', { params: { file: acceptedFiles[0]?.path, isHomeTeam: this.props.isHomeTeam }});
-        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0], pathElectron: data.split('#').shift()! }, homeTeam: this.props.isHomeTeam});
+        const data = await window.app.setFile({ file: acceptedFiles[0]?.pathElectron, isHomeTeam: this.props.isHomeTeam });
+        await this.props.ObsRemote.updateTextProps({ props: 'logo', value: { file: acceptedFiles[0].file, pathElectron: data.split('#').shift()! }, homeTeam: this.props.isHomeTeam});
         await this.setState({ loadingFile: false });
       }
     } catch (error) {
@@ -160,7 +154,7 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
     );
 
     return (
-      <>
+      <div id='teamScoreboardEditStyle2' style={{ position: 'relative' }}>
         { this.state.displayColorPicker ?
           <div style={{ position: 'absolute', zIndex: 99, top: 25, left: 325 }}>
             <div style={{ position: 'fixed', top: '0px', bottom: '0px', left: '0px', right: '0px', }} onClick={ this.handleCloseColorpicker }/>
@@ -195,46 +189,50 @@ class TeamScorboardEditable extends React.Component<TeamScorboardEditableProps, 
           </Form>
         </Modal>
 
-        <div className="teamblock-scoreboard" style={(this.props.isHomeTeam) ? { width: '360px', background: team?.color } : { width: '360px', background: team?.color, marginLeft: '5px' }} >
-          <div className="teamcolor-scoreboard" onClick={ this.handleClickColorPickerBtn }></div>
-          <ReactDropzone onDrop={this.onChangeHandler}>
-            {({getRootProps, getInputProps}: any) => (
-              <section className="container teamlogo-scoreboard">
-                <span className="avatar-uploader ant-upload-picture-card-wrapper">
-                  <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', style: { width: 50, height: 50, backgroundColor: 'transparent', border: 0 }})}>
-                    <input {...getInputProps({ multiple: false })} />
-                    <span tabIndex={0} style={{ padding: 0 }} className="ant-upload" role="button">
-                      <div>
-                        {team?.logo ? <img style={{ backgroundColor: 'transparent', border: 0 }} className='img-thumbnail' alt='home team logo' src={ this.props.ObsRemote.Utilitites?.getImageFullPath(team.logo) } /> : uploadButton}
-                      </div>
-                    </span>
-                  </div>
-                </span>
-              </section>
-            )}
-          </ReactDropzone>
-          <div onClick={(e) => this.showModalTeam()} className="teamname-scoreboard" style={{ fontWeight: 700 }}>
-            { team?.name || 'Name' }
-          </div>
-          <div onClick={(e) => this.showModal()} className="teamscore-scoreboard" style={{ fontWeight: 700 }}>
-            { team?.score.toLocaleString('fr-FR', { minimumIntegerDigits:2, useGrouping: false }) }
-          </div>
-          <div className="teamtimeoutblock-scoreboard">
-            { [1, 2, 3].map((timeout: Timeout) => {
-              return <div key={`timeout${timeout}`} onClick={this.handleTimeout(timeout, team!)} className={classNames({
-                'teamtimeout-scoreboard': true,
-                'bg-warning': timeout <= team?.timeout!,
-                'bg-transparent': timeout > team?.timeout!,
-                border: timeout > team?.timeout!,
-                'border-warning': timeout > team?.timeout!
-              })}></div>
-            })}
+        <div className="teamblock-scoreboard" style={(this.props.isHomeTeam) ? { width: 225, background: team?.color } : { width: 225, background: team?.color }} >          
+          <div className="teamblock-scoreboard-overflow">
+            <div className="teamcolor-scoreboard" onClick={ this.handleClickColorPickerBtn }></div>
+            <ReactDropzone noDrag={true} >
+              {({getRootProps, getInputProps}: any) => (
+                <section className="container teamlogo-scoreboard">
+                  <span className="avatar-uploader ant-upload-picture-card-wrapper">
+                    <div {...getRootProps({className: 'dropzone ant-upload ant-upload-select ant-upload-select-picture-card', onClick: async () => { await this.uploadElectronFile; }, style: { width: 50, height: 50, backgroundColor: 'transparent', border: 0 }})}>
+                      <input {...getInputProps({ multiple: false })} />
+                      <span tabIndex={0} style={{ padding: 0 }} className="ant-upload" role="button">
+                        <div>
+                          {team?.logo ? <img style={{ backgroundColor: 'transparent', border: 0 }} className='img-thumbnail' alt='home team logo' src={ this.props.ObsRemote.Utilitites?.getImageFullPath(team.logo) } /> : uploadButton}
+                        </div>
+                      </span>
+                    </div>
+                  </span>
+                </section>
+              )}
+            </ReactDropzone>
+            <div onClick={this.showModalTeam} className="teamname-scoreboard" style={{ fontWeight: 700, color: this.props.ObsRemote.Utilitites?.pickTextColorBasedOnBgColorAdvanced('#FFFFFF', '#000000', team?.color) }}>
+              { team?.name.substring(0,5).normalize("NFD").replace(/\p{Diacritic}/gu, "") || 'Name'.substring(0,5).normalize("NFD").replace(/\p{Diacritic}/gu, "") }
+            </div>
+            <div onClick={this.showModal} className="teamscore-scoreboard" style={{ fontWeight: 700, color: this.props.ObsRemote.Utilitites?.pickTextColorBasedOnBgColorAdvanced('#FFFFFF', '#000000', team?.color) }}>
+              { Utilities.zeroPad(team?.score!) }
+            </div>
+            <div className="teamtimeoutblock-scoreboard">
+              { [1, 2, 3].map((timeout: Timeout) => {
+                return <div key={`timeout${timeout}`} onClick={this.handleTimeout(timeout, team!)} className={classNames({
+                  'teamtimeout-scoreboard': true,
+                  'bg-transparent': timeout > team?.timeout!,
+                  border: timeout > team?.timeout!,
+                  'border-warning': timeout > team?.timeout!
+                })} style={{ 
+                  backgroundColor: timeout > team?.timeout! ? 'transparent' : this.props.ObsRemote.Utilitites?.pickTextColorBasedOnBgColorAdvanced('#FFFFFF', '#000000', team?.color),
+                  borderColor: timeout > team?.timeout! ? this.props.ObsRemote.Utilitites?.pickTextColorBasedOnBgColorAdvanced('#FFFFFF', '#000000', team?.color) : '',
+                }}></div>
+              })}
+            </div>
           </div>
           { this.props.ObsRemote.store?.GameStatut.Options.possession === (this.props.isHomeTeam ? TeamPossession.HOME : TeamPossession.AWAY) && <div className="teampossession-scoreboard bg-warning"></div> }
         </div>
-      </>
+      </div>
     );
   }
 };
 
-export { TeamScorboardEditable };
+export { TeamScoreboardEditableStyle2 };

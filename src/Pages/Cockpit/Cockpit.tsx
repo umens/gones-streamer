@@ -1,15 +1,13 @@
 import React, { createRef } from "react";
-import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form } from 'antd';
-import { IpcService } from "../../Utils";
-import { GameEvent, SceneName, StoreType } from "../../Models";
+import { message, Button, Row, Col, Card, PageHeader, Tag, Statistic, Menu, Dropdown, Popconfirm, Descriptions, Input, Modal, Form, notification, Progress } from 'antd';
+import { AutoUpdaterData, AutoUpdaterEvent, GameEvent, SceneName, StoreType } from "../../Models";
 import { DownOutlined, ArrowUpOutlined, ArrowDownOutlined, SyncOutlined, EyeInvisibleOutlined, EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, StatsTinyChart } from "../../Components";
-// import ReactDropzone from "react-dropzone";
+import { Scenes, IObsRemote, GameControl, Preview, Editable, ScoreboardEditable, SponsorControl, PlayerControl, RealTimeLineChart, RealTimeBarChart } from "../../Components";
 import './Cockpit.css';
 import { FormInstance } from "antd/lib/form";
 import prettyBytes from 'pretty-bytes';
-
-const ipc: IpcService = new IpcService();
+import { PointTooltipProps } from "@nivo/line";
+import { ArgsProps } from "antd/lib/notification";
 
 type CockpitProps = {
   ObsRemote: IObsRemote;
@@ -22,8 +20,12 @@ type CockpitState = {
   displayPreview: boolean;
   TabKey: string;
   newGameModalVisible: boolean;
+  changelogModalVisible: boolean;
+  update: { version: string; changelog: string; };
 };
 class Cockpit extends React.Component<CockpitProps, CockpitState> {
+
+  autoUpdaterTimer?: number;
 
   constructor(props: Readonly<CockpitProps>) {
     super(props);
@@ -35,12 +37,16 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       displayPreview: false,
       TabKey: 'GameControl',
       newGameModalVisible: false,
+      changelogModalVisible: false,
+      update: { version: '', changelog: '' },
     };
   }
 
   componentDidMount = async () => {
     try {
-      await this.getStoredConfig();
+      window.addEventListener('autoUpdaterEvent', this.onData);
+      await this.checkUpdater();
+      // await this.getStoredConfig();
       // setTimeout(async () => {
       //   await this.setState({ displayPreview: true });
       // }, 500);
@@ -49,13 +55,78 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     }
   }
 
+  componentWillUnmount = async () => {
+    window.clearTimeout(this.autoUpdaterTimer);
+    this.autoUpdaterTimer = undefined;
+    window.removeEventListener('autoUpdaterEvent', this.onData);
+  }
+
+  onData = async (data: any) => {
+    try {
+      const detail: {eventType: AutoUpdaterEvent, data: AutoUpdaterData} = data.detail;
+      let key: string;
+      let args: ArgsProps;
+      switch (detail.eventType) {
+        case AutoUpdaterEvent.AVAILABLE:
+          this.setState({ update: { version: detail.data.version!, changelog: detail.data.releaseNote! } });
+          key = `open${Date.now()}`;
+          args = {
+            message: `${detail.data.version} is here !`,
+            description: (
+              <div>
+                <p>A new version is available. Would you like to dowload it ?</p>
+                <Button type="link" size="small" onClick={() => this.setState({ changelogModalVisible: true }) }>Read changelog</Button>
+              </div>
+            ),
+            duration: 0,
+            btn: (
+              <>
+                <Button type="primary" style={{ borderColor: '#f53838', backgroundColor: '#f53838' }} size="small" onClick={() => notification.close(key)}>Later</Button>
+                <span> </span>                
+                <Button type="primary" style={{ borderColor: '#0baf36', backgroundColor: '#0baf36' }} size="small" onClick={() => { notification.close(key); window.app.handleUpdater(AutoUpdaterEvent.DOWNLOADRESQUESTED); }}>Download</Button>
+              </>
+            ),
+            key,
+            placement: 'bottomRight'
+          };
+          notification.info(args);
+          break;
+      
+        case AutoUpdaterEvent.DOWNLOADING:
+        case AutoUpdaterEvent.DOWNLOADED:
+          key = `notifDownload`;
+          args = {
+            message: detail.eventType === AutoUpdaterEvent.DOWNLOADED ? detail.data.message : 'Downloading update...',
+            description: (
+              <div>
+                <Progress percent={ detail.data.download ? +detail.data.download?.percent.toFixed(0) : 100 } />
+                { detail.eventType === AutoUpdaterEvent.DOWNLOADING && <span>{ prettyBytes(detail.data.download?.transferred!) }/{ prettyBytes(detail.data.download?.total!) } @ {prettyBytes(detail.data.download?.bytesPerSecond!)}/s</span> }
+              </div>
+            ),
+            btn: (
+              detail.eventType === AutoUpdaterEvent.DOWNLOADED && <Button size="small" type="primary" onClick={() => { notification.close(key); window.app.handleUpdater(AutoUpdaterEvent.QUITANDINSTALL); } }>Install</Button>
+            ),
+            duration: 0,
+            key,
+            placement: 'bottomRight'
+          };
+          notification.open(args);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   getStoredConfig = async () => {
     try {
       await this.setState({ loadingSettings: true });
       message.loading({ content: 'Loading settings...', key: 'loadingSettings' });
-      let data = await ipc.send<{ StoredConfig: StoreType }>('stored-config');
+      const data = await window.app.manageStoredConfig({ action: 'get' });
       // setTimeout(async () => {
-        await this.setState({ StoredConfig: data.StoredConfig, loadingSettings: false });
+        await this.setState({ StoredConfig: data, loadingSettings: false });
         message.success({ content: 'Settings loaded !', duration: 2, key: 'loadingSettings' });
       // }, 1500);
     } catch (error) {
@@ -75,6 +146,20 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
     }
   }
 
+  checkUpdater = async () => {
+    if(this.props.ObsRemote.connected2Obs && this.props.ObsRemote.firstStart) {
+      await this.props.ObsRemote.firstLoadDone();
+      window.clearTimeout(this.autoUpdaterTimer);
+      this.autoUpdaterTimer = undefined;
+      window.app.handleUpdater(AutoUpdaterEvent.CHECKRESQUESTED);
+    }
+    else {
+      this.autoUpdaterTimer = window.setTimeout(() => {
+        this.checkUpdater();
+      }, 1000)
+    }
+  }
+
   handleMenuClick = async (e: any) => {
     let _this = this;
     switch (e.key) {
@@ -91,6 +176,9 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
         break;
       case 'new':
         await this.setState({ newGameModalVisible: true });
+        break;
+      case 'toggleStats':
+        await this.props.ObsRemote.toogleStats();
         break;
     
       default:
@@ -133,7 +221,7 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       {
         key: 'PlayerControl',
         tab: 'Players',
-        disabled: this.props.ObsRemote.scenes?.["current-scene"] !== SceneName.Live,
+        disabled: this.props.ObsRemote.scenes?.currentScene !== SceneName.Live,
       },
       {
         key: 'SponsorControl',
@@ -152,10 +240,11 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
       <Menu onClick={async(e) => await this.handleMenuClick(e)}>
         <Menu.Item key="new">Start New Game</Menu.Item>
         <Menu.Item key="reset">Reset Game</Menu.Item>
+        <Menu.Item key="toggleStats">{ this.props.ObsRemote.stats.enable ? 'Disable stats' : 'Enable stats' }</Menu.Item>
       </Menu>
     );
-    const inputCompetRef = createRef<Input>();
-    const inputWeekRef = createRef<Input>();
+    const inputCompetRef = createRef<any>();
+    const inputWeekRef = createRef<any>();
 
     return (
       <>
@@ -197,10 +286,10 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   <Statistic title="Length" value={this.props.ObsRemote.streamingStats ? this.props.ObsRemote.streamingStats?.totalStreamTime : '00:00:00'} />
                   <Statistic
                     title="Dropped Frame"
-                    prefix={this.props.ObsRemote.streamingStats ? (this.props.ObsRemote.streamingStats?.droppedFrame > this.props.ObsRemote.streamingStats?.oldDroppedFrame) ? <ArrowUpOutlined /> : <ArrowDownOutlined /> : ''}
+                    prefix={this.props.ObsRemote.coreStats ? (this.props.ObsRemote.coreStats?.droppedFrame > this.props.ObsRemote.coreStats?.oldDroppedFrame) ? <ArrowUpOutlined /> : <ArrowDownOutlined /> : ''}
                     suffix="%"
-                    value={this.props.ObsRemote.streamingStats ? this.props.ObsRemote.streamingStats?.droppedFrame : '0.00'}
-                    valueStyle={this.props.ObsRemote.streamingStats ? (this.props.ObsRemote.streamingStats?.droppedFrame > this.props.ObsRemote.streamingStats?.oldDroppedFrame) ? { color: '#cf1322' } : { color: '#3f8600' } : { color: 'rgba(255, 255, 255, 0.85)' }}
+                    value={this.props.ObsRemote.coreStats ? this.props.ObsRemote.coreStats?.droppedFrame.toFixed(2) : '0.00'}
+                    valueStyle={this.props.ObsRemote.coreStats ? (this.props.ObsRemote.coreStats?.droppedFrame > this.props.ObsRemote.coreStats?.oldDroppedFrame) ? { color: '#cf1322' } : { color: '#3f8600' } : { color: 'rgba(255, 255, 255, 0.85)' }}
                     style={{
                       margin: '0 32px',
                     }}
@@ -208,22 +297,73 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                   <Statistic title="Transfert Speed" value={this.props.ObsRemote.streamingStats ? `${prettyBytes(this.props.ObsRemote.streamingStats?.bytesPerSec)}ps` : `${prettyBytes(0)}ps`} />
                 </Col>
                 <Col span={3} style={{ display: "flex" }}>
-                  <div className={'ant-statistic'} style={{ margin: '0 32px' }}>
+                  <div className={'ant-statistic'}>
                     <div className={'ant-statistic-title'}>Memory Usage</div>
-                    <div className={'ant-statistic-content'} style={{ width: 130 }}>
-                      <StatsTinyChart chartType="bar" data={this.props.ObsRemote.streamingStats?.memoryUsage} customContent={(title, items) => { return `${items[0] && prettyBytes(+items[0].value * 1000000)}`; }}/>
+                    <div className={'ant-statistic-content'}>         
+                      { this.props.ObsRemote.stats.enable &&              
+                        <RealTimeBarChart 
+                          data={this.props.ObsRemote.coreStats?.memoryUsage || [{ x : new Date(), y: 0}]}
+                          yFormat={value => 
+                            `${prettyBytes(Number(value) * 1000000)}`
+                          }
+                          tooltip={
+                            (propsTooltip: PointTooltipProps) => (
+                              <div
+                                style={{
+                                  padding: 12,
+                                  fontSize: 10,
+                                  color: propsTooltip.point.color,
+                                  // background: '#141414',
+                                  backgroundColor: 'transparent'
+                                }}
+                              >
+                                <strong>
+                                  {propsTooltip.point.data.yFormatted}
+                                </strong>
+                              </div>
+                            )
+                          }  
+                        />
+                      }
                     </div>
                   </div>
                 </Col>
                 <Col span={3} style={{ display: "flex" }}>
                   <div className={'ant-statistic'}>
                     <div className={'ant-statistic-title'}>CPU Usage</div>
-                    <div className={'ant-statistic-content'} style={{ width: 130 }}>
-                      <StatsTinyChart maxY={100} chartType="area" data={this.props.ObsRemote.streamingStats?.cpuUsage} formatter={(datum: any) => { return { name: datum.x, value: `${+(datum.y).toFixed(2)}` }; }} customContent={(title, items) => { return `${items[0] && items[0].value}%`; }}/>
+                    <div className={'ant-statistic-content'}>
+                      { this.props.ObsRemote.stats.enable && 
+                        <RealTimeLineChart 
+                          data={this.props.ObsRemote.coreStats?.cpuUsage || [{ x : new Date(), y: 0}]} 
+                          yFormat={value =>
+                            `${Number(value).toLocaleString('fr-FR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}%`          
+                          }
+                          tooltip={
+                            (propsTooltip: PointTooltipProps) => (
+                              <div
+                                style={{
+                                  padding: 12,
+                                  fontSize: 10,
+                                  color: propsTooltip.point.color,
+                                  // background: '#141414',
+                                  backgroundColor: 'transparent'
+                                }}
+                              >
+                                <strong>
+                                  {propsTooltip.point.data.yFormatted}
+                                </strong>
+                              </div>
+                            )
+                          }
+                        />
+                      }
                     </div>
                   </div>
                 </Col>
-                <Col span={8}>
+                <Col span={3}>
                   <Descriptions size="small" column={1}>
                     <Descriptions.Item label="Compétition">
                       <Editable
@@ -247,6 +387,22 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
                     </Descriptions.Item>
                   </Descriptions>
                 </Col>
+                {/* <Col span={9}> */}
+                  {/* <Card bordered={false} title="Preview" loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} extra={this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }>
+                    <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
+                  </Card> */}
+                  {/* <Descriptions size="small" column={1}>
+                  <Descriptions.Item label={<>Preview  { this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }</>}>
+                    <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
+                  </Descriptions.Item>
+                  </Descriptions> */}
+                  {/* <div className={'ant-statistic'}>
+                    <div className={'ant-statistic-title'}>Preview { this.state.displayPreview ? <Button size='small' onClick={this.togglePreview} icon={<EyeInvisibleOutlined />}>Hide</Button> : <Button size='small' onClick={this.togglePreview} icon={<EyeOutlined />}>Show</Button> }</div>
+                    <div className={'ant-statistic-content'} style={{ padding: 25 }} >
+                      <Preview ObsRemote={this.props.ObsRemote} display={this.state.displayPreview} />
+                    </div>
+                  </div> */}
+                {/* </Col> */}
               </Row>
             </PageHeader>
           </Col>
@@ -384,6 +540,19 @@ class Cockpit extends React.Component<CockpitProps, CockpitState> {
             </Row>
           </Form>
         </Modal>
+
+        <Modal
+          title={`${this.state.update.version} Changelog`}
+          centered
+          cancelText="Fermer"
+          visible={this.state.changelogModalVisible}
+          onOk={() => this.setState({ changelogModalVisible: false })}
+          onCancel={() => this.setState({ changelogModalVisible: false })}
+          width={'30%'}
+        >
+          <div style={{ height: '50vh', overflow: 'auto' }} dangerouslySetInnerHTML={{ __html: this.state.update.changelog }}></div>
+        </Modal>
+
       </>
     );
   }

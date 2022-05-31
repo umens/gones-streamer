@@ -1,6 +1,16 @@
+// import { FileWithPath } from "react-dropzone";
+
+import { Datum } from "@nivo/line";
+
 /**
  * Types
  */
+export type OBSInputProps = {
+  itemEnabled: boolean;
+  itemName: string;
+  itemValue: string;
+}
+
 export type PathsType = {
   binFolder: string;
   appFolder: string;
@@ -13,9 +23,26 @@ export type StoreType = {
   LiveSettings: LiveSettings;
   BackgroundImage: string | null;
   CamerasHardware: CameraHardware[];
+  AudioHardware: AudioHardware[];
   Sponsors: Sponsor[];
   Players: Player[];
+  UpdateChannel: string;
+  TextsSettings: TextsSettings;
+  ScoreboardSettings: ScoreboardSettings;
 };
+
+export type ScoreboardSettings = {
+  position: ScoreboardSettingsPosition,
+  style: ScoreboardSettingsStyle,
+}
+
+export type TextsSettings = {
+  font: string;
+  homeTeamColor: string;
+  awayTeamColor: string;
+  scoreColor: string;
+  journeyColor: string;
+}
 
 export type GameStatut = {
   AwayTeam: Team;
@@ -56,9 +83,17 @@ export type FileUp = {
 }
 
 export type CameraHardware = {
+  uuid?: string;
   title: string;
   active: boolean;
-  device?: MediaDeviceInfo;
+  deviceid: MediaDeviceInfo["deviceId"];
+}
+
+export type AudioHardware = {
+  uuid?: string;
+  title: string;
+  deviceid: MediaDeviceInfo["deviceId"];
+  type: AudioType;
 }
 
 export type GameClock = {
@@ -90,16 +125,63 @@ export type Player = {
 
 export type StreamingStats = {
   totalStreamTime: string;
+  bytesPerSec: number;
+}
+
+export type CoreStats = {
+  cpuUsage: Datum[];
+  memoryUsage: Datum[];
   oldDroppedFrame: number;
   droppedFrame: number;
-  cpuUsage: number[];
-  memoryUsage: number[];
-  bytesPerSec: number;
+}
+
+export type AutoUpdaterData = {
+  message?: string;
+  releaseNote?: string;
+  more?: string;
+  version?: string;
+  download? : {
+    bytesPerSecond: number;
+    percent: number;
+    transferred: number;
+    total: number;
+  }
 }
 
 /**
  * Enums
  */
+
+export enum ScoreboardSettingsPosition {
+  TL = 'top left',
+  TC = 'top center',
+  TR = 'top right',
+  BL = 'bottom left',
+  BC = 'bottom center',
+  BR = 'bottom right',
+}
+
+export enum ScoreboardSettingsStyle {
+  STYLE1 = 'style 1',
+  STYLE2 = 'style 2',
+}
+
+export enum AutoUpdaterEvent {
+  QUITANDINSTALL = 'install-requested-updater',
+  DOWNLOADRESQUESTED = 'download-requested-updater',
+  CHECKRESQUESTED = 'check-requested-updater',
+  CHECKING = 'checking-for-update-updater',
+  AVAILABLE = 'update-available-updater',
+  NOUPDATE = 'update-not-available-updater',
+  ERROR = 'error-updater',
+  DOWNLOADING = 'download-progress-updater',
+  DOWNLOADED = 'update-downloaded-updater',
+  CHANNELCHANGED = 'channel-changed-updater',
+};
+export enum UpdateChannel {
+  STABLE = 'latest',
+  BETA = 'beta',
+};
 
 export enum Timeout {
   NONE = 0,
@@ -135,10 +217,11 @@ export enum SceneName {
 }
 
 export enum StreamingSport {
-  Football = 0,
-  Soccer = 1,
-  Basketball = 2,
-  Handball = 3,
+  FOOTBALL = 'football',
+  SOCCER = 'soccer',
+  BASKETBALL = 'basketball',
+  HANDBALL = 'handball',
+  RUGBY = 'rugby',
 }
 
 export enum ScoreType {
@@ -159,8 +242,8 @@ export enum AnimationType {
 }
 
 export enum StreamingService {
-  Youtube = 'youtube',
-  Facebook = 'facebook',
+  YOUTUBE = 'youtube',
+  FACEBOOK = 'facebook',
 }
 
 export enum MediaType {
@@ -185,6 +268,24 @@ export enum SponsorDisplayTypeSceneIdSmall {
   Halftime = 12,
   Live = 13,
   Starting = 14,
+}
+
+export enum FPS {
+  slow = 1000/15, // var 15fps = 1000/15; // 66
+  normal = 1000/24, // var 24fps = 1000/24; // 42
+  regular = 1000/30, // var 30fps = 1000/30; // 33
+  fast = 1000/60, // var 60fps = 1000/60; // 16
+}
+
+export enum AudioType {
+  Input = 'wasapi_input_capture',
+  Output = 'wasapi_output_capture',
+}
+
+export interface IVolmeter {
+  magnitude: number[];
+  peak: number[];
+  inputPeak: number[];
 }
 
 /** 
@@ -228,25 +329,42 @@ export function GetDefaultConfig(): StoreType {
     bitrate: 6000,
     buffer: 15,
     streamKey: '',
-    sport: StreamingSport.Football,
-    streamingService: StreamingService.Youtube,
+    sport: StreamingSport.FOOTBALL,
+    streamingService: StreamingService.YOUTUBE,
   };
   const CamerasHardware: CameraHardware[] = [
     {
-      title: 'Camera 1',
+      title: 'Field',
       active: true,
+      deviceid: 'OBS Virtual Camera:'
     }
   ];
+  const AudioHardware: AudioHardware[] = [];
   const Sponsors: Sponsor[] = [];
   const Players: Player[] = [];
   const BackgroundImage = '../../../../appDatas/bg.jpg';
+  const TextsSettings: TextsSettings = {
+    awayTeamColor: '#ffffff',
+    font: 'Impact',
+    homeTeamColor: '#ffffff',
+    journeyColor: '#ffffff',
+    scoreColor: '#ffffff',
+  };
+  const ScoreboardSettings: ScoreboardSettings = {
+    position: ScoreboardSettingsPosition.TR,
+    style: ScoreboardSettingsStyle.STYLE1
+  };
   let storedConfigDefault: StoreType = {
     GameStatut,
     LiveSettings,
     BackgroundImage,
     CamerasHardware,
+    AudioHardware,
     Sponsors,
     Players,
-  };
+    UpdateChannel: 'latest',
+    TextsSettings,
+    ScoreboardSettings,
+  }
   return storedConfigDefault;
 }

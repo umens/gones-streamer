@@ -1,5 +1,5 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
-import { IpcMainEvent } from 'electron';
+import { IpcMainInvokeEvent } from 'electron';
 import { IpcRequest, MediaType, PathsType, Sponsor } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
@@ -21,10 +21,11 @@ export class SponsorsDataChannel implements IpcChannelInterface {
     return 'sponsors-data';
   }
 
-  async handle(event: IpcMainEvent, request: IpcRequest): Promise<void> {
-    if (!request.responseChannel) {
-      request.responseChannel = `${this.getName()}_response`;
-    }
+  async handle(event: IpcMainInvokeEvent, request: IpcRequest): Promise<Sponsor[]> {
+    // if (!request.responseChannel) {
+    //   request.responseChannel = `${this.getName()}_response`;
+    // }
+    let sponsors: Sponsor[] = [];
     try {
       if(request.params && request.params.action) {
         switch (request.params.action) {
@@ -42,20 +43,20 @@ export class SponsorsDataChannel implements IpcChannelInterface {
                 await videoUtils.makeScreenshotsPreview({ mediaPath: join(this.paths.sponsorsFolder, '/medias/' + fileName), destPath: join(this.paths.sponsorsFolder, '/medias/' + sponsor.uuid) });
               }
               const rawSponsors = await fs.readFile(join(this.paths.sponsorsFolder, '/sponsors.json'), 'utf8');
-              const sponsors: Sponsor[] = JSON.parse(rawSponsors);
+              sponsors = JSON.parse(rawSponsors);
               sponsors.push(sponsor);
               await fs.writeFile(
                 join(this.paths.sponsorsFolder, '/sponsors.json'),
                 JSON.stringify(sponsors, null, 2),
               );
-              event.sender.send(request.responseChannel, sponsors);
+              // event.sender.send(request.responseChannel, sponsors);
             }        
             break;
           case 'delete':
             if(request.params.id) {
               const id = request.params.id as string;
               const rawSponsors = await fs.readFile(join(this.paths.sponsorsFolder, '/sponsors.json'), 'utf8');
-              const sponsors: Sponsor[] = JSON.parse(rawSponsors);
+              sponsors = JSON.parse(rawSponsors);
               const sponsorIndex = sponsors.findIndex((obj => obj.uuid === id));
               await fs.unlink(sponsors[sponsorIndex].media!);
               if(sponsors[sponsorIndex].mediaType === MediaType.Video) {
@@ -66,14 +67,14 @@ export class SponsorsDataChannel implements IpcChannelInterface {
                 join(this.paths.sponsorsFolder, '/sponsors.json'),
                 JSON.stringify(sponsors, null, 2),
               );
-              event.sender.send(request.responseChannel, sponsors);
+              // event.sender.send(request.responseChannel, sponsors);
             }            
             break;
           case 'edit':
             if(request.params.sponsor) {
               let sponsor = request.params.sponsor as Sponsor;
               const rawSponsors = await fs.readFile(join(this.paths.sponsorsFolder, '/sponsors.json'), 'utf8');
-              const sponsors: Sponsor[] = JSON.parse(rawSponsors);
+              sponsors = JSON.parse(rawSponsors);
               const sponsorIndex = sponsors.findIndex((obj => obj.uuid === sponsor.uuid));
               // delete old files              
               await fs.unlink(sponsors[sponsorIndex].media!);
@@ -100,20 +101,22 @@ export class SponsorsDataChannel implements IpcChannelInterface {
                 join(this.paths.sponsorsFolder, '/sponsors.json'),
                 JSON.stringify(sponsors, null, 2),
               );
-              event.sender.send(request.responseChannel, sponsors);
+              // event.sender.send(request.responseChannel, sponsors);
             }  
             break;
           case 'get':
           default:
             const rawSponsors = await fs.readFile(join(this.paths.sponsorsFolder, '/sponsors.json'), 'utf8');
-            const sponsors: Sponsor[] = JSON.parse(rawSponsors);
-            event.sender.send(request.responseChannel, sponsors);
+            sponsors = JSON.parse(rawSponsors);
+            // event.sender.send(request.responseChannel, sponsors);
             break;
         }
       }
+      return sponsors;
     } catch (error) {
       this.log.error(error);
-      event.sender.send(request.responseChannel, []);
+      throw error;
+      // event.sender.send(request.responseChannel, []);
     }
   }
 }

@@ -1,6 +1,6 @@
-import React, { SyntheticEvent } from "react";
-import { IObsRemote } from "..";
-import { List, Tag } from "antd";
+ import React, { SyntheticEvent } from "react";
+import { AudioSources, IObsRemote } from "..";
+import { List, Tag, Row, Col } from "antd";
 import { SyncOutlined, VideoCameraFilled } from '@ant-design/icons';
 import { SceneName } from "../../Models";
 import './Scenes.css';
@@ -25,6 +25,13 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
     }
   }
 
+  shouldComponentUpdate = (nextProps: Readonly<ScenesProps>, nextState: Readonly<ScenesState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
+  }
+
   changeScene = (name: SceneName) => async (event: SyntheticEvent) => {
     try {
       await this.props.ObsRemote.changeActiveScene(name);
@@ -33,7 +40,7 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
     }
   }
 
-  changeActiveCam = (name: SceneName) => async (event: SyntheticEvent) => {
+  changeActiveCam = (name: string) => async (event: SyntheticEvent) => {
     try {
       await this.props.ObsRemote.changeActiveCam(name);
     } catch (error) {
@@ -42,45 +49,73 @@ class Scenes extends React.Component<ScenesProps, ScenesState> {
   }
   
   render() {
-    return (
-      <>
-        <List
-          bordered
-          loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} 
-          dataSource={this.props.ObsRemote.scenes?.scenes}
-          renderItem={item => {
-            let extra: any = '';
-            let content = (item.name === this.props.ObsRemote.scenes?.["current-scene"]) ? <span style={{ color: '#177ddc' }}><SyncOutlined spin /> {item.name}</span> : item.name;
-            if(item.name === this.props.ObsRemote.scenes?.["current-scene"] && item.name === SceneName.Live) {
-              let data = this.props.ObsRemote.scenes.scenes.filter(item => {
-                return item.name === SceneName.Live
-              });
-              let cams = (data[0]).sources.filter(item => {
-                return item.name.startsWith('Camera');
-              });
-              cams = cams.sort(function(a, b) {
-                var textA = a.name.toUpperCase();
-                var textB = b.name.toUpperCase();
-                return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-              });
-              extra = <div>{cams.map(item => {
-                return (item.render) ? <Tag key={item.name} icon={<VideoCameraFilled />} color="processing">{item.name}</Tag> : <Tag onClick={this.changeActiveCam(item.name as SceneName)} key={item.name} color="default">{item.name}</Tag>;
-              })}</div>;
-            }
-
-            let itemNode;
-            if (![SceneName.Replay, SceneName.Sponsors].includes(item.name as SceneName)) {
-              itemNode = <List.Item key={item.name} extra={extra} className="sceneItem" onClick={this.changeScene(item.name as SceneName)}>{content}</List.Item>;
-            } 
-            else {
-              itemNode = <List.Item key={item.name} extra={extra} style={{ color: '#6b6b6b' }}>{content}</List.Item>;
-            }
-
-            return itemNode;
-          }}
-        />
-      </>
-    );
+    if(this.props.ObsRemote.scenes?.currentScene === SceneName.Live) {
+      return (
+        <Row gutter={[16, { xs: 8, sm: 16, md: 24, lg: 32 }]}>
+          <Col span={12}>
+            <List
+              bordered
+              loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} 
+              dataSource={this.props.ObsRemote.scenes?.scenes}
+              renderItem={item => {
+                let extra: any = '';
+                let content = (item.sceneName === this.props.ObsRemote.scenes?.currentScene) ? <span style={{ color: '#177ddc' }}><SyncOutlined spin /> {item.sceneName}</span> : item.sceneName;
+                if(item.sceneName === this.props.ObsRemote.scenes?.currentScene && item.sceneName === SceneName.Live && this.props.ObsRemote.store?.CamerasHardware) {
+                  // let data = this.props.ObsRemote.scenes!.scenes.filter(item => {
+                  //   return item.name === SceneName.Live
+                  // });
+                  let cams = this.props.ObsRemote.store?.CamerasHardware;
+                  // cams = cams.sort(function(a, b) {
+                  //   var textA = a.name.toUpperCase();
+                  //   var textB = b.name.toUpperCase();
+                  //   return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+                  // });
+                  extra = <div>{cams.map(item => {
+                    return (item.active) ? <Tag key={item.title} icon={<VideoCameraFilled />} color="processing">{item.title}</Tag> : <Tag onClick={this.changeActiveCam(item.title)} key={item.title} color="default">{item.title.replace('Camera - ', '')}</Tag>;
+                  })}</div>;
+                }
+    
+                let itemNode;
+                if (![SceneName.Replay, SceneName.Sponsors].includes(item.sceneName as SceneName)) {
+                  itemNode = <List.Item key={item.sceneName} extra={extra} className="sceneItem" onClick={this.changeScene(item.sceneName as SceneName)}>{content}</List.Item>;
+                } 
+                else {
+                  itemNode = <List.Item key={item.sceneName} extra={extra} style={{ color: '#6b6b6b' }}>{content}</List.Item>;
+                }
+    
+                return itemNode;
+              }}
+            />
+          </Col>
+          <Col span={12}>
+            <AudioSources ObsRemote={this.props.ObsRemote}/>
+          </Col>
+        </Row>
+      );
+    } else {
+      return (
+        <>
+          <List
+            bordered
+            loading={!this.props.ObsRemote.connected2Obs && !this.props.ObsRemote.firstDatasLoaded} 
+            dataSource={this.props.ObsRemote.scenes?.scenes}
+            renderItem={item => {
+              let content = (item.sceneName === this.props.ObsRemote.scenes?.currentScene) ? <span style={{ color: '#177ddc' }}><SyncOutlined spin /> {item.sceneName}</span> : item.sceneName;
+  
+              let itemNode;
+              if (![SceneName.Replay, SceneName.Sponsors].includes(item.sceneName as SceneName)) {
+                itemNode = <List.Item key={item.sceneName} className="sceneItem" onClick={this.changeScene(item.sceneName as SceneName)}>{content}</List.Item>;
+              } 
+              else {
+                itemNode = <List.Item key={item.sceneName} style={{ color: '#6b6b6b' }}>{content}</List.Item>;
+              }
+  
+              return itemNode;
+            }}
+          />
+        </>
+      );
+    }
   }
 };
 

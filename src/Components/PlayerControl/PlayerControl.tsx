@@ -29,6 +29,13 @@ class PlayerControl extends React.Component<PlayerControlProps, PlayerControlSta
     };
   }
 
+  shouldComponentUpdate = (nextProps: Readonly<PlayerControlProps>, nextState: Readonly<PlayerControlState>, nextContext: any): boolean => {
+    if(nextProps.ObsRemote.coreStats !== this.props.ObsRemote.coreStats || nextProps.ObsRemote.streamingStats !== this.props.ObsRemote.streamingStats) {
+      return false;
+    }
+    return true;
+  }
+
   componentDidMount = () => {
   }
   

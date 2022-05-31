@@ -1,5 +1,92 @@
 Changelog
 
+# :rocket: Release [v2.1.0-beta.6](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.5...v2.1.0-beta.6) (2022-05-31)
+          
+
+### :sparkles: Enhancements
+
+* **theme:** add theme switcher between light and dark theme ([f02cfb5](https://github.com/umens/gones-streamer/commit/f02cfb5994f45f69b71e9c63dcd800db82757697))
+
+
+### :recycle: Chores
+
+* **dependencies:** update dependencies ([0b9f28a](https://github.com/umens/gones-streamer/commit/0b9f28afffdabb243624be7e3532a58d6fcd0fb1))
+
+# :rocket: Release [v2.1.0-beta.5](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.4...v2.1.0-beta.5) (2022-05-30)
+          
+
+### :bug: Bug Fixes
+
+* **charts:** fix infinite value display of bytes/s ([e5c0d7d](https://github.com/umens/gones-streamer/commit/e5c0d7d71bc878beb90ab4a1535e780ab22e035a))
+* **settings:** fix buffer value display in settings ([46dcfe9](https://github.com/umens/gones-streamer/commit/46dcfe93ba52e1e484486055bdf6df7563a425b3))
+
+
+### :robot: Continuous Integration
+
+* **binaries:** lock version of dependencies binaries ([25d7e6a](https://github.com/umens/gones-streamer/commit/25d7e6ae0ba3c65c855d74b98f635781f2b5b354))
+
+# :rocket: Release [v2.1.0-beta.4](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2022-05-14)
+          
+
+### :sparkles: Enhancements
+
+* **charts:** toggle chart display ([4a08f43](https://github.com/umens/gones-streamer/commit/4a08f437101cefa147748f2e66faae4f77c71803))
+* **scoreboard:** add multiple scoreboard designs ([960f9ef](https://github.com/umens/gones-streamer/commit/960f9efec657541a46885f652cb4cb498480fe93))
+
+
+### :fast_forward: Performance Improvements
+
+* **chart rerendering:** disable rerendering for component which doesn't need to ([477d4b4](https://github.com/umens/gones-streamer/commit/477d4b4ecf8b0d21f5c5e8a81cb7283700a8005e))
+
+# :rocket: Release [v2.1.0-beta.3](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2022-04-28)
+          
+
+### :sparkles: Enhancements
+
+* **charts:** add ability to toogle stream and core stats ([82afab8](https://github.com/umens/gones-streamer/commit/82afab8a60cb6db4fe0675d0da73c083bb7b68fa))
+
+# :rocket: Release [v2.1.0-beta.2](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.1...v2.1.0-beta.2) (2022-04-28)
+          
+
+### :sparkles: Enhancements
+
+* **auto updater:** add auto update feature with update channel setting ([ff0bbae](https://github.com/umens/gones-streamer/commit/ff0bbaec66e7483b47738980c1c407454300ab3b))
+
+# :rocket: Release [v2.1.0-beta.1](https://github.com/umens/gones-streamer/compare/v2.0.0...v2.1.0-beta.1) (2022-04-27)
+          
+
+### :recycle: Chores
+
+* **dependencies:** update deps ([5d0bf94](https://github.com/umens/gones-streamer/commit/5d0bf9440433a30a56e356c47c834d5785d1fd67))
+
+
+### :sparkles: Enhancements
+
+* **audio:** add ability to manage audio (add/edit/delete) ([b7241d8](https://github.com/umens/gones-streamer/commit/b7241d8e30ff821183b44a08a4c67587ce7c3a02))
+* **cameras:** add the ability to manage cameras (add/edit/delete) ([7aa9162](https://github.com/umens/gones-streamer/commit/7aa916211afc477afe92db7c8067265758bed5e5))
+* **display:** add ability to change texts color and font ([3000fc6](https://github.com/umens/gones-streamer/commit/3000fc683eef89be6fcf5995167ceb6f3d3220de))
+* **hardware setup:** add multi cam support ([9537dc4](https://github.com/umens/gones-streamer/commit/9537dc4edac5f6194d906d1061cfb57bdbc3eec8))
+
+
+### :bug: Bug Fixes
+
+* **audio form:** fix display of audio type in select ([7d4e96f](https://github.com/umens/gones-streamer/commit/7d4e96f6bdbc51dda7aa27720a720b8179d1b75c))
+* **cameras:** fix displayed camera after first run in settings ([fd15073](https://github.com/umens/gones-streamer/commit/fd15073ce101530ef2b1c3f8c6b950949a43b424))
+* **scoreboard:** fix text color (team and score) based on background color (team color) ([de9957b](https://github.com/umens/gones-streamer/commit/de9957b7bee94c174608cc3f779ea31eae73d10d))
+
+
+### :zap: Code Refactoring
+
+* **charts:** replace charts library to decrease build size ([ef9fd2b](https://github.com/umens/gones-streamer/commit/ef9fd2b27bfe79e8ccfeee1ad517bf64d7442e4c))
+* **config store:** add new elements to Config Store for update existing install ([84ef5eb](https://github.com/umens/gones-streamer/commit/84ef5ebba07f09de7e93b0536f8cf4775afd3854))
+* **updates deps:** use new obs websocket v5 ([990ae32](https://github.com/umens/gones-streamer/commit/990ae32abcb0a674e1d5c2de872c213ba7c381cc))
+
+
+### :robot: Continuous Integration
+
+* **ci:** update node version in release step ([497e06a](https://github.com/umens/gones-streamer/commit/497e06a4b772be7648ac446f83afeaca96bc3bee))
+* **ci:** upgrade  node version in CI ([802f222](https://github.com/umens/gones-streamer/commit/802f222173648509d3ec96aa10c8a2c38809ad95))
+
 # :rocket: Release [v2.0.0](https://github.com/umens/gones-streamer/compare/v1.3.0...v2.0.0) (2020-11-12)
           
 

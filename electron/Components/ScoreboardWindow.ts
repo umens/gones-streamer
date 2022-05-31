@@ -41,8 +41,9 @@ export default class ScoreboardWindow {
       // autoHideMenuBar: true,
       frame: false,
       webPreferences: {        
-        nodeIntegration: true,
-        webSecurity: false, // handle local file bug
+        backgroundThrottling: false,
+        // nodeIntegration: true,
+        // webSecurity: false, // handle local file bug
         additionalArguments: ['--allow-file-access-from-files'], // handle local file bug
         preload: join(__dirname, "preload.bundle.js") // use a preload script
       }
@@ -56,6 +57,9 @@ export default class ScoreboardWindow {
     
     if (isDev) {
       this.window.loadURL('http://localhost:3000/index.html#/scoreboard');
+      this.window.webContents.on("did-frame-finish-load", () => {
+          this.window && this.window.webContents.openDevTools()
+      });
     } else {
       // 'build/index.html'
       this.window.removeMenu();

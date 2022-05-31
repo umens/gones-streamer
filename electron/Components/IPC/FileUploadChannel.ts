@@ -1,5 +1,5 @@
 import { IpcChannelInterface } from "./IpcChannelInterface";
-import { IpcMainEvent } from 'electron';
+import { IpcMainInvokeEvent } from 'electron';
 import { IpcRequest, PathsType } from "../../../src/Models";
 import { join } from 'path';
 import { promises as fs } from 'fs';
@@ -19,11 +19,11 @@ export class FileUploadChannel implements IpcChannelInterface {
     return 'file-upload';
   }
 
-  async handle(event: IpcMainEvent, request: IpcRequest): Promise<void> {
+  async handle(event: IpcMainInvokeEvent, request: IpcRequest): Promise<string> {
     try {
-      if (!request.responseChannel) {
-        request.responseChannel = `${this.getName()}_response`;
-      }
+      // if (!request.responseChannel) {
+      //   request.responseChannel = `${this.getName()}_response`;
+      // }
 
       // if('setter' in request.params!) {
         const file = request.params?.file as string;
@@ -37,7 +37,8 @@ export class FileUploadChannel implements IpcChannelInterface {
           finalCopy = isHomeTeam ? join(this.paths.appFolder, '/home.' + ext) : join(this.paths.appFolder, '/away.' + ext);
         }
         await fs.copyFile(file, finalCopy);        
-        event.sender.send(request.responseChannel, finalCopy + '#' + new Date().getTime());
+        // event.sender.send(request.responseChannel, finalCopy + '#' + new Date().getTime());
+        return finalCopy + '#' + new Date().getTime();
       // } else {
       //   const rawStreamSettingsOBS: string = await fs.readFile(join(this.paths.binFolder, '/obs/config/obs-studio/basic/profiles/gonesstreamer/streamEncoder.json'), 'utf8');
       //   const streamSettingsOBS = JSON.parse(rawStreamSettingsOBS);
@@ -45,6 +46,7 @@ export class FileUploadChannel implements IpcChannelInterface {
       // }
     } catch (error) {
       this.log.error(error);
+      throw error;
     }
   }
 }
