@@ -1,5 +1,17 @@
 Changelog
 
+# :rocket: Release [v2.1.0-beta.6](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.5...v2.1.0-beta.6) (2022-05-31)
+          
+
+### :sparkles: Enhancements
+
+* **theme:** add theme switcher between light and dark theme ([f02cfb5](https://github.com/umens/gones-streamer/commit/f02cfb5994f45f69b71e9c63dcd800db82757697))
+
+
+### :recycle: Chores
+
+* **dependencies:** update dependencies ([0b9f28a](https://github.com/umens/gones-streamer/commit/0b9f28afffdabb243624be7e3532a58d6fcd0fb1))
+
 # :rocket: Release [v2.1.0-beta.5](https://github.com/umens/gones-streamer/compare/v2.1.0-beta.4...v2.1.0-beta.5) (2022-05-30)
           
 
