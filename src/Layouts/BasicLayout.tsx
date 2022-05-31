@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Layout, Menu } from 'antd';
 import './BasicLayout.less';
 
 const { Header, Content, Footer } = Layout;
 
-const BasicLayout: React.FC = ({ children }) => {
+const BasicLayout: React.FC<{ children: ReactNode }> = ({ children }: { children: ReactNode }) => {
   return (
     <Layout>
       <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
