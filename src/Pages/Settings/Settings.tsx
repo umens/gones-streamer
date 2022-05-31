@@ -1,11 +1,12 @@
 import React from "react";
 import { CameraControl, IObsRemote, PlayerControl, SponsorControl, AudioControl, BackgroundTextControl, ScoreboardControl } from "../../Components";
-import { Row, Col, message, Form, Input, Button, Select, Card, Divider } from "antd";
+import { Row, Col, message, Form, Input, Button, Select, Card, Divider, Switch } from "antd";
 import ReactDropzone from "react-dropzone";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { FormInstance } from "antd/lib/form";
 import { AutoUpdaterData, AutoUpdaterEvent, FileUp, StreamingService, StreamingSport, UpdateChannel } from "../../Models";
 import { Utilities } from "../../Utils";
+import { getDarkMode } from "../../Themes/useTheme";
 
 type SettingsProps = {  
   ObsRemote: IObsRemote;
@@ -17,6 +18,7 @@ type SettingsState = {
   loadingCams: boolean[];
   checkingUpdate: boolean;
   updaterMessage: string;
+  darkMode: boolean;
 };
 class Settings extends React.Component<SettingsProps, SettingsState> {
   
@@ -31,6 +33,7 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
       loadingCams: [],
       checkingUpdate: false,
       updaterMessage: 'Check Update',
+      darkMode: getDarkMode(),
     };
   }
 
@@ -99,6 +102,13 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
       message.error('Image must smaller than 2MB!');
     }
     return isJpgOrPng && isLt2M;
+  }
+
+  onChangeTheme = (checked: boolean) => {
+    if (this.state.darkMode !== checked) {
+      localStorage.setItem("dark-mode", checked + '');
+      window.location.reload();
+    }
   }
 
   onChangeHandler = async (acceptedFiles: FileUp[], fileRejections: any[], event: any): Promise<void> => {
@@ -227,7 +237,8 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
                 sport: this.props.ObsRemote.store?.LiveSettings?.sport,
                 buffer: (this.props.ObsRemote.store?.LiveSettings?.buffer || 0),
                 bitrate: this.props.ObsRemote.store?.LiveSettings?.bitrate,
-                updateChannel:  this.props.ObsRemote.store?.UpdateChannel || UpdateChannel.STABLE
+                updateChannel:  this.props.ObsRemote.store?.UpdateChannel || UpdateChannel.STABLE,
+                theme: this.state.darkMode,
               }}
             >
               <Divider orientation="left">App</Divider>
@@ -252,7 +263,11 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
                   <Button loading={this.state.checkingUpdate} onClick={() => { this.setState({ checkingUpdate: true }); window.app.handleUpdater(AutoUpdaterEvent.CHECKRESQUESTED) }}>{ this.state.updaterMessage }</Button> 
                   {/* { this.state.updaterMessage } */}
                 </div>
+              </Form.Item>              
+              <Form.Item label="Theme sombre" name="theme">
+                <Switch defaultChecked={this.state.darkMode} onChange={this.onChangeTheme} />
               </Form.Item>
+
               <Divider orientation="left">Stream</Divider>
               <Form.Item label="Service de streaming" name="service">
                 <Select style={{ width: '100%' }}>
